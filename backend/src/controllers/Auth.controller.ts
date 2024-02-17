@@ -1,0 +1,99 @@
+import { Request, Response, NextFunction } from "express";
+import bcrypt from "bcrypt";
+import {SignupSchema, LoginSchema } from "../utils/Validation";
+import { getUserByEmail, addNewUser } from "../database/UserQueries";
+import { generateToken } from "../utils/GenerateToken";
+import { QueryResultRow } from "pg";
+import sql from "../database";
+
+const throwError = (next: NextFunction, message: string, status: number) => {
+  const err = new Error(message);
+  (err as any).status = status;
+  (err as any).success = false;
+  next(err);
+};
+
+export const Login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, password } = LoginSchema.parse(req.body);
+
+    const existingUser: QueryResultRow | null = await getUserByEmail(email);
+    if (!existingUser) {
+      throwError(next, "No user with that email exists", 400);
+      return;
+    }
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
+
+    if (!isPasswordCorrect) {
+      throwError(next, "Password is incorrect", 400);
+      return;
+    }
+    const token = generateToken({
+      id: existingUser.user_id.toString(),
+      email: existingUser.email,
+    });
+    res.cookie("auth-token", token, { httpOnly: true });
+    res.status(200).json({ success: true, message: "Login successful" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const Signup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { name, email, password } = SignupSchema.parse(req.body);
+    const isUserExists: QueryResultRow | null = await getUserByEmail(email);
+    if (isUserExists) {
+      throwError(next, "User with this email already exists", 400);
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUserRow: QueryResultRow | null = await addNewUser(
+      name,
+      email,
+      hashedPassword
+    );
+
+    if (!newUserRow) {
+      throwError(next, "Failed to create user", 500);
+      return;
+    }
+
+    const token = generateToken({
+      id: newUserRow.user_id,
+      email: newUserRow.email,
+    });
+    res.cookie("auth-token", token, { httpOnly: true });
+    res
+      .status(200)
+      .json({ success: true, message: "Signup successful", data: newUserRow });
+  } catch (error) {
+    next(error);
+  }
+};
+export const deleteAllUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+  
+    await sql`DELETE FROM users`;
+
+    res.status(200).json({ success: true, message: 'All users deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
