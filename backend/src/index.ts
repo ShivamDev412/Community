@@ -9,7 +9,7 @@ dotenv.config();
 const PORT = process.env.NODE_PORT || 4000;
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 
 
 RouteMiddleware();

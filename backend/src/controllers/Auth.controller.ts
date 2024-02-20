@@ -1,16 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
-import {SignupSchema, LoginSchema } from "../utils/Validation";
+import { SignupSchema, LoginSchema } from "../utils/Validation";
 import { getUserByEmail, addNewUser } from "../database/UserQueries";
 import { generateToken } from "../utils/GenerateToken";
 import { QueryResultRow } from "pg";
 import sql from "../database";
 
-const throwError = (next: NextFunction, message: string, status: number) => {
-  const err = new Error(message);
-  (err as any).status = status;
-  (err as any).success = false;
-  next(err);
+const throwError = (next: NextFunction, message: string) => {
+  next({
+    message,
+  });
 };
 
 export const Login = async (
@@ -23,7 +22,7 @@ export const Login = async (
 
     const existingUser: QueryResultRow | null = await getUserByEmail(email);
     if (!existingUser) {
-      throwError(next, "No user with that email exists", 400);
+      throwError(next, "No user with that email exists");
       return;
     }
     const isPasswordCorrect = await bcrypt.compare(
@@ -32,15 +31,22 @@ export const Login = async (
     );
 
     if (!isPasswordCorrect) {
-      throwError(next, "Password is incorrect", 400);
+      throwError(next, "Password is incorrect");
       return;
     }
     const token = generateToken({
       id: existingUser.user_id.toString(),
       email: existingUser.email,
     });
-    res.cookie("auth-token", token, { httpOnly: true });
-    res.status(200).json({ success: true, message: "Login successful" });
+    res.cookie("community-auth-token", token, {
+      httpOnly: false,
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7 * 30),
+    });
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: existingUser,
+    });
   } catch (error) {
     next(error);
   }
@@ -55,7 +61,7 @@ export const Signup = async (
     const { name, email, password } = SignupSchema.parse(req.body);
     const isUserExists: QueryResultRow | null = await getUserByEmail(email);
     if (isUserExists) {
-      throwError(next, "User with this email already exists", 400);
+      throwError(next, "User with this email already exists");
       return;
     }
 
@@ -67,7 +73,7 @@ export const Signup = async (
     );
 
     if (!newUserRow) {
-      throwError(next, "Failed to create user", 500);
+      throwError(next, "Failed to create user");
       return;
     }
 
@@ -75,10 +81,15 @@ export const Signup = async (
       id: newUserRow.user_id,
       email: newUserRow.email,
     });
-    res.cookie("auth-token", token, { httpOnly: true });
-    res
-      .status(200)
-      .json({ success: true, message: "Signup successful", data: newUserRow });
+    res.cookie("community-auth-token", token, {
+      httpOnly: false,
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7 * 30),
+    });
+    res.status(200).json({
+      success: true,
+      message: "Signup successful",
+      data: newUserRow,
+    });
   } catch (error) {
     next(error);
   }
@@ -89,10 +100,10 @@ export const deleteAllUsers = async (
   next: NextFunction
 ) => {
   try {
-  
     await sql`DELETE FROM users`;
-
-    res.status(200).json({ success: true, message: 'All users deleted successfully' });
+    res
+      .status(200)
+      .json({ success: true, message: "All users deleted successfully" });
   } catch (error) {
     next(error);
   }

@@ -6,7 +6,23 @@ export default {
   ],
   important: true,
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        display: ["Poppins", "sans-serif"],
+        body: ["Open Sans", "sans-serif"],
+      },
+      colors: {
+        primary: "#581080",
+      },
+      screens: {
+        xs: "320px",
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1280px",
+        "2xl": "1536px",
+      },
+    },
   },
   plugins: [],
-}
+};

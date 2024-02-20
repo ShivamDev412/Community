@@ -2,7 +2,7 @@
 import { lazy } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import PublicRoute from "./PublicRoute";
-import { Endpoints } from "../utils/endpoints";
+import { Endpoints } from "@/utils/Endpoints";
 import PrivateRoute from "./PrivateRoute";
 const { LOGIN, SIGNUP, HOME } = Endpoints;
 const LoginScreen = lazy(() => import("../screen/Login"));
