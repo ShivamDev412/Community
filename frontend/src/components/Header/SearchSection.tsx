@@ -10,19 +10,23 @@ const SearchSection = () => {
   }, [city]);
 
   return (
-    <div className="border border-slate-300 rounded-lg flex items-center">
+    <div className="border rounded-lg flex items-center">
+      <div>
+      <SearchIcon className="fill-slate-400" />
+        <input
+          type="text"
+          className="rounded-l-lg p-2 border  focus:outline-none focus:border-black"
+          placeholder="Search events"
+        />
+      </div>
+
       <input
         type="text"
-        className="rounded-l-lg p-2 border-r border-slate-300"
-        placeholder="Search events"
-      />
-      <input
-        type="text"
-        className=" p-2"
+        className=" p-2 border border-slate-300 focus:outline-none focus:border-black "
         value={place}
         onChange={(e) => setPlace(e.target.value)}
       />
-      <button className="bg-primary p-2 flex justify-center rounded-r-lg">
+      <button className="bg-primary p-2 flex justify-center rounded-r-lg border border-primary">
         <SearchIcon className="fill-white" />
       </button>
     </div>
