@@ -1,7 +1,15 @@
 export interface LoginType {
-    email:string
-    password:string
+  email: string;
+  password: string;
 }
 export interface SignupType extends LoginType {
-    name:string
+  name: string;
+}
+export interface LocationDropdownProps {
+  placePredictions: {
+    place_id: string;
+    description: string;
+  }[];
+  isPlacePredictionsLoading: boolean;
+  handleLocationSelect: (placeId: string) => void;
 }

@@ -1,5 +1,5 @@
 export const Endpoints = {
-    HOME:"/home",
+    HOME:"/",
     LOGIN:"/login",
     SIGNUP:"/signup",
     LOGOUT:"/logout",

@@ -1,31 +1,85 @@
-import { useGetCity } from "@/Hooks/useGetCity";
 import SearchIcon from "@mui/icons-material/Search";
-import { useEffect, useState } from "react";
+import { FC } from "react";
+import { useHeader } from "./useHeader";
+import { LocationDropdownProps } from "@/Types";
 
-const SearchSection = () => {
-  const [place, setPlace] = useState("");
-  const { city } = useGetCity();
-  useEffect(() => {
-    setPlace(city);
-  }, [city]);
-
+export const LocationDropdown: FC<LocationDropdownProps> = ({
+  placePredictions,
+  isPlacePredictionsLoading,
+  handleLocationSelect,
+}) => {
   return (
-    <div className="border rounded-lg flex items-center">
-      <div>
-      <SearchIcon className="fill-slate-400" />
+    <>
+      {placePredictions.length !== 0 && isPlacePredictionsLoading === false && (
+        <div className="absolute bg-white z-10 top-10 left-0 border rounded-lg px-2 py-4 w-full">
+          {placePredictions.map((prediction) => (
+            <p
+              key={prediction.place_id}
+              className="text-black py-2 hover:cursor-pointer hover:bg-slate-100 transition-all p-2 rounded-md"
+              onClick={() => handleLocationSelect(prediction.place_id)}
+            >
+              {prediction.description}
+            </p>
+          ))}
+        </div>
+      )}
+    </>
+  );
+};
+const SearchSection = () => {
+  const {
+    ref1,
+    ref2,
+    place,
+    handleLocationInputClick,
+    handleLocationChange,
+    isLeftInputFocused,
+    isRightInputFocused,
+    getPlacePredictions,
+    placePredictions,
+    isPlacePredictionsLoading,
+    handleLocationSelect,
+    showLocationDropdown,
+    handleLocationBlur
+  } = useHeader();
+  return (
+    <div className="rounded-lg flex items-center w-[40%]">
+      <div className="relative w-[40%]">
+        <SearchIcon className="fill-slate-400 absolute left-2 top-[0.59rem]" />
         <input
+          ref={ref1}
           type="text"
-          className="rounded-l-lg p-2 border  focus:outline-none focus:border-black"
+          className={`rounded-l-lg p-2 pl-10 border w-full ${
+            isRightInputFocused ? "border-r-0" : "border-slate-300"
+          } focus:outline-none focus:border-black hover:border-black`}
           placeholder="Search events"
         />
       </div>
+      <div className="relative w-[40%]">
+        <input
+          ref={ref2}
+          type="text"
+          placeholder="City name"
+          className={`p-2 border w-full ${
+            isLeftInputFocused ? "border-l-0" : "border-slate-300"
+          } focus:outline-none focus:border-black hover:border-black`}
+          value={place}
+          onFocus={handleLocationInputClick}
+          onBlur={handleLocationBlur}
+          onChange={(e: any) => {
+            getPlacePredictions({ input: e.target.value });
+            handleLocationChange(e);
+          }}
+        />
+        {showLocationDropdown && (
+          <LocationDropdown
+            placePredictions={placePredictions}
+            isPlacePredictionsLoading={isPlacePredictionsLoading}
+            handleLocationSelect={handleLocationSelect}
+          />
+        )}
+      </div>
 
-      <input
-        type="text"
-        className=" p-2 border border-slate-300 focus:outline-none focus:border-black "
-        value={place}
-        onChange={(e) => setPlace(e.target.value)}
-      />
       <button className="bg-primary p-2 flex justify-center rounded-r-lg border border-primary">
         <SearchIcon className="fill-white" />
       </button>
