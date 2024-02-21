@@ -5,4 +5,5 @@ export const Endpoints = {
     LOGOUT:"/logout",
     PROFILE:"/profile",
     FORGOT_PASSWORD:"/forgot-password",
+    NOTIFICATIONS:"/notifications",
 }

@@ -43,8 +43,8 @@ const SearchSection = () => {
     handleLocationBlur
   } = useHeader();
   return (
-    <div className="rounded-lg flex items-center w-[40%]">
-      <div className="relative w-[40%]">
+    <div className="rounded-lg flex items-center w-full">
+      <div className="relative w-[45%]">
         <SearchIcon className="fill-slate-400 absolute left-2 top-[0.59rem]" />
         <input
           ref={ref1}
@@ -55,7 +55,7 @@ const SearchSection = () => {
           placeholder="Search events"
         />
       </div>
-      <div className="relative w-[40%]">
+      <div className="relative w-[45%]">
         <input
           ref={ref2}
           type="text"

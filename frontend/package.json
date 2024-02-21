@@ -12,6 +12,7 @@
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@hookform/resolvers": "^3.3.4",
+    "@mui/base": "5.0.0-beta.36",
     "@mui/icons-material": "^5.15.10",
     "@mui/material": "^5.15.10",
     "@passageidentity/passage-elements": "^1.21.0",

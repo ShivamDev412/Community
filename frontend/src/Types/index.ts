@@ -13,3 +13,7 @@ export interface LocationDropdownProps {
   isPlacePredictionsLoading: boolean;
   handleLocationSelect: (placeId: string) => void;
 }
+export interface MenuDataProps {
+  menu: string;
+  link: string;
+}

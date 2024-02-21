@@ -1,5 +1,5 @@
 import { Endpoints } from "@/utils/Endpoints";
-import Logo from "../../assets/brand_logo1.svg";
+import Logo from "../../assets/brand_logo.svg";
 import { Link } from "react-router-dom";
 const LogoSection = () => {
     return (
