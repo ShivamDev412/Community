@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, MenuItem } from "@mui/material";
 import { Dropdown } from "@mui/base/Dropdown";
@@ -6,28 +6,62 @@ import { Menu } from "@mui/base/Menu";
 import { MenuButton } from "@mui/base/MenuButton";
 import { MenuDataProps } from "@/Types";
 import { Endpoints } from "@/utils/Endpoints";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/RootReducer";
+import { useHeader } from "./useHeader";
 
-const MenuData: FC<MenuDataProps> = ({ menu, link }) => {
+const MenuData: FC<MenuDataProps> = ({ menu, link, setShowDropdown }) => {
   return (
     <MenuItem className="px-6 hover:bg-white hover:text-primary text-gray-600">
-      <Link to={link}>{menu}</Link>
+      <Link to={link} onClick={() => setShowDropdown(false)}>
+        {menu}
+      </Link>
     </MenuItem>
   );
 };
 const ProfileSection = () => {
+  const { name } = useSelector((state: RootState) => state.user);
+  const { logout } = useHeader();
+  const [showDropdown, setShowDropdown] = useState(false);
   return (
     <div>
-      <Dropdown className="relative">
+      <Dropdown open={showDropdown}>
         <MenuButton>
-          <Avatar className="bg-primary">SN</Avatar>
+          <Avatar
+            className="bg-primary"
+            onClick={() => setShowDropdown(!showDropdown)}
+          >{`${name?.split(" ")[0]?.split("")[0]}${
+            name?.split(" ")[1]?.split("")[0]
+          }`}</Avatar>
         </MenuButton>
-        <Menu className="bg-white absolute top-1 right-0 rounded-lg border w-[2in] shadow-md py-3">
-          <MenuData menu="Your Groups" link={Endpoints.HOME} />
-          <MenuData menu="Your Events" link={Endpoints.HOME} />
+        <Menu className="bg-white rounded-lg border w-[2in] shadow-md py-3">
+          <MenuData
+            menu="Your Groups"
+            link={Endpoints.YOUR_GROUPS}
+            setShowDropdown={setShowDropdown}
+          />
+          <MenuData
+            menu="Your Events"
+            link={Endpoints.YOUR_EVENTS}
+            setShowDropdown={setShowDropdown}
+          />
           <div className="w-full h-[1px] bg-slate-200 my-2"></div>
-          <MenuData menu="Profile" link={Endpoints.HOME} />
-          <MenuData menu="Settings" link={Endpoints.HOME} />
-          <MenuData menu="Log Out" link={Endpoints.HOME} />
+          <MenuData
+            menu="Profile"
+            link={Endpoints.PROFILE}
+            setShowDropdown={setShowDropdown}
+          />
+          <MenuData
+            menu="Settings"
+            link={Endpoints.SETTINGS}
+            setShowDropdown={setShowDropdown}
+          />
+          <MenuItem
+            className="px-6 hover:bg-white hover:text-primary text-gray-600"
+            onClick={logout}
+          >
+            <p>Logout</p>
+          </MenuItem>
         </Menu>
       </Dropdown>
     </div>

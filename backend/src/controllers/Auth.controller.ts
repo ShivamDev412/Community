@@ -1,16 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
 import { SignupSchema, LoginSchema } from "../utils/Validation";
-import { getUserByEmail, addNewUser } from "../database/UserQueries";
+import { getUserByEmail, addNewUser, getUserById } from "../database/UserQueries";
 import { generateToken } from "../utils/GenerateToken";
 import { QueryResultRow } from "pg";
 import sql from "../database";
+import { throwError } from "../utils/Error";
 
-const throwError = (next: NextFunction, message: string) => {
-  next({
-    message,
-  });
-};
 
 export const Login = async (
   req: Request,
@@ -21,6 +17,7 @@ export const Login = async (
     const { email, password } = LoginSchema.parse(req.body);
 
     const existingUser: QueryResultRow | null = await getUserByEmail(email);
+  
     if (!existingUser) {
       throwError(next, "No user with that email exists");
       return;
@@ -28,8 +25,7 @@ export const Login = async (
     const isPasswordCorrect = await bcrypt.compare(
       password,
       existingUser.password
-    );
-
+    )
     if (!isPasswordCorrect) {
       throwError(next, "Password is incorrect");
       return;
@@ -45,7 +41,19 @@ export const Login = async (
     res.status(200).json({
       success: true,
       message: "Login successful",
-      data: existingUser,
+      data: {
+        userId: existingUser.user_id,
+        email: existingUser.email,
+        name: existingUser.name,
+        image: existingUser.image,
+        bio: existingUser.bio,
+        location: existingUser.location,
+        dob: existingUser.dob,
+        sex: existingUser.sex,
+        age: existingUser.age,
+        joined_on: existingUser.joined_on,
+        
+      },
     });
   } catch (error) {
     next(error);
@@ -76,7 +84,7 @@ export const Signup = async (
       throwError(next, "Failed to create user");
       return;
     }
-
+    const user = await getUserById(newUserRow.user_id)
     const token = generateToken({
       id: newUserRow.user_id,
       email: newUserRow.email,
@@ -88,7 +96,7 @@ export const Signup = async (
     res.status(200).json({
       success: true,
       message: "Signup successful",
-      data: newUserRow,
+      data: user,
     });
   } catch (error) {
     next(error);

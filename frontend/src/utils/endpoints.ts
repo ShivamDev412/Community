@@ -6,4 +6,11 @@ export const Endpoints = {
     PROFILE:"/profile",
     FORGOT_PASSWORD:"/forgot-password",
     NOTIFICATIONS:"/notifications",
+    SETTINGS:"/settings",
+    YOUR_GROUPS:"/your-groups",
+    NEW_GROUP:"/new-group",
+    EDIT_GROUP:"/edit-group/:id",
+    YOUR_EVENTS:"/your-events",
+    NEW_EVENT:"/new-event",
+    EDIT_EVENT:"/edit-event/:id",
 }

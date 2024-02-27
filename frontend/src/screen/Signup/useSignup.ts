@@ -7,8 +7,11 @@ import { SignupType } from "@/Types";
 import { postApi } from "@/utils/Api";
 import { Endpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/redux/slice/userSlice";
 export const useSignup = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   type FormField = z.infer<typeof SignupSchema>;
   const {
     register,
@@ -19,7 +22,8 @@ export const useSignup = () => {
     formState: { errors },
   } = useForm<SignupType>({
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
     },
@@ -27,9 +31,13 @@ export const useSignup = () => {
   });
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     try {
-      const response = await postApi(`/api/auth${Endpoints.SIGNUP}`, data);
+      const response = await postApi(`/api/auth${Endpoints.SIGNUP}`, {
+        ...data,
+        name: `${data.firstName} ${data.lastName}`,
+      });
       if (response.success) {
         Toast(response.message, "success");
+        dispatch(setUser(response.data));
         navigate(Endpoints.HOME);
         reset();
         clearErrors();

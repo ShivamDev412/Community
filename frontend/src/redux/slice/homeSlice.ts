@@ -10,7 +10,7 @@ const initialState = {
   events: {},
   intrusts: {},
 };
-const userSlice = createSlice({
+const homeSlice = createSlice({
   name: "home",
   initialState,
   reducers: {
@@ -26,5 +26,5 @@ const userSlice = createSlice({
     },
   },
 });
-export const { setLocation } = userSlice.actions;
-export default userSlice.reducer;
+export const { setLocation } = homeSlice.actions;
+export default homeSlice.reducer;

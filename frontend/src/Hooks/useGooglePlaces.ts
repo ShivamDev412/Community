@@ -1,5 +1,8 @@
 import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocompleteService";
-export const useGooglePlaces = () => {
+
+export const useGooglePlaces = (type: string = "cities") => {
+  const options = type !== "" ? { types: [`(${type})`] } : {};
+
   const {
     placesService,
     placePredictions,
@@ -9,10 +12,9 @@ export const useGooglePlaces = () => {
     language: "en",
     apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_ID,
     debounce: 300,
-    options: {
-      types: ["(regions)"],
-    },
+    options: options,
   });
+
   return {
     placesService,
     placePredictions,

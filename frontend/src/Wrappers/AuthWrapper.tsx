@@ -1,12 +1,12 @@
-import React, { FC } from "react";
+import { WrapperProps } from "@/Types";
+import { FC } from "react";
 
-interface AuthWrapperProps {
-  children: React.ReactNode;
-}
-const AuthWrapper: FC<AuthWrapperProps> = ({ children }) => {
+const AuthWrapper: FC<WrapperProps> = ({ children }) => {
   return (
     <main className="flex justify-between font-display bg-primary">
-      <section className=" xs:w-screen lg:w-1/2 justify-center flex flex-col lg:px-12">{children}</section>
+      <section className=" xs:w-screen lg:w-1/2 justify-center flex flex-col lg:px-12">
+        {children}
+      </section>
 
       <section className="w-1/2 justify-center lg:flex flex-col h-screen p-4 text-white xs:hidden">
         <h1 className="text-[2rem] font-bold ">

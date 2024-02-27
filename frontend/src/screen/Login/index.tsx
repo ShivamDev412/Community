@@ -8,6 +8,7 @@ import { useLogin } from "./useLogin";
 
 function Login() {
   const { register, handleSubmit, onSubmit, errors } = useLogin();
+
   return (
     <AuthWrapper>
       <section className=" bg-white xs:rounded-none sm:rounded-[25px] p-4 xs:h-screen lg:h-[85%] justify-center flex flex-col items-center">

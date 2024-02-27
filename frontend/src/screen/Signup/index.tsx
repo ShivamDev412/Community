@@ -21,8 +21,15 @@ function Signup() {
             Create Account
           </h2>
           <InputField
-            id={"name"}
-            label={"Name"}
+            id={"firstName"}
+            label={"First Name"}
+            type={"text"}
+            register={register}
+            errors={errors}
+          />
+           <InputField
+            id={"lastName"}
+            label={"Last Name"}
             type={"text"}
             register={register}
             errors={errors}

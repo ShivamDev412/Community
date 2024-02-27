@@ -1,31 +1,7 @@
 import SearchIcon from "@mui/icons-material/Search";
-import { FC } from "react";
 import { useHeader } from "./useHeader";
-import { LocationDropdownProps } from "@/Types";
+import LocationDropdown from "../LocationDropdown";
 
-export const LocationDropdown: FC<LocationDropdownProps> = ({
-  placePredictions,
-  isPlacePredictionsLoading,
-  handleLocationSelect,
-}) => {
-  return (
-    <>
-      {placePredictions.length !== 0 && isPlacePredictionsLoading === false && (
-        <div className="absolute bg-white z-10 top-10 left-0 border rounded-lg px-2 py-4 w-full">
-          {placePredictions.map((prediction) => (
-            <p
-              key={prediction.place_id}
-              className="text-black py-2 hover:cursor-pointer hover:bg-slate-100 transition-all p-2 rounded-md"
-              onClick={() => handleLocationSelect(prediction.place_id)}
-            >
-              {prediction.description}
-            </p>
-          ))}
-        </div>
-      )}
-    </>
-  );
-};
 const SearchSection = () => {
   const {
     ref1,
@@ -40,7 +16,7 @@ const SearchSection = () => {
     isPlacePredictionsLoading,
     handleLocationSelect,
     showLocationDropdown,
-    handleLocationBlur
+    handleLocationBlur,
   } = useHeader();
   return (
     <div className="rounded-lg flex items-center w-full">

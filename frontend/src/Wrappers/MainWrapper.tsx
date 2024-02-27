@@ -1,19 +1,14 @@
-
+import { WrapperProps } from "@/Types";
 import Header from "@/components/Header";
+import { FC } from "react";
 
-import React from "react";
-
-
-interface Props {
-  children: React.ReactNode;
-}
-
-const MainWrapper = ({ children }: Props) => {
-
+const MainWrapper: FC<WrapperProps> = ({ children }) => {
   return (
-    <div>
+    <div className="flex flex-col justify-between h-screen overflow-x-hidden">
       <Header />
-      {children}
+      <main className="font-display flex-1 overflow-y-auto">
+        <section className="w-8/12 mx-auto overflow-x-hidden">{children}</section>
+      </main>
     </div>
   );
 };

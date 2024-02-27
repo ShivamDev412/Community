@@ -5,16 +5,13 @@ import {
   TextFieldProps,
   OutlinedInput,
   InputLabel,
+  Select,
+  MenuItem,
+  FormControl,
 } from "@mui/material";
-import { UseFormRegister } from "react-hook-form";
 import { VisibilityOff, Visibility } from "@mui/icons-material";
 import { FC, useState } from "react";
-
-interface InputProps {
-  register: UseFormRegister<any>;
-  errors: any;
-  id: string;
-}
+import { InputProps, SelectFieldProps } from "@/Types";
 
 export const InputField: FC<InputProps & TextFieldProps> = ({
   register,
@@ -30,7 +27,7 @@ export const InputField: FC<InputProps & TextFieldProps> = ({
     event.preventDefault();
   };
   return (
-    <div className="w-full">
+    <FormControl className="w-full">
       {rest.type === "text" ? (
         <TextField
           variant="outlined"
@@ -70,6 +67,66 @@ export const InputField: FC<InputProps & TextFieldProps> = ({
       ) : (
         errors[id] && <p className="text-red-700 my-2">{errors[id].message}</p>
       )}
-    </div>
+    </FormControl>
+  );
+};
+export const DescriptionField: FC<InputProps & TextFieldProps> = ({
+  register,
+  id,
+  errors,
+  ...rest
+}) => {
+  return (
+    <FormControl className="w-full">
+      <TextField
+        color="primary"
+        {...register(id)}
+        className="w-full"
+        multiline
+        rows={10}
+        {...rest}
+      />
+      {typeof errors[id] === "string" ? (
+        <p className="text-red-700 my-2">{errors[id]}</p>
+      ) : (
+        errors[id] && <p className="text-red-700 my-2">{errors[id].message}</p>
+      )}
+    </FormControl>
+  );
+};
+export const SelectField: FC<SelectFieldProps> = ({
+  register,
+  id,
+  errors,
+  options,
+  label,
+  defaultValue,
+  ...rest
+}) => {
+  return (
+    <FormControl className="w-full">
+      <InputLabel id={id}>{label}</InputLabel>
+      <Select
+        labelId={id}
+        id={id}
+        color="primary"
+        className="w-full"
+        label={label}
+        defaultValue={defaultValue}
+        {...register(id)}
+        {...rest}
+      >
+        {options.map((option) => (
+          <MenuItem value={option.value} key={option.label}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </Select>
+      {typeof errors[id] === "string" ? (
+        <p className="text-red-700 my-2">{errors[id]}</p>
+      ) : (
+        errors[id] && <p className="text-red-700 my-2">{errors[id].message}</p>
+      )}
+    </FormControl>
   );
 };

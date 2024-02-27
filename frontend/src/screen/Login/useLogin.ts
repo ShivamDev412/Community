@@ -7,7 +7,10 @@ import { LoginType } from "@/Types";
 import { postApi } from "@/utils/Api";
 import { Endpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/redux/slice/userSlice";
 export const useLogin = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   type FormField = z.infer<typeof LoginSchema>;
   const {
@@ -29,6 +32,7 @@ export const useLogin = () => {
       const response = await postApi(`/api/auth${Endpoints.LOGIN}`, data);
       if (response.success) {
         Toast(response.message, "success");
+        dispatch(setUser(response.data));
         navigate(Endpoints.HOME);
         reset();
         clearErrors();

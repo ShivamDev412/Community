@@ -4,10 +4,12 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import PublicRoute from "./PublicRoute";
 import { Endpoints } from "@/utils/Endpoints";
 import PrivateRoute from "./PrivateRoute";
-const { LOGIN, SIGNUP, HOME } = Endpoints;
+const { LOGIN, SIGNUP, HOME, YOUR_EVENTS, YOUR_GROUPS, NEW_GROUP } = Endpoints;
 const LoginScreen = lazy(() => import("../screen/Login"));
 const SignupScreen = lazy(() => import("../screen/Signup"));
-const HomeScreen = lazy(() => import("../screen/Home"));
+const HomeScreen = lazy(() => import("../screen/Home/Index"));
+const YourGroupsScreen = lazy(() => import("../screen/YourGroups"));
+const NewGroupScreen = lazy(() => import("../screen/YourGroups/NewGroup"))
 const Router = () => {
   return (
     <BrowserRouter>
@@ -19,6 +21,8 @@ const Router = () => {
         </Route>
         {/* Private Routes */}
         <Route element={<PrivateRoute />}>
+          <Route path={YOUR_GROUPS} element={<YourGroupsScreen />} />
+          <Route path={NEW_GROUP} element={<NewGroupScreen />} />
           <Route path={HOME} element={<HomeScreen />} />
         </Route>
       </Routes>
