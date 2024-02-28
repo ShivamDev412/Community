@@ -6,14 +6,18 @@ import Button from "@/components/Button";
 import SearchLocation from "@/components/SearchLocation";
 
 const NewGroup = () => {
-  const { register, handleSubmit, errors, onSubmit } = useNewGroup();
+  const { register, handleSubmit, errors, onSubmit, backToGroup } = useNewGroup();
   return (
     <>
       <h1 className="mt-10 text-[2rem] text-center font-semibold">
         Create a new group
       </h1>
       <section className="my-10 w-full sm:w-1/2 mx-auto">
-        <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
+        <form
+          className="flex flex-col gap-8"
+          onSubmit={handleSubmit(onSubmit)}
+          encType="multipart/form-data"
+        >
           <InputField
             id={"name"}
             label={"Group Name"}
@@ -41,8 +45,16 @@ const NewGroup = () => {
             register={register}
             errors={errors}
           />
-          <FileUpload id={"image"} register={register} errors={errors}/>
-          <Button type="submit">Create Group</Button>
+          <FileUpload id={"image"} register={register} errors={errors} />
+          <div className="flex items-center w-full justify-center gap-4">
+            <Button type="button" className="bg-red-800" onClick={backToGroup}>
+              Cancel
+            </Button>
+
+            <Button type="submit">
+              Create Group
+            </Button>
+          </div>
         </form>
       </section>
     </>

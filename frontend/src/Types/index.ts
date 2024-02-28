@@ -51,7 +51,9 @@ export type SectionTitleProps = {
 };
 export interface ExtendedButtonProps
   extends ButtonProps,
-    ButtonHTMLAttributes<HTMLButtonElement> {}
+    ButtonHTMLAttributes<HTMLButtonElement> {
+      loading?:boolean;
+    }
 export type NewGroupType = {
   name: string;
   description: string;

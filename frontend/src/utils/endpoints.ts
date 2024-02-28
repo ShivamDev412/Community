@@ -8,7 +8,7 @@ export const Endpoints = {
     NOTIFICATIONS:"/notifications",
     SETTINGS:"/settings",
     YOUR_GROUPS:"/your-groups",
-    NEW_GROUP:"/new-group",
+    NEW_GROUP:"/create-group",
     EDIT_GROUP:"/edit-group/:id",
     YOUR_EVENTS:"/your-events",
     NEW_EVENT:"/new-event",

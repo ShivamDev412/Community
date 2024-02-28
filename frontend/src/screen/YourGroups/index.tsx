@@ -12,12 +12,11 @@ const YourGroups = () => {
           <BackToHome />
           <h1 className="text-[2rem] font-bold ">Your Groups</h1>
         </div>
-
-        <Button
-          onClick={() => navigation(Endpoints.NEW_GROUP)}
-        >
-          Start a group
-        </Button>
+        <div className="w-2/12">
+          <Button onClick={() => navigation(Endpoints.NEW_GROUP)}>
+            Start a group
+          </Button>
+        </div>
       </section>
       <section></section>
     </>

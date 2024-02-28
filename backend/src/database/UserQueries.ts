@@ -15,8 +15,7 @@ export const getUserById = async (
 export const getUserByEmail = async (
   email: string
 ): Promise<QueryResultRow | null> => {
-  const result =
-    await sql`SELECT * FROM users WHERE email = ${email}`;
+  const result = await sql`SELECT * FROM users WHERE email = ${email}`;
   if (result && result.length > 0) {
     return result[0];
   }
@@ -48,4 +47,32 @@ export const getUserGroups = async (
     WHERE ug.user_id = ${userId}
   `;
   return result;
+};
+export const getGroupById = async (groupId: string) => {
+  const result = await sql`
+    SELECT *
+    FROM groups WHERE group_id = ${groupId}
+  `;
+  return result[0];
+};
+export const addUserGroup = async (
+  name: string,
+  groupType: string,
+  location: string,
+  organizedBy: string,
+  about: string,
+  image: string
+): Promise<QueryResultRow | null> => {
+  try {
+    const result = await sql`
+      INSERT INTO groups (name, group_type, location, organized_by, about, image)
+      VALUES (${name}, ${groupType}, ${location}, ${organizedBy}, ${about}, ${image})
+      RETURNING group_id;
+    `;
+    const newGroup = await getGroupById(result[0].group_id);
+    return newGroup
+  } catch (error) {
+    console.error("Error adding user group:", error);
+    return null;
+  }
 };

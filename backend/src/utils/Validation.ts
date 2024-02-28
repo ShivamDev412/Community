@@ -37,5 +37,18 @@ const SignupSchema = z.object({
       }
     ),
 });
-
+export const NewGroupSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  about: z.string().min(1, "About is required"),
+  group_type: z.string().min(1, "Group Type is required"),
+  image: z.any().refine(
+    (value) => {
+      return value !== null;
+    },
+    {
+      message: "Group Image is required",
+    }
+  ),
+  location: z.string().min(1, "Group Location is required"),
+});
 export { LoginSchema, SignupSchema };

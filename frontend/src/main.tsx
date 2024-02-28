@@ -13,6 +13,10 @@ const theme = createTheme({
     primary: {
      main:"#581080"
     },
+    
+    secondary: {
+      main:"#ffffff"
+    }
   },
 });
 ReactDOM.createRoot(document.getElementById("root")!).render(

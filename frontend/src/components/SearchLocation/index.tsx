@@ -24,7 +24,7 @@ const SearchLocation: FC<InputProps & TextFieldProps> = ({
       <TextField
         variant="outlined"
         color="primary"
-        // value={locationInput}
+        value={locationInput}
         label={label}
         {...register(id, {
           value: locationInput,

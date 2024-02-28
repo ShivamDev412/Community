@@ -13,6 +13,7 @@ export const useSearchLocation = () => {
   };
 
   const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+
     const { value } = e.target;
     if (placePredictions.length) {
       setShowLocationDropdown(true);

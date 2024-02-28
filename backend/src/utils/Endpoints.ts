@@ -3,7 +3,8 @@ export const ENDPOINTS = {
     LOGIN: "/login",
     SIGNUP: "/signup",
     USER: "/",
-    GROUPS:"/groups"
+    GROUPS:"/groups",
+    CREATE_GROUP: "/create-group"
 };
 
 export const API_ENDPOINTS = {
