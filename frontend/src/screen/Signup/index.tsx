@@ -1,6 +1,5 @@
 import { FormControl, Button } from "@mui/material";
 import { Link } from "react-router-dom";
-// import "@passageidentity/passage-elements/passage-register";
 import AuthWrapper from "@/Wrappers/AuthWrapper";
 import { InputField } from "@/components/Input";
 import { Endpoints } from "@/utils/Endpoints";

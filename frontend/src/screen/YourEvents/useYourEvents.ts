@@ -1,7 +1,7 @@
 import { setGroupsCreated } from "@/redux/slice/groupSlice";
 import { setLoading } from "@/redux/slice/loadingSlice";
 import { getApi } from "@/utils/Api";
-import { Endpoints } from "@/utils/Endpoints";
+import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +15,7 @@ export const useYourEvents = () => {
     dispatch(setLoading(true));
     try {
       const res = await getApi(
-        `/api/user${Endpoints.GROUPS_ORGANIZED_BY_USER}`
+        `${API_ENDPOINTS.GROUP}${Endpoints.GROUPS_ORGANIZED_BY_USER}`
       );
       if (res.success) {
         dispatch(setGroupsCreated(res.data));

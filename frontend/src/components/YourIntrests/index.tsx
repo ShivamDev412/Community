@@ -1,4 +1,4 @@
-import { Endpoints } from '@/utils/Endpoints'
+import { RouteEndpoints } from '@/utils/Endpoints'
 import SectionTitle from '../SectionEventTitle'
 
 const YourInterests = () => {
@@ -6,7 +6,7 @@ const YourInterests = () => {
     <section>
     <SectionTitle
       title="Your Interests"
-      url={Endpoints.HOME}
+      url={RouteEndpoints.HOME}
       more={"See all your interests"}
     />
 

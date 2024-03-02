@@ -1,5 +1,5 @@
 import BackToHome from "@/components/BackToHome";
-import { Endpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import Button from "@/components/Button";
 import { useYourEvents } from "./useYourEvents";
 
@@ -13,7 +13,7 @@ const YourEvents = () => {
           <h1 className="text-[2rem] font-bold ">Your Events</h1>
         </div>
         <div className="w-2/12">
-          <Button onClick={() => navigation(Endpoints.NEW_EVENT)}>
+          <Button onClick={() => navigation(RouteEndpoints.CREATE_EVENT)}>
             Start an event
           </Button>
         </div>

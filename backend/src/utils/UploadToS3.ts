@@ -24,7 +24,6 @@ export const uploadToS3 = async (
     ContentType: contentType,
     // ACL: "public-read",
   };
-  console.log(params, "params");
   try {
     const s3UploadResult = await s3.upload(params).promise();
     const imageUrl = s3UploadResult.Location;

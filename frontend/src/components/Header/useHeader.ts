@@ -8,8 +8,9 @@ import { getCity, handleLocation } from "@/utils/CommonFunctions/getCity";
 import Cookies from "js-cookie";
 import Toast from "@/utils/Toast";
 import { clearUser } from "@/redux/slice/userSlice";
-import { Endpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import { useNavigate } from "react-router-dom";
+import { clearGroups } from "@/redux/slice/groupSlice";
 
 export const useHeader = () => {
   const [place, setPlace] = useState("");
@@ -108,8 +109,9 @@ export const useHeader = () => {
   const logout = () => {
     Cookies.remove("community-auth-token");
     Toast("Logged out successfully", "success");
-    navigate(Endpoints.LOGIN);
+    navigate(RouteEndpoints.LOGIN);
     dispatch(clearUser());
+    dispatch(clearGroups())
   };
 
   return {

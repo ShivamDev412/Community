@@ -1,4 +1,4 @@
-import { Endpoints } from "@/utils/Endpoints"
+import { RouteEndpoints } from "@/utils/Endpoints"
 import SectionTitle from "../SectionEventTitle"
 
 const YourGroups = () => {
@@ -6,7 +6,7 @@ const YourGroups = () => {
     <section>
     <SectionTitle
       title="Your Groups"
-      url={Endpoints.HOME}
+      url={RouteEndpoints.HOME}
       more={"See all your groups"}
     />
 

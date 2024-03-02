@@ -6,7 +6,8 @@ export const ENDPOINTS = {
     GROUPS:"/groups",
     CREATE_GROUP: "/create-group",
     GROUPS_ORGANIZED_BY_USER: "/groups-organized-by-user",
-    TAGS:"/tags"
+    TAGS:"/tags",
+    CREATE_EVENT:"/create-event",
 };
 
 export const API_ENDPOINTS = {

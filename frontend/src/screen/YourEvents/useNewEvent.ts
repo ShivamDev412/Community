@@ -1,6 +1,6 @@
 import { NewEventType } from "@/Types";
 import { getApi, postApiFile } from "@/utils/Api";
-import { Endpoints } from "@/utils/Endpoints";
+import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
 import { NewEventSchema } from "@/utils/Validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -92,18 +92,18 @@ export const useNewEvent = () => {
     if (data.type === "in-person") {
       data?.address && formData.append("location", data?.address);
     } else {
-      data?.link && formData.append("location", data?.link);
+      data?.link && formData.append("link", data?.link);
     }
     try {
       dispatch(setLoading(true));
       const res = await postApiFile(
-        `/api/user${Endpoints.NEW_EVENT}`,
+        `${API_ENDPOINTS.EVENT}${Endpoints.CREATE_EVENT}`,
         formData
       );
       if (res.success) {
         dispatch(setLoading(false));
         Toast(res.message, "success");
-        navigation(Endpoints.YOUR_EVENTS);
+        navigation(RouteEndpoints.YOUR_EVENTS);
         reset();
         clearErrors();
       }
@@ -113,7 +113,7 @@ export const useNewEvent = () => {
     }
   };
   const backToEvent = () => {
-    navigation(Endpoints.YOUR_EVENTS);
+    navigation(RouteEndpoints.YOUR_EVENTS);
   };
   return {
     register,

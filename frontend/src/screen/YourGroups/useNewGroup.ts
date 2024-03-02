@@ -1,6 +1,6 @@
 import { NewGroupType } from "@/Types";
 import { postApiFile } from "@/utils/Api";
-import { Endpoints } from "@/utils/Endpoints";
+import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
 import { NewGroupSchema } from "@/utils/Validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -48,7 +48,7 @@ export const useNewGroup = () => {
     try {
       dispatch(setLoading(true));
       const res = await postApiFile(
-        `/api/user${Endpoints.NEW_GROUP}`,
+        `${API_ENDPOINTS.GROUP}${Endpoints.CREATE_GROUP}`,
         formData
       );
       if (res.success) {

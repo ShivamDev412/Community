@@ -1,7 +1,7 @@
 import { IoMdHome } from "react-icons/io";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useState } from "react";
-import { Endpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import { useNavigate } from "react-router-dom";
 
 const BackToHome = () => {
@@ -10,7 +10,7 @@ const BackToHome = () => {
   return (
     <div
       className="flex items-center gap-2"
-      onClick={() => navigation(Endpoints.HOME)}
+      onClick={() => navigation(RouteEndpoints.HOME)}
     >
       <IoMdHome
         className={`h-7 w-7 transition-all ${

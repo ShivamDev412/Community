@@ -1,7 +1,7 @@
 import BackToHome from "@/components/BackToHome";
 import Button from "@/components/Button";
 import { useNavigate } from "react-router-dom";
-import { Endpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 
 const YourGroups = () => {
   const navigation = useNavigate();
@@ -13,7 +13,7 @@ const YourGroups = () => {
           <h1 className="text-[2rem] font-bold ">Your Groups</h1>
         </div>
         <div className="w-2/12">
-          <Button onClick={() => navigation(Endpoints.NEW_GROUP)}>
+          <Button onClick={() => navigation(RouteEndpoints.CREATE_GROUP)}>
             Start a group
           </Button>
         </div>

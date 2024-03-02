@@ -1,10 +1,10 @@
-import { Endpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import SectionTitle from "../SectionEventTitle";
 
 const YourSavedEvents = () => {
   return (
     <section>
-      <SectionTitle title="Your Saved Event" url={Endpoints.HOME} more={"View All"}/>
+      <SectionTitle title="Your Saved Event" url={RouteEndpoints.HOME} more={"View All"}/>
 
       {/* <NoNewEvents /> */}
     </section>

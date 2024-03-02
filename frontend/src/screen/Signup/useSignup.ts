@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { SignupSchema } from "@/utils/Validations";
 import { SignupType } from "@/Types";
 import { postApi } from "@/utils/Api";
-import { Endpoints } from "@/utils/Endpoints";
+import { API_ENDPOINTS, RouteEndpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slice/userSlice";
@@ -31,14 +31,14 @@ export const useSignup = () => {
   });
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     try {
-      const response = await postApi(`/api/auth${Endpoints.SIGNUP}`, {
+      const response = await postApi(`${API_ENDPOINTS.AUTH}${RouteEndpoints.SIGNUP}`, {
         ...data,
         name: `${data.firstName} ${data.lastName}`,
       });
       if (response.success) {
         Toast(response.message, "success");
         dispatch(setUser(response.data));
-        navigate(Endpoints.HOME);
+        navigate(RouteEndpoints.HOME);
         reset();
         clearErrors();
       }

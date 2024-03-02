@@ -5,7 +5,7 @@ import { Dropdown } from "@mui/base/Dropdown";
 import { Menu } from "@mui/base/Menu";
 import { MenuButton } from "@mui/base/MenuButton";
 import { MenuDataProps } from "@/Types";
-import { Endpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/RootReducer";
 import { useHeader } from "./useHeader";
@@ -37,23 +37,23 @@ const ProfileSection = () => {
         <Menu className="bg-white rounded-lg border w-[2in] shadow-md py-3">
           <MenuData
             menu="Your Groups"
-            link={Endpoints.YOUR_GROUPS}
+            link={RouteEndpoints.YOUR_GROUPS}
             setShowDropdown={setShowDropdown}
           />
           <MenuData
             menu="Your Events"
-            link={Endpoints.YOUR_EVENTS}
+            link={RouteEndpoints.YOUR_EVENTS}
             setShowDropdown={setShowDropdown}
           />
           <div className="w-full h-[1px] bg-slate-200 my-2"></div>
           <MenuData
             menu="Profile"
-            link={Endpoints.PROFILE}
+            link={RouteEndpoints.PROFILE}
             setShowDropdown={setShowDropdown}
           />
           <MenuData
             menu="Settings"
-            link={Endpoints.SETTINGS}
+            link={RouteEndpoints.SETTINGS}
             setShowDropdown={setShowDropdown}
           />
           <MenuItem

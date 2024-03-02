@@ -37,7 +37,7 @@ export const addNewUser = async (
   }
   return newUser[0];
 };
-export const getUserGroups = async (
+export const getUserGroupsQuery = async (
   userId: string
 ): Promise<QueryResultRow[]> => {
   const result = await sql`
@@ -100,5 +100,44 @@ export const getAllTags = async () => {
   } catch (error) {
     console.error("Error fetching all tags:", error);
     return [];
+  }
+};
+export const addEvent = async (
+  name: string,
+  image: string,
+  details: string,
+  hostId: string,
+  groupId: string,
+  eventDate: string,
+  eventTime: string,
+  eventType: string,
+  link: string,
+  address: string,
+  tags: string[]
+): Promise<QueryResultRow | null> => {
+  try {
+    const result = await sql`
+      INSERT INTO events (name, image, details, host_id, group_id, event_date, event_time, event_type, link, address, tags)
+      VALUES (${name}, ${image}, ${details}, ${hostId}, ${groupId}, ${eventDate}, ${eventTime}, ${eventType}, ${link}, ${address}, ${tags})
+      RETURNING event_id;
+    `;
+    const newEvent = await getEventById(result[0].event_id);
+    return newEvent;
+  } catch (error) {
+    console.error("Error adding event:", error);
+    return null;
+  }
+};
+export const getEventById = async (eventId: string): Promise<QueryResultRow | null> => {
+  try {
+    const result = await sql`
+      SELECT *
+      FROM events
+      WHERE event_id = ${eventId};
+    `;
+    return result[0];
+  } catch (error) {
+    console.error("Error fetching event by ID:", error);
+    return null;
   }
 };

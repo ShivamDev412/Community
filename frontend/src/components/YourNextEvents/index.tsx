@@ -1,4 +1,4 @@
-import { Endpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import NoNewEvents from "../NoNewEvents";
 import SectionTitle from "../SectionEventTitle";
 
@@ -7,7 +7,7 @@ function YourNextEvents() {
     <section>
       <SectionTitle
         title="Your Next Event"
-        url={Endpoints.HOME}
+        url={RouteEndpoints.HOME}
         more={"View All"}
       />
 

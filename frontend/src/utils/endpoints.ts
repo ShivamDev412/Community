@@ -1,4 +1,4 @@
-export const Endpoints = {
+export const RouteEndpoints = {
     HOME:"/",
     LOGIN:"/login",
     SIGNUP:"/signup",
@@ -8,11 +8,30 @@ export const Endpoints = {
     NOTIFICATIONS:"/notifications",
     SETTINGS:"/settings",
     YOUR_GROUPS:"/your-groups",
-    NEW_GROUP:"/create-group",
     EDIT_GROUP:"/edit-group/:id",
     YOUR_EVENTS:"/your-events",
     NEW_EVENT:"/new-event",
     EDIT_EVENT:"/edit-event/:id",
+    CREATE_EVENT:"/create-event",
+    CREATE_GROUP:"/create-group",
+}
+export const Endpoints = {
+    LOGIN:"/login",
+    SIGNUP:"/signup",
+    LOGOUT:"/logout",
+    PROFILE:"/profile",
+    FORGOT_PASSWORD:"/forgot-password",
+    NOTIFICATIONS:"/notifications",
+    SETTINGS:"/settings",
+    YOUR_GROUPS:"/your-groups",
     GROUPS_ORGANIZED_BY_USER: "/groups-organized-by-user",
     TAGS:"/tags",
+    CREATE_EVENT:"/create-event",
+    CREATE_GROUP:"/create-group",
 }
+export const API_ENDPOINTS = {
+    USER: "/api/user",
+    AUTH: "/api/auth",
+    GROUP: "/api/group",
+    EVENT: "/api/event",
+};
