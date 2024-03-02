@@ -1,12 +1,13 @@
 import { useGooglePlaces } from "@/Hooks/useGooglePlaces";
 import { useState } from "react";
 
-export const useSearchLocation = () => {
+export const useSearchLocation = (setValue:Function, id:String) => {
   const [locationInput, setInputLocation] = useState("");
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const { placePredictions, getPlacePredictions, isPlacePredictionsLoading } =
     useGooglePlaces("");
   const handleLocationSelect = (place: string) => {
+    setValue(id, place);
     setInputLocation(place);
     setShowLocationDropdown(false);
     placePredictions.length = 0;

@@ -8,11 +8,25 @@ import {
   Select,
   MenuItem,
   FormControl,
+  SelectChangeEvent,
+  Checkbox,
+  ListItemText,
 } from "@mui/material";
+import {
+  DatePicker,
+  LocalizationProvider,
+  TimePicker,
+} from "@mui/x-date-pickers";
+import moment from "moment";
 import { VisibilityOff, Visibility } from "@mui/icons-material";
 import { FC, useState } from "react";
-import { InputProps, SelectFieldProps } from "@/Types";
-
+import {
+  DateAndTimePickerProps,
+  InputProps,
+  MultiSelectFieldProps,
+  SelectFieldProps,
+} from "@/Types";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 export const InputField: FC<InputProps & TextFieldProps> = ({
   register,
   errors,
@@ -94,13 +108,14 @@ export const DescriptionField: FC<InputProps & TextFieldProps> = ({
     </FormControl>
   );
 };
-export const SelectField: FC<SelectFieldProps> = ({
+export const SelectField: FC<SelectFieldProps & { onChange?: Function }> = ({
   register,
   id,
   errors,
   options,
   label,
   defaultValue,
+  onChange,
   ...rest
 }) => {
   return (
@@ -113,12 +128,178 @@ export const SelectField: FC<SelectFieldProps> = ({
         className="w-full"
         label={label}
         defaultValue={defaultValue}
-        {...register(id)}
+        {...register(id, {
+          onChange: (e: SelectChangeEvent) => {
+            onChange && onChange(e.target.value);
+          },
+        })}
         {...rest}
       >
         {options.map((option) => (
           <MenuItem value={option.value} key={option.label}>
             {option.label}
+          </MenuItem>
+        ))}
+      </Select>
+      {typeof errors[id] === "string" ? (
+        <p className="text-red-700 my-2">{errors[id]}</p>
+      ) : (
+        errors[id] && <p className="text-red-700 my-2">{errors[id].message}</p>
+      )}
+    </FormControl>
+  );
+};
+export const DateField: FC<DateAndTimePickerProps> = ({
+  register,
+  errors,
+  id,
+  setValue,
+  label,
+  setError,
+}) => {
+  const [date, setDate] = useState<moment.Moment | null>(moment());
+
+  const onChange = (date: moment.Moment | null) => {
+    if (date) {
+      const dateOnlyString = date.format("YYYY-MM-DD");
+      setValue(id, dateOnlyString);
+      setDate(date);
+      setError(id, undefined);
+    }
+  };
+
+  return (
+    <div>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        {/*   @ts-ignore */}
+        <DatePicker
+          className="w-full"
+          {...register(id, {
+            value: date,
+          })}
+          label={label}
+          // @ts-ignore
+          onChange={onChange}
+        />
+      </LocalizationProvider>
+
+      {typeof errors[id] === "string" ? (
+        <p className="text-red-700 my-2">{errors[id]}</p>
+      ) : (
+        errors[id] && <p className="text-red-700 my-2">{errors[id].message}</p>
+      )}
+    </div>
+  );
+};
+export const TimeField: FC<DateAndTimePickerProps> = ({
+  register,
+  errors,
+  label,
+  id,
+  setError,
+  setValue,
+}) => {
+  const [time, setTime] = useState<moment.Moment | null>(moment());
+  const onChange = (time: moment.Moment) => {
+    if (time) {
+      const timeString = time.format("HH:mm"); 
+      setValue(id, timeString);
+      setTime(time);
+      setError(id, undefined);
+    }
+  };
+  return (
+    <div>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <TimePicker
+          className="w-full"
+          {...register(id, {
+            value: time,
+          })}
+          label={label}
+          // @ts-ignore
+          onChange={onChange}
+        />
+      </LocalizationProvider>
+
+      {typeof errors[id] === "string" ? (
+        <p className="text-red-700 my-2">{errors[id]}</p>
+      ) : (
+        errors[id] && <p className="text-red-700 my-2">{errors[id].message}</p>
+      )}
+    </div>
+  );
+};
+export const MultiSelectField: FC<
+  MultiSelectFieldProps & { clearErrors: Function; setError: Function }
+> = ({
+  register,
+  id,
+  errors,
+  options,
+  label,
+  defaultValue,
+  setValue,
+  clearErrors,
+  setError,
+  ...rest
+}) => {
+  const [selectedData, setSelectedData] = useState<Array<string>>([]);
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+  return (
+    <FormControl className="w-full">
+      <InputLabel id={id}>{label}</InputLabel>
+      <Select
+        labelId={id}
+        id={id}
+        multiple
+        color="primary"
+        className="w-full"
+        label={label}
+        {...(register("tags"),
+        {
+          value: selectedData,
+          onChange: (e: SelectChangeEvent<string[]>) => {
+            if (e.target.value.length !== 0) {
+              clearErrors(id);
+            }
+            if (e.target.value.length === 0) {
+              setError(id, {
+                type: "required",
+                message: "At least one tag is required",
+              });
+            }
+            setValue(
+              id,
+              typeof e.target.value === "string"
+                ? e.target.value.split(",")
+                : e.target.value
+            );
+            setSelectedData(
+              typeof e.target.value === "string"
+                ? e.target.value.split(",")
+                : e.target.value
+            );
+          },
+        })}
+        {...rest}
+        input={<OutlinedInput label={label} />}
+        renderValue={(selected) => selected.join(", ")}
+        MenuProps={MenuProps}
+      >
+        {options.map((value) => (
+          <MenuItem key={value.value} value={value.label}>
+            <Checkbox checked={selectedData.includes(value.label)} />
+            <ListItemText primary={value.label} />
           </MenuItem>
         ))}
       </Select>

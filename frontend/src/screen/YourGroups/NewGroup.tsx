@@ -6,7 +6,7 @@ import Button from "@/components/Button";
 import SearchLocation from "@/components/SearchLocation";
 
 const NewGroup = () => {
-  const { register, handleSubmit, errors, onSubmit, backToGroup } = useNewGroup();
+  const { register, handleSubmit, errors, onSubmit, backToGroup, setValue } = useNewGroup();
   return (
     <>
       <h1 className="mt-10 text-[2rem] text-center font-semibold">
@@ -44,6 +44,7 @@ const NewGroup = () => {
             label={"Group Location"}
             register={register}
             errors={errors}
+            setValue={setValue}
           />
           <FileUpload id={"image"} register={register} errors={errors} />
           <div className="flex items-center w-full justify-center gap-4">

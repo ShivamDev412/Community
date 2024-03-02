@@ -10,34 +10,38 @@ export const ResponsiveMenu = [
     id: "Home",
     title: "Home",
     Logo: IoIosHome,
-    path:Endpoints.HOME,
+    path: Endpoints.HOME,
   },
   {
     id: "Your Events",
     title: "Your Events",
     Logo: MdOutlineEventNote,
-    path:Endpoints.YOUR_EVENTS,
+    path: Endpoints.YOUR_EVENTS,
   },
   {
     id: "Your Groups",
     title: "Your Groups",
     Logo: MdGroups3,
-    path:Endpoints.YOUR_GROUPS,
+    path: Endpoints.YOUR_GROUPS,
   },
   {
-    id:"Notifications",
-    title:"Notifications",
-    Logo:IoIosNotifications,
-    path:Endpoints.NOTIFICATIONS,
+    id: "Notifications",
+    title: "Notifications",
+    Logo: IoIosNotifications,
+    path: Endpoints.NOTIFICATIONS,
   },
-   {
-    id:"Settings",
-    title:"Settings",
-    Logo:IoIosSettings,
-    path:Endpoints.SETTINGS,
-   }
+  {
+    id: "Settings",
+    title: "Settings",
+    Logo: IoIosSettings,
+    path: Endpoints.SETTINGS,
+  },
 ];
 export const GroupType = [
   { value: "Public", label: "Public" },
   { value: "Private", label: "Private" },
-]
+];
+export const EventType = [
+  { value: "online", label: "Online" },
+  { value: "in-person", label: "In-Person" },
+];

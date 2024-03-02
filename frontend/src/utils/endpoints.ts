@@ -13,4 +13,6 @@ export const Endpoints = {
     YOUR_EVENTS:"/your-events",
     NEW_EVENT:"/new-event",
     EDIT_EVENT:"/edit-event/:id",
+    GROUPS_ORGANIZED_BY_USER: "/groups-organized-by-user",
+    TAGS:"/tags",
 }

@@ -1,7 +1,6 @@
 import { ButtonProps } from "@mui/base";
 import { ButtonHTMLAttributes } from "react";
 import { UseFormRegister } from "react-hook-form";
-
 export interface LoginType {
   email: string;
   password: string;
@@ -52,8 +51,8 @@ export type SectionTitleProps = {
 export interface ExtendedButtonProps
   extends ButtonProps,
     ButtonHTMLAttributes<HTMLButtonElement> {
-      loading?:boolean;
-    }
+  loading?: boolean;
+}
 export type NewGroupType = {
   name: string;
   description: string;
@@ -61,6 +60,19 @@ export type NewGroupType = {
   groupType: string;
   image: File | string | null;
 };
+export type NewEventType = {
+  name: string;
+  image: any;
+  details: string;
+  group: string;
+  date: any;
+  time: any;
+  type: string;
+  tags: string[];
+  link?: string;
+  address?: string;
+};
+
 export type InputProps = {
   register: UseFormRegister<any>;
   errors: any;
@@ -71,3 +83,27 @@ export interface SelectFieldProps extends InputProps {
   label: string;
   defaultValue: string;
 }
+export interface MultiSelectFieldProps extends InputProps {
+  options: { value: string; label: string }[];
+  label: string;
+  setValue:Function;
+  defaultValue: Array<string>;
+}
+type Group = {
+  group_id: string;
+  name: string;
+  group_type?: "public" | "private"; // optional field with enum for group_type
+  location?: string;
+  organized_by: string;
+  about?: string;
+  image?: string;
+};
+export interface DateAndTimePickerProps extends InputProps {
+  setValue:any;
+  setError:Function;
+  label:string;
+}
+export type GroupsSliceType = {
+  groupsCreated: Array<Group>;
+  groupsInMember: Array<Group>;
+};

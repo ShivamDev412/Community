@@ -19,6 +19,7 @@ export const useNewGroup = () => {
     handleSubmit,
     reset,
     clearErrors,
+    setValue,
     formState: { errors },
   } = useForm<NewGroupType>({
     defaultValues: {
@@ -71,5 +72,6 @@ export const useNewGroup = () => {
     errors,
     onSubmit,
     backToGroup,
+    setValue
   };
 };

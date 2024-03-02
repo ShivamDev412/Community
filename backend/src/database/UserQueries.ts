@@ -70,9 +70,35 @@ export const addUserGroup = async (
       RETURNING group_id;
     `;
     const newGroup = await getGroupById(result[0].group_id);
-    return newGroup
+    return newGroup;
   } catch (error) {
     console.error("Error adding user group:", error);
     return null;
+  }
+};
+export const getGroupsByOrganizedBy = async (
+  organizedBy: string
+): Promise<QueryResultRow[]> => {
+  try {
+    const result = await sql`
+      SELECT * 
+      FROM groups 
+      WHERE organized_by = ${organizedBy};
+    `;
+    return result;
+  } catch (error) {
+    console.error("Error fetching groups by organized_by:", error);
+    return [];
+  }
+};
+export const getAllTags = async () => {
+  try {
+    const result = await sql`
+      SELECT * FROM tags;
+    `;
+    return result;
+  } catch (error) {
+    console.error("Error fetching all tags:", error);
+    return [];
   }
 };

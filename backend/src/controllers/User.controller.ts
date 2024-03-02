@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 
 import {
   addUserGroup,
+  getGroupsByOrganizedBy,
   getUserById,
   getUserGroups,
 } from "../database/UserQueries";
@@ -70,12 +71,31 @@ export const createUserGroup = async (
         imageUrl
       );
       res.status(200).json({
-
         success: true,
         message: "Group created successfully",
         data: newGroup,
       });
     }
+  } catch (error) {
+    next(error);
+  }
+};
+export const getGroupsByOrganizer = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  const userId: string | undefined = request?.user?.userId;
+  if (!userId) {
+    return throwError(next, "User not found");
+  }
+  try {
+    const groups = await getGroupsByOrganizedBy(userId);
+    response.status(200).json({
+      success: true,
+      message: "Groups fetched successfully",
+      data: groups,
+    });
   } catch (error) {
     next(error);
   }

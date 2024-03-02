@@ -4,10 +4,11 @@ import { TextField, TextFieldProps } from "@mui/material";
 import { useSearchLocation } from "./useSearchLocation";
 import LocationDropdown from "../LocationDropdown";
 
-const SearchLocation: FC<InputProps & TextFieldProps> = ({
+const SearchLocation: FC<InputProps & TextFieldProps & {setValue:Function}> = ({
   register,
   label,
   errors,
+  setValue,
   id,
 }) => {
   const {
@@ -17,7 +18,7 @@ const SearchLocation: FC<InputProps & TextFieldProps> = ({
     handleLocationSelect,
     showLocationDropdown,
     onChangeHandler,
-  } = useSearchLocation();
+  } = useSearchLocation(setValue, id);
 
   return (
     <div className="relative">
