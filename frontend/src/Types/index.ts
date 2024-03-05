@@ -119,10 +119,7 @@ export type EditProfileLinkProps = {
   name:string;
 }
 export type ProfileImageProps = {
-  location:{
-    city:string;
-    state:string;
-  }
+  location:string;
   image:string;
   name:string;
   email:string;

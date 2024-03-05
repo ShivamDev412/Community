@@ -43,7 +43,10 @@ const useEditProfile = () => {
   }, [location]);
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     const formData = new FormData();
-    formData.append("image", typeof data?.image[0] === "object" ? data?.image[0] : data.image);
+    formData.append(
+      "image",
+      typeof data?.image[0] === "object" ? data?.image[0] : data.image
+    );
     formData.append("name", `${data?.firstName} ${data?.lastName}`);
     formData.append("address", data?.address);
     formData.append("bio", JSON.stringify(data?.bio));
@@ -66,6 +69,9 @@ const useEditProfile = () => {
       Toast(e.message, "error");
     }
   };
-  return { handleSubmit, register, errors, onSubmit, getValues, setValue };
+  const routeToProfile = () => {
+    navigation(RouteEndpoints.PROFILE);
+  }
+  return { handleSubmit, register, errors, onSubmit, getValues, setValue, routeToProfile};
 };
 export default useEditProfile;

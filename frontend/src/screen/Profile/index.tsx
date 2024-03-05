@@ -13,7 +13,7 @@ const Profile = () => {
   return (
     <section className="overflow-x-hidden bg-[#f8f8f9] h-full">
       <section className="flex justify-between flex-wrap mt-10 xs:w-11/12 sm:w-8/12 mx-auto">
-        <section className="xs:w-full sm:w-[30%]">
+        <section className="xs:w-full sm:w-[30%] xl:w-4/12">
           <section className="bg-white p-6 rounded-lg">
             <ProfileImage
               image={image}

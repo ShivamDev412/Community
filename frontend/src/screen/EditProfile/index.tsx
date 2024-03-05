@@ -9,11 +9,18 @@ import { CiCircleInfo } from "react-icons/ci";
 import Tooltip from "@mui/material/Tooltip";
 
 const EditProfile = () => {
-  const { handleSubmit, register, errors, onSubmit, getValues, setValue } =
-    useEditProfile();
+  const {
+    handleSubmit,
+    register,
+    errors,
+    onSubmit,
+    getValues,
+    setValue,
+    routeToProfile,
+  } = useEditProfile();
   return (
     <EditProfileWrapper>
-      <section className="my-10 xs:ml-5 sm:ml-10">
+      <section className="my-10 xs:ml-5 sm:ml-10 w-full">
         <div>
           {" "}
           <h1 className="text-[2rem] font-bold">Edit Profile</h1>
@@ -22,7 +29,7 @@ const EditProfile = () => {
         <FormControl
           component="form"
           encType="multipart/form-data"
-          className="mx-auto flex flex-col gap-4 mt-10"
+          className="flex flex-col gap-4 mt-10 xs:w-[85%] sm:w-9/12 lg:w-6/12 xl:w-4/12"
           onSubmit={handleSubmit(onSubmit)}
         >
           <FileUpload
@@ -71,7 +78,20 @@ const EditProfile = () => {
               </IconButton>
             </Tooltip>
           </div>
-          <Button type="submit">Save Changes</Button>
+          <div className="flex items-center gap-2 flex-1">
+            <div className="w-1/2">
+              <Button
+                type="button"
+                className="bg-red-700"
+                onClick={routeToProfile}
+              >
+                Cancel
+              </Button>
+            </div>
+            <div className="w-1/2">
+              <Button type="submit">Save Changes</Button>
+            </div>
+          </div>
         </FormControl>
       </section>
     </EditProfileWrapper>
