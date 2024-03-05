@@ -51,4 +51,14 @@ export const NewGroupSchema = z.object({
   ),
   location: z.string().min(1, "Group Location is required"),
 });
+export const EditProfileSchema = z.object({
+  image: z.string().optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .regex(/^[a-zA-Z\s]+$/, "Name should only contain letters"),
+
+  address: z.string().min(1, { message: "Address is required" }),
+  bio: z.string().optional(),
+});
 export { LoginSchema, SignupSchema };

@@ -1,5 +1,5 @@
 import { RouteEndpoints } from "@/utils/Endpoints";
-import NoNewEvents from "../NoNewEvents";
+import NoNewEvents from "../../NoNewEvents";
 import SectionTitle from "../SectionEventTitle";
 
 function YourNextEvents() {

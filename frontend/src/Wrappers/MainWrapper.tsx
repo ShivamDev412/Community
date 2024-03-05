@@ -9,18 +9,17 @@ const MainWrapper: FC<WrapperProps> = ({ children }) => {
   const { loading } = useSelector((state: RootState) => state.loading);
   return (
     <div className="flex flex-col justify-between h-screen overflow-x-hidden">
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
+      {loading && (
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      )}
+
       <Header />
-      <main className="font-display flex-1 overflow-y-auto">
-        <section className="w-8/12 mx-auto overflow-x-hidden">
-          {children}
-        </section>
-      </main>
+      <main className="font-display flex-1 overflow-y-auto">{children}</main>
     </div>
   );
 };

@@ -6,7 +6,7 @@ import { useYourEvents } from "./useYourEvents";
 const YourEvents = () => {
   const { navigation } = useYourEvents();
   return (
-    <>
+    <section className="w-8/12 mx-auto overflow-x-hidden">
       <section className="flex items-center justify-between mt-10">
         <div className="flex items-center gap-4">
           <BackToHome />
@@ -19,7 +19,7 @@ const YourEvents = () => {
         </div>
       </section>
       <section></section>
-    </>
+    </section>
   );
 };
 

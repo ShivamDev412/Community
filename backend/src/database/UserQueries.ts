@@ -5,7 +5,7 @@ export const getUserById = async (
   id: string
 ): Promise<QueryResultRow | null> => {
   const result =
-    await sql`SELECT user_id, name, email, location, age, joined_on, image, bio, dob, sex FROM users WHERE user_id = ${id}`;
+    await sql`SELECT user_id, name, email, location, age, joined_on, image, bio, dob, sex, joined_on FROM users WHERE user_id = ${id}`;
   if (result && result.length > 0) {
     return result[0];
   }
@@ -25,11 +25,12 @@ export const getUserByEmail = async (
 export const addNewUser = async (
   name: string,
   email: string,
-  password: string
+  password: string,
+  imageUrl: string
 ): Promise<QueryResultRow | null> => {
   const newUser: QueryResultRow = await sql`
-      INSERT INTO users (name, email, password) 
-      VALUES (${name}, ${email}, ${password})
+      INSERT INTO users (name, email, password, image) 
+      VALUES (${name}, ${email}, ${password}, ${imageUrl})
       RETURNING user_id, email;
     `;
   if (newUser.length === 0) {
@@ -128,7 +129,9 @@ export const addEvent = async (
     return null;
   }
 };
-export const getEventById = async (eventId: string): Promise<QueryResultRow | null> => {
+export const getEventById = async (
+  eventId: string
+): Promise<QueryResultRow | null> => {
   try {
     const result = await sql`
       SELECT *
@@ -139,5 +142,27 @@ export const getEventById = async (eventId: string): Promise<QueryResultRow | nu
   } catch (error) {
     console.error("Error fetching event by ID:", error);
     return null;
+  }
+};
+export const updateUserProfileById = async (
+  userId: string,
+  name: string,
+  image: string,
+  bio: string,
+  location: string
+): Promise<void> => {
+  try {
+    await sql`
+      UPDATE users
+      SET name = ${name},
+          image = ${image},
+          bio = ${bio},
+          location = ${location},
+          updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = ${userId};
+    `;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
   }
 };

@@ -4,16 +4,13 @@ const initialState = {
   user_id: "",
   name: "",
   email: "",
-  location: {
-    city: "",
-    state: "",
-  },
-  age: null,
+  location: "",
+  age: "",
   joined_on: "",
-  image: null,
-  bio: null,
-  dob: null,
-  sex: null,
+  image: "",
+  bio: "",
+  dob: "",
+  sex: "",
 };
 
 const userSlice = createSlice({

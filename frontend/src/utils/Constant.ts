@@ -4,37 +4,41 @@ import { MdGroups3 } from "react-icons/md";
 import { IoIosNotifications } from "react-icons/io";
 import { IoIosSettings } from "react-icons/io";
 
-import { Endpoints } from "./Endpoints";
+import { RouteEndpoints } from "./Endpoints";
+import { FaUserEdit } from "react-icons/fa";
+import { CgNotes } from "react-icons/cg";
+import { FaStar } from "react-icons/fa6";
+
 export const ResponsiveMenu = [
   {
     id: "Home",
     title: "Home",
     Logo: IoIosHome,
-    path: Endpoints.HOME,
+    path: RouteEndpoints.HOME,
   },
   {
     id: "Your Events",
     title: "Your Events",
     Logo: MdOutlineEventNote,
-    path: Endpoints.YOUR_EVENTS,
+    path: RouteEndpoints.YOUR_EVENTS,
   },
   {
     id: "Your Groups",
     title: "Your Groups",
     Logo: MdGroups3,
-    path: Endpoints.YOUR_GROUPS,
+    path: RouteEndpoints.YOUR_GROUPS,
   },
   {
     id: "Notifications",
     title: "Notifications",
     Logo: IoIosNotifications,
-    path: Endpoints.NOTIFICATIONS,
+    path: RouteEndpoints.NOTIFICATIONS,
   },
   {
     id: "Settings",
     title: "Settings",
     Logo: IoIosSettings,
-    path: Endpoints.SETTINGS,
+    path: RouteEndpoints.SETTINGS,
   },
 ];
 export const GroupType = [
@@ -44,4 +48,30 @@ export const GroupType = [
 export const EventType = [
   { value: "online", label: "Online" },
   { value: "in-person", label: "In-Person" },
+];
+export const Settings = [
+  {
+    id: "edit-profile",
+    label: "Edit Profile",
+    Logo: FaUserEdit,
+    path: RouteEndpoints.PROFILE,
+  },
+  {
+    id: "personal-info",
+    label: "Personal Info",
+    Logo: CgNotes,
+    path: RouteEndpoints.PROFILE,
+  },
+  {
+    id: "account-management",
+    label: "Account Management",
+    Logo: IoIosSettings,
+    path: RouteEndpoints.PROFILE,
+  },
+  {
+    id: "interests",
+    label: "Interests",
+    Logo: FaStar,
+    path: RouteEndpoints.PROFILE,
+  },
 ];

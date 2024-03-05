@@ -26,7 +26,8 @@ const LocationDropdown: FC<LocationDropdownProps> = ({
                 handleLocationSelect(
                   addressType === "city"
                     ? prediction.place_id
-                    : prediction.description
+                    : prediction.description,
+                    addressType === "city" ? "placedId" : "fullAddress"
                 );
               }}
             >

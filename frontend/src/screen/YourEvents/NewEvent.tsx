@@ -110,7 +110,6 @@ const NewEvent = () => {
               register={register}
               errors={errors}
               setValue={setValue}
-            
             />
           ) : (
             <></>

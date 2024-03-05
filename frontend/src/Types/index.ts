@@ -1,21 +1,24 @@
 import { ButtonProps } from "@mui/base";
 import { ButtonHTMLAttributes } from "react";
 import { UseFormRegister } from "react-hook-form";
-export interface LoginType {
+export type LoginType = {
   email: string;
   password: string;
-}
-export interface SignupType extends LoginType {
+};
+export type SignupType = {
+  email: string;
+  password: string;
+  image: File | string | null;
   firstName: string;
   lastName: string;
-}
+};
 export interface LocationDropdownProps {
   placePredictions: {
     place_id: string;
     description: string;
   }[];
   isPlacePredictionsLoading: boolean;
-  handleLocationSelect: (placeId: string) => void;
+  handleLocationSelect: (placeId: string, addressType:string) => void;
   className?: string;
   addressType?: string;
 }
@@ -86,7 +89,7 @@ export interface SelectFieldProps extends InputProps {
 export interface MultiSelectFieldProps extends InputProps {
   options: { value: string; label: string }[];
   label: string;
-  setValue:Function;
+  setValue: Function;
   defaultValue: Array<string>;
 }
 type Group = {
@@ -99,11 +102,36 @@ type Group = {
   image?: string;
 };
 export interface DateAndTimePickerProps extends InputProps {
-  setValue:any;
-  setError:Function;
-  label:string;
+  setValue: any;
+  setError: Function;
+  label: string;
 }
 export type GroupsSliceType = {
   groupsCreated: Array<Group>;
   groupsInMember: Array<Group>;
 };
+export type ProfileStatsProps = {
+  title:string;
+  value:string;
+}
+export type EditProfileLinkProps = {
+  image:string;
+  name:string;
+}
+export type ProfileImageProps = {
+  location:{
+    city:string;
+    state:string;
+  }
+  image:string;
+  name:string;
+  email:string;
+  joined_on_date:string;
+}
+export type EditProfileType = {
+  image:string;
+  firstName:string;
+  lastName:string;
+  address:string;
+  bio:string;
+}

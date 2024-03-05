@@ -2,17 +2,23 @@ import { setLocation } from "@/redux/slice/homeSlice";
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/Store";
-
 import { useGooglePlaces } from "@/Hooks/useGooglePlaces";
-import { getCity, handleLocation } from "@/utils/CommonFunctions/getCity";
 import Cookies from "js-cookie";
 import Toast from "@/utils/Toast";
 import { clearUser } from "@/redux/slice/userSlice";
-import { RouteEndpoints } from "@/utils/Endpoints";
+import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
 import { useNavigate } from "react-router-dom";
 import { clearGroups } from "@/redux/slice/groupSlice";
+import axios from "axios";
+import { getApi } from "@/utils/Api";
+import { handleLocation } from "@/utils/CommonFunctions/handleLocation";
 
 export const useHeader = () => {
+  const [coord, setCoord] = useState({
+    lat: 0,
+    lon: 0,
+  });
+  const [event, setEvent] = useState("");
   const [place, setPlace] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -29,13 +35,6 @@ export const useHeader = () => {
     getPlacePredictions,
     isPlacePredictionsLoading,
   } = useGooglePlaces();
-
-  useEffect(() => {
-    if (location?.city && location?.state) {
-      handleSetPlace(location?.city, location?.state);
-    }
-  }, [location]);
-
   useEffect(() => {
     const handleLeftInputFocus = () => setIsLeftInputFocused(true);
     const handleRightInputFocus = () => setIsRightInputFocused(true);
@@ -49,7 +48,6 @@ export const useHeader = () => {
     leftInput?.addEventListener("blur", handleLeftInputBlur);
     rightInput?.addEventListener("focus", handleRightInputFocus);
     rightInput?.addEventListener("blur", handleRightInputBlur);
-
     return () => {
       leftInput?.removeEventListener("focus", handleLeftInputFocus);
       leftInput?.removeEventListener("blur", handleLeftInputBlur);
@@ -57,13 +55,56 @@ export const useHeader = () => {
       rightInput?.removeEventListener("blur", handleRightInputBlur);
     };
   }, []);
+  useEffect(() => {
+    if (location?.city && location?.state) {
+      handleSetPlace(location?.city, location?.state);
+    }
+  }, [location]);
+  const fetchCity = async () => {
+    try {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${
+          coord.lat
+        },${coord.lon}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_ID!}`
+      );
+      const data = response.data;
+
+      if (data.status === "OK") {
+        const addressComponents = data.results[0].address_components;
+        dispatch(setLocation(handleLocation(addressComponents)));
+      } else {
+        throw new Error(data.error_message || "Failed to fetch city name");
+      }
+    } catch (error) {
+      console.error("Error fetching city name:", error);
+      throw error;
+    }
+  };
+  useEffect(() => {
+    if (coord.lat !== 0 && coord.lon !== 0) fetchCity();
+  }, [coord]);
+
 
   useEffect(() => {
-    if (location?.city === "" && location?.state === "") {
-      getCity();
-    }
-  }, []);
+    const fetchCoordinates = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            setCoord({ lat: latitude, lon: longitude });
+          },
+          () => console.log("Unable to retrieve your location")
+        );
+      } else {
+        console.log("Geolocation not supported");
+      }
+    };
 
+    fetchCoordinates();
+
+    return () => {};
+  }, [dispatch]);
   const handleSetPlace = (city: string, state: string) => {
     setPlace(`${city}, ${state}`);
   };
@@ -111,14 +152,33 @@ export const useHeader = () => {
     Toast("Logged out successfully", "success");
     navigate(RouteEndpoints.LOGIN);
     dispatch(clearUser());
-    dispatch(clearGroups())
+    dispatch(clearGroups());
   };
-
+  const handleSetEvent = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEvent(e.target.value);
+  };
+  const handleSearch = async () => {
+    let query = `city=${location.city}&state=${location.state}`;
+    if (event.trim()) {
+      query += `&event=${event}`;
+    }
+    try {
+      const res = await getApi(
+        `${API_ENDPOINTS.HOME}${Endpoints.SEARCH}?${query}`
+      );
+      console.log(res);
+    } catch (error) {
+      Toast("Something went wrong", "error");
+    }
+  };
   return {
+    event,
     ref1,
     ref2,
     place,
-    setPlace,
+    logout,
+    handleSearch,
+    handleSetEvent,
     handleLocationInputClick,
     handleLocationChange,
     isLeftInputFocused,
@@ -129,6 +189,5 @@ export const useHeader = () => {
     handleLocationSelect,
     showLocationDropdown,
     handleLocationBlur,
-    logout,
   };
 };

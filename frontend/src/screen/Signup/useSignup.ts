@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { SignupSchema } from "@/utils/Validations";
 import { SignupType } from "@/Types";
-import { postApi } from "@/utils/Api";
-import { API_ENDPOINTS, RouteEndpoints } from "@/utils/Endpoints";
+import { postApiFile } from "@/utils/Api";
+import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slice/userSlice";
@@ -19,6 +19,7 @@ export const useSignup = () => {
     reset,
     clearErrors,
     setError,
+    control,
     formState: { errors },
   } = useForm<SignupType>({
     defaultValues: {
@@ -26,15 +27,21 @@ export const useSignup = () => {
       lastName: "",
       email: "",
       password: "",
+      image: null,
     },
     resolver: zodResolver(SignupSchema),
   });
   const onSubmit: SubmitHandler<FormField> = async (data) => {
+    const formData = new FormData();
+    formData.append("image", data.image[0]);
+    formData.append("name", `${data.firstName} ${data.lastName}`);
+    formData.append("email", data.email);
+    formData.append("password", data.password);
     try {
-      const response = await postApi(`${API_ENDPOINTS.AUTH}${RouteEndpoints.SIGNUP}`, {
-        ...data,
-        name: `${data.firstName} ${data.lastName}`,
-      });
+      const response = await postApiFile(
+        `${API_ENDPOINTS.AUTH}${Endpoints.SIGNUP}`,
+        formData
+      );
       if (response.success) {
         Toast(response.message, "success");
         dispatch(setUser(response.data));
@@ -50,5 +57,5 @@ export const useSignup = () => {
     }
   };
 
-  return { register, handleSubmit, onSubmit, errors };
+  return { register, handleSubmit, onSubmit, errors, control };
 };

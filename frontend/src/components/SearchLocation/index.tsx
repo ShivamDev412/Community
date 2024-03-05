@@ -3,32 +3,29 @@ import { InputProps } from "@/Types";
 import { TextField, TextFieldProps } from "@mui/material";
 import { useSearchLocation } from "./useSearchLocation";
 import LocationDropdown from "../LocationDropdown";
+import { useLocation } from "react-router-dom";
 
-const SearchLocation: FC<InputProps & TextFieldProps & {setValue:Function}> = ({
-  register,
-  label,
-  errors,
-  setValue,
-  id,
-}) => {
+const SearchLocation: FC<
+  InputProps & TextFieldProps & { setValue: Function;}
+> = ({ register, label, errors, setValue, id }) => {
   const {
-    locationInput,
+    // locationInput,
     placePredictions,
     isPlacePredictionsLoading,
     handleLocationSelect,
     showLocationDropdown,
     onChangeHandler,
   } = useSearchLocation(setValue, id);
-
+  const { pathname } = useLocation();
+  const path = pathname.split("/")[1];
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <TextField
         variant="outlined"
         color="primary"
-        value={locationInput}
         label={label}
         {...register(id, {
-          value: locationInput,
+          // value: locationInput,
           onChange: onChangeHandler,
         })}
         // onChange={onChangeHandler}
@@ -40,7 +37,7 @@ const SearchLocation: FC<InputProps & TextFieldProps & {setValue:Function}> = ({
           isPlacePredictionsLoading={isPlacePredictionsLoading}
           handleLocationSelect={handleLocationSelect}
           className="top-[3.5rem]"
-          addressType="fullAddress"
+          addressType={path === "edit-profile" ? "city" : "fullAddress"}
         />
       )}
       {errors[id] && (

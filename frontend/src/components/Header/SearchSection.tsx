@@ -1,12 +1,15 @@
 import SearchIcon from "@mui/icons-material/Search";
 import { useHeader } from "./useHeader";
 import LocationDropdown from "../LocationDropdown";
-
+import Button from "../Button";
 const SearchSection = () => {
   const {
     ref1,
     ref2,
+    event,
     place,
+    handleSearch,
+    handleSetEvent,
     handleLocationInputClick,
     handleLocationChange,
     isLeftInputFocused,
@@ -18,6 +21,7 @@ const SearchSection = () => {
     showLocationDropdown,
     handleLocationBlur,
   } = useHeader();
+
   return (
     <div className="rounded-lg flex items-center w-full">
       <div className="relative w-[45%]">
@@ -25,6 +29,8 @@ const SearchSection = () => {
         <input
           ref={ref1}
           type="text"
+          value={event}
+          onChange={handleSetEvent}
           className={`rounded-l-lg p-2 pl-10 border w-full ${
             isRightInputFocused ? "border-r-0" : "border-slate-300"
           } focus:outline-none focus:border-black hover:border-black`}
@@ -56,9 +62,12 @@ const SearchSection = () => {
         )}
       </div>
 
-      <button className="bg-primary p-2 flex justify-center rounded-r-lg border border-primary">
-        <SearchIcon className="fill-white" />
-      </button>
+      <Button
+        className="p-2 flex justify-center rounded-r-lg rounded-l-none"
+        onClick={handleSearch}
+      >
+        <SearchIcon className="fill-white h-6 w-6" />
+      </Button>
     </div>
   );
 };

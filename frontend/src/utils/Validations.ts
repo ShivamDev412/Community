@@ -27,6 +27,14 @@ export const SignupSchema = z.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()])[a-zA-Z\d!@#$%^&*()]+$/,
       "Password must contain at least one lowercase letter, one uppercase letter, one number and one special character"
     ),
+  image: z.any().refine(
+    (value) => {
+      return value !== null;
+    },
+    {
+      message: "Profile Image is required",
+    }
+  ),
 });
 export const NewGroupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -86,3 +94,23 @@ export const NewEventSchema = z
       });
     }
   });
+export const EditProfileSchema = z.object({
+  image: z.any().refine(
+    (value) => {
+      return value !== null;
+    },
+    {
+      message: "Profile Image is required",
+    }
+  ),
+  firstName: z
+    .string()
+    .min(1, "First Name is required")
+    .regex(/^[a-zA-Z]+$/, "Name should only contain letters"),
+  lastName: z
+    .string()
+    .min(1, "Last Name is required")
+    .regex(/^[a-zA-Z]+$/, "Name should only contain letters"),
+  address: z.string().min(1, { message: "Address is required" }),
+  bio: z.string().optional(),
+});

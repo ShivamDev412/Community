@@ -4,6 +4,7 @@ export const RouteEndpoints = {
     SIGNUP:"/signup",
     LOGOUT:"/logout",
     PROFILE:"/profile",
+    EDIT_PROFILE:"/edit-profile",
     FORGOT_PASSWORD:"/forgot-password",
     NOTIFICATIONS:"/notifications",
     SETTINGS:"/settings",
@@ -20,6 +21,7 @@ export const Endpoints = {
     SIGNUP:"/signup",
     LOGOUT:"/logout",
     PROFILE:"/profile",
+    
     FORGOT_PASSWORD:"/forgot-password",
     NOTIFICATIONS:"/notifications",
     SETTINGS:"/settings",
@@ -28,10 +30,14 @@ export const Endpoints = {
     TAGS:"/tags",
     CREATE_EVENT:"/create-event",
     CREATE_GROUP:"/create-group",
+    SEARCH:"/search",
+    EDIT_PROFILE:"/edit-profile"
 }
 export const API_ENDPOINTS = {
     USER: "/api/user",
     AUTH: "/api/auth",
     GROUP: "/api/group",
     EVENT: "/api/event",
+    HOME: "/api/home",
+    
 };
