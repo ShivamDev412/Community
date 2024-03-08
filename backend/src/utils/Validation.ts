@@ -74,4 +74,33 @@ export const PersonalInfoSchema = z.object({
   lookingFor: z.array(z.string()).optional(),
   lifeStages: z.array(z.string()).optional()
 });
+export const ChangePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current Password is required"),
+    newPassword: z
+      .string()
+      .min(1, "New Password is required")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()])[a-zA-Z\d!@#$%^&*()]+$/,
+        "Password must contain at least one lowercase letter, one uppercase letter, one number and one special character"
+      ),
+    confirmPassword: z.string().min(1, "Confirm Password is required"),
+  })
+  .superRefine(({ confirmPassword, newPassword, currentPassword }, ctx) => {
+    if(currentPassword === newPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Your old password and new password should not be same",
+        path: ["newPassword"],
+      });
+    }
+    if (newPassword !== confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "New Password and Confirm Password do not match",
+        path: ["confirmPassword"],
+      });
+    }
+  });
+
 export { LoginSchema, SignupSchema };

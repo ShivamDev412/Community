@@ -69,9 +69,6 @@ const useEditProfile = () => {
       Toast(e.message, "error");
     }
   };
-  const routeToProfile = () => {
-    navigation(RouteEndpoints.PROFILE);
-  };
   return {
     handleSubmit,
     register,
@@ -79,7 +76,6 @@ const useEditProfile = () => {
     onSubmit,
     getValues,
     setValue,
-    routeToProfile,
   };
 };
 export default useEditProfile;

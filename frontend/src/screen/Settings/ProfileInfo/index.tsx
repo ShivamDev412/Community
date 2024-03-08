@@ -3,8 +3,8 @@ import { FormControl } from "@mui/material";
 import { usePersonalInfo } from "./usePersonalInfo";
 import { DateField, SelectField } from "@/components/Input";
 import { GenderType } from "@/utils/Constant";
-import Button from "@/components/Button";
 import LookingFor from "@/components/Settings/EditProfile/LookingFor";
+import FormAction from "@/components/Settings/FormAction";
 const ProfileInfo = () => {
   const {
     register,
@@ -13,7 +13,6 @@ const ProfileInfo = () => {
     errors,
     setValue,
     setError,
-    routeToProfile,
     lookingFor,
     lifeStages,
     setData,
@@ -69,20 +68,7 @@ const ProfileInfo = () => {
             subTitle={"Select what represents you"}
             cb={"setLifeStages"}
           />
-          <div className="flex items-center gap-2 flex-1 mt-10">
-            <div className="w-1/2">
-              <Button
-                type="button"
-                className="bg-red-700"
-                onClick={routeToProfile}
-              >
-                Cancel
-              </Button>
-            </div>
-            <div className="w-1/2">
-              <Button type="submit">Save Changes</Button>
-            </div>
-          </div>
+      <FormAction />
         </FormControl>
       </section>
     </EditProfileWrapper>

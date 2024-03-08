@@ -6,7 +6,10 @@ import { IoIosSettings } from "react-icons/io";
 
 import { RouteEndpoints } from "./Endpoints";
 import { FaUserEdit } from "react-icons/fa";
-import { CgNotes } from "react-icons/cg";
+import { IoDocument } from "react-icons/io5";
+
+
+
 import { FaStar } from "react-icons/fa6";
 
 export const ResponsiveMenu = [
@@ -59,14 +62,14 @@ export const Settings = [
   {
     id: "personal-info",
     label: "Personal Info",
-    Logo: CgNotes,
+    Logo: IoDocument,
     path: RouteEndpoints.PROFILE_INFO,
   },
   {
     id: "account-management",
     label: "Account Management",
     Logo: IoIosSettings,
-    path: RouteEndpoints.PROFILE,
+    path: RouteEndpoints.ACCOUNT_MANAGEMENT,
   },
   {
     id: "interests",

@@ -1,0 +1,61 @@
+import EditProfileWrapper from "@/Wrappers/EditProfileWrapper";
+import { FormControl } from "@mui/material";
+import { useAccountManagement } from "./useAccountManagement";
+import { InputField } from "@/components/Input";
+import FormAction from "@/components/Settings/FormAction";
+import { RouteEndpoints } from "@/utils/Endpoints";
+import { Link } from "react-router-dom";
+const AccountManagement = () => {
+  const {
+    register,
+    handleSubmit,
+    // reset,
+    // clearErrors,
+    // getValues,
+    errors,
+    // setValue,
+    onSubmit,
+  } = useAccountManagement();
+  return (
+    <EditProfileWrapper>
+      <section className="my-10 sm:ml-10 w-full xs:pl-[1in] sm:pl-[3.2in] md:pl-[2.5in] lg:pl-[2.8in] xl:pl-[2.5in] 2xl:pl-[3in]">
+        <div>
+          {" "}
+          <h1 className="text-[2rem] font-bold">Account Management</h1>
+        </div>
+        <FormControl
+          component="form"
+          encType="multipart/form-data"
+          className="flex flex-col gap-4 mt-10 xs:w-[85%] sm:w-9/12 lg:w-6/12 xl:w-4/12"
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <InputField
+            id={"email"}
+            label={"Email"}
+            type={"text"}
+            register={register}
+            errors={errors}
+          />
+          <FormAction />
+          <section>
+            <h2 className="text-lg font-bold my-6">Change your password</h2>
+            <Link
+              to={RouteEndpoints.CHANGE_PASSWORD}
+              className="text-cyan-700 border-2 text-md border-cyan-700 rounded-lg p-2 bg-white hover:bg-cyan-700 hover:text-white transition"
+            >
+              Change Password
+            </Link>
+          </section>
+          <section>
+            <h2 className="text-lg font-bold my-6">Deactivate your account</h2>
+            <button className="capitalize text-md text-cyan-700 border-2 border-cyan-700 rounded-lg p-2 bg-white hover:bg-cyan-700 hover:text-white transition">
+              Deactivate Account
+            </button>
+          </section>
+        </FormControl>
+      </section>
+    </EditProfileWrapper>
+  );
+};
+
+export default AccountManagement;

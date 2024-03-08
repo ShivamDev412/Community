@@ -2,6 +2,7 @@ import express from "express";
 import { ENDPOINTS } from "../utils/Endpoints";
 import {
   GetUserData,
+  changePassword,
   editUserProfile,
   updateUserPersonalInfo,
 } from "../controllers/User.controller";
@@ -17,5 +18,6 @@ route.put(
   AuthMiddleware,
   updateUserPersonalInfo
 );
+route.put(ENDPOINTS.CHANGE_PASSWORD, AuthMiddleware, changePassword);
 
 export default route;

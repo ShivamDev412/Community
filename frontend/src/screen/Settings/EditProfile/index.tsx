@@ -3,10 +3,10 @@ import { FormControl, IconButton } from "@mui/material";
 import useEditProfile from "./useEditProfile";
 import { DescriptionField, InputField } from "@/components/Input";
 import FileUpload from "@/components/UploadFile";
-import Button from "@/components/Button";
 import SearchLocation from "@/components/SearchLocation";
 import { CiCircleInfo } from "react-icons/ci";
 import Tooltip from "@mui/material/Tooltip";
+import FormAction from "@/components/Settings/FormAction";
 
 const EditProfile = () => {
   const {
@@ -16,7 +16,7 @@ const EditProfile = () => {
     onSubmit,
     getValues,
     setValue,
-    routeToProfile,
+
   } = useEditProfile();
   return (
     <EditProfileWrapper>
@@ -78,20 +78,7 @@ const EditProfile = () => {
               </IconButton>
             </Tooltip>
           </div>
-          <div className="flex items-center gap-2 flex-1">
-            <div className="w-1/2">
-              <Button
-                type="button"
-                className="bg-red-700"
-                onClick={routeToProfile}
-              >
-                Cancel
-              </Button>
-            </div>
-            <div className="w-1/2">
-              <Button type="submit">Save Changes</Button>
-            </div>
-          </div>
+          <FormAction />
         </FormControl>
       </section>
     </EditProfileWrapper>

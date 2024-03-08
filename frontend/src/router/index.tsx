@@ -15,6 +15,8 @@ const {
   PROFILE,
   EDIT_PROFILE,
   PROFILE_INFO,
+  ACCOUNT_MANAGEMENT,
+  CHANGE_PASSWORD
 } = RouteEndpoints;
 const LoginScreen = lazy(() => import("../screen/Login"));
 const SignupScreen = lazy(() => import("../screen/Signup"));
@@ -25,7 +27,11 @@ const YourEventsScreen = lazy(() => import("../screen/YourEvents"));
 const NewEventScreen = lazy(() => import("../screen/YourEvents/NewEvent"));
 const ProfileScreen = lazy(() => import("../screen/Profile"));
 const EditProfileScreen = lazy(() => import("../screen/Settings/EditProfile"));
-const ProfileInfo = lazy(() => import("../screen/Settings/ProfileInfo"));
+const ProfileInfoScreen = lazy(() => import("../screen/Settings/ProfileInfo"));
+const AccountManagementScreen = lazy(
+  () => import("../screen/Settings/AccountManagement")
+);
+const ChangePasswordScreen = lazy(() => import("../screen/Settings/ChangePassword"));
 const Router = () => {
   return (
     <BrowserRouter>
@@ -36,8 +42,14 @@ const Router = () => {
           <Route path={SIGNUP} element={<SignupScreen />} />
         </Route>
         {/* Private Routes */}
+   
         <Route element={<PrivateRoute />}>
-          <Route path={PROFILE_INFO} element={<ProfileInfo />} />
+        <Route path={CHANGE_PASSWORD} element={<ChangePasswordScreen />} />
+          <Route
+            path={ACCOUNT_MANAGEMENT}
+            element={<AccountManagementScreen />}
+          />
+          <Route path={PROFILE_INFO} element={<ProfileInfoScreen />} />
           <Route path={EDIT_PROFILE} element={<EditProfileScreen />} />
           <Route path={PROFILE} element={<ProfileScreen />} />
           <Route path={YOUR_GROUPS} element={<YourGroupsScreen />} />

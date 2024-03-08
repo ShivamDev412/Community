@@ -11,6 +11,7 @@ export const ENDPOINTS = {
     SEARCH:"/search",
     EDIT_PROFILE:"/edit-profile",
     UPDATE_PERSONAL_INFO:"/update-personal-info",
+    CHANGE_PASSWORD:"/change-password",
 };
 
 export const API_ENDPOINTS = {

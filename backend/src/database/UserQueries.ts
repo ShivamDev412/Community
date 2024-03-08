@@ -11,7 +11,16 @@ export const getUserById = async (
   }
   return null;
 };
-
+export const getUserPasswordById = async (
+  userId: string
+): Promise<QueryResultRow | null> => {
+  const result =
+    await sql`SELECT password FROM users WHERE user_id = ${userId}`;
+  if (result && result.length > 0) {
+    return result[0];
+  }
+  return null;
+};
 export const getUserByEmail = async (
   email: string
 ): Promise<QueryResultRow | null> => {
@@ -166,12 +175,12 @@ export const updateUserProfileById = async (
     throw error;
   }
 };
-export const updateUserProfileInfo= async (
+export const updateUserProfileInfo = async (
   userId: string,
   dob: Date | any,
   sex: string | any,
   lookingFor: string[] | any,
-  lifeState: string[] | any,
+  lifeState: string[] | any
 ): Promise<void> => {
   try {
     await sql`
@@ -185,6 +194,22 @@ export const updateUserProfileInfo= async (
     `;
   } catch (error) {
     console.error("Error updating user:", error);
+    throw error;
+  }
+};
+export const updateUserPassword = async (
+  userId: string,
+  password: string
+): Promise<void> => {
+  console.log(userId, password);
+  try {
+    await sql`
+      UPDATE users
+      SET password = ${password}
+      WHERE user_id = ${userId};
+    `;
+  } catch (error) {
+    console.error("Error updating user password:", error);
     throw error;
   }
 };

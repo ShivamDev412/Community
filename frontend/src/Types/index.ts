@@ -150,3 +150,11 @@ export type LookingForType = {
   subTitle: string;
   cb: string;
 };
+export type AccountManagementType = {
+  email:string
+}
+export type ChangePasswordType = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}

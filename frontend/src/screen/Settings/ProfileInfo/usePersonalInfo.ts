@@ -81,9 +81,6 @@ export const usePersonalInfo = () => {
 
     setValue("lifeStages", filteredValues);
   }, [lifeStages]);
-  const routeToProfile = () => {
-    navigation(RouteEndpoints.PROFILE);
-  };
   const setData = (
     value: string,
     data: { value: string; active: boolean }[],
@@ -124,7 +121,6 @@ export const usePersonalInfo = () => {
     errors,
     setValue,
     setError,
-    routeToProfile,
     setData,
     lookingFor,
     lifeStages,

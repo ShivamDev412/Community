@@ -19,13 +19,13 @@ const EditProfileWrapper: FC<WrapperProps> = ({ children }) => {
       {Settings.map(({ Logo, id, label, path }) => (
         <div key={id} className="mx-auto">
           <div className="mb-6 relative pl-6">
-            {routePath === id && (
+            {routePath === id  && (
               <div className="bg-cyan-600 h-7 w-1 absolute left-0 top-0"></div>
             )}
             <Link to={path} className="flex items-center gap-2">
               <Logo
                 className={`h-5 w-5 ${
-                  routePath === id ? "fill-cyan-600" : "fill-gray-500"
+                  routePath === id  ? "fill-cyan-600" : "fill-gray-500"
                 }`}
               />
               <p

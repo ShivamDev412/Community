@@ -31,6 +31,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 export const InputField: FC<InputProps & TextFieldProps> = ({
   register,
   errors,
+  label,
   id,
   ...rest
 }) => {
@@ -50,10 +51,11 @@ export const InputField: FC<InputProps & TextFieldProps> = ({
           color="primary"
           {...register(id)}
           className="w-full"
+          label={label}
         />
       ) : (
         <div className="relative">
-          <InputLabel htmlFor={id}>Password</InputLabel>
+          <InputLabel htmlFor={id}>{label ? label : "Password"}</InputLabel>
           <OutlinedInput
             id={id}
             className="w-full"
@@ -72,7 +74,7 @@ export const InputField: FC<InputProps & TextFieldProps> = ({
                 </IconButton>
               </InputAdornment>
             }
-            label="Password"
+            label={label ? label : "Password"} 
           />
         </div>
       )}

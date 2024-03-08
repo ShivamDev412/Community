@@ -1,14 +1,18 @@
 import { getImage } from "./../utils/UploadToS3";
+import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
 import {
   getUserById,
+  getUserPasswordById,
+  updateUserPassword,
   updateUserProfileById,
   updateUserProfileInfo,
 } from "../database/UserQueries";
 import { throwError } from "../utils/Error";
-import { EditProfileSchema, PersonalInfoSchema } from "../utils/Validation";
+import { EditProfileSchema, PersonalInfoSchema, ChangePasswordSchema} from "../utils/Validation";
 import { uploadToS3 } from "../utils/UploadToS3";
 import moment from "moment";
+import { QueryResultRow } from "pg";
 
 export const GetUserData = async (
   req: Request,
@@ -83,11 +87,11 @@ export const updateUserPersonalInfo = async (
   try {
     const parsedData = PersonalInfoSchema.safeParse(req.body);
     if (parsedData.success) {
-      const { birthday, gender, lookingFor, lifeStages } = parsedData.data; 
-      
-      let formattedBirthday = null; 
+      const { birthday, gender, lookingFor, lifeStages } = parsedData.data;
+
+      let formattedBirthday = null;
       if (birthday) {
-        formattedBirthday = moment(birthday, 'YYYY-MM-DD').format('YYYY-MM-DD');
+        formattedBirthday = moment(birthday, "YYYY-MM-DD").format("YYYY-MM-DD");
       }
       const userId: string | undefined = req?.user?.userId;
       if (userId) {
@@ -112,6 +116,38 @@ export const updateUserPersonalInfo = async (
       }
     } else {
       return throwError(next, "Invalid data provided");
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+export const changePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = ChangePasswordSchema.parse(req.body);
+    const userId: string | undefined = req?.user?.userId;
+    if (userId) {
+      const existingUser: QueryResultRow | null = await getUserPasswordById(userId);
+      if (existingUser) {
+        const isPasswordCorrect = await bcrypt.compare(
+          currentPassword,
+          existingUser.password
+        );
+        if (!isPasswordCorrect) {
+          return throwError(next, "Current password is incorrect");
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await updateUserPassword(userId, hashedPassword);
+        res.status(200).json({
+          success: true,
+          message: "Password updated successfully",
+        });
+      }
+    } else {
+      return throwError(next, "User not found");
     }
   } catch (err) {
     next(err);
