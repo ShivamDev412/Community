@@ -48,7 +48,7 @@ const useEditProfile = () => {
       typeof data?.image[0] === "object" ? data?.image[0] : data.image
     );
     formData.append("name", `${data?.firstName} ${data?.lastName}`);
-    formData.append("address", data?.address);
+    formData.append("address", data?.address ? data.address : "");
     formData.append("bio", JSON.stringify(data?.bio));
     try {
       dispatch(setLoading(true));
@@ -71,7 +71,15 @@ const useEditProfile = () => {
   };
   const routeToProfile = () => {
     navigation(RouteEndpoints.PROFILE);
-  }
-  return { handleSubmit, register, errors, onSubmit, getValues, setValue, routeToProfile};
+  };
+  return {
+    handleSubmit,
+    register,
+    errors,
+    onSubmit,
+    getValues,
+    setValue,
+    routeToProfile,
+  };
 };
 export default useEditProfile;

@@ -29,9 +29,9 @@ const ProfileImage: FC<ProfileImageProps> = ({
         <h3 className="font-semibold text-[1.8rem]">{name}</h3>
         <h3 className="">{email}</h3>
         <h3 className="flex items-center gap-1">
-          {location && (
+          {location !== "" && location !== null && (
             <>
-              <FaLocationDot /> {location}
+              <FaLocationDot /> {location && location}
             </>
           )}
         </h3>

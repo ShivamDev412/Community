@@ -18,7 +18,7 @@ export interface LocationDropdownProps {
     description: string;
   }[];
   isPlacePredictionsLoading: boolean;
-  handleLocationSelect: (placeId: string, addressType:string) => void;
+  handleLocationSelect: (placeId: string, addressType: string) => void;
   className?: string;
   addressType?: string;
 }
@@ -105,30 +105,48 @@ export interface DateAndTimePickerProps extends InputProps {
   setValue: any;
   setError: Function;
   label: string;
+  getValues?:any
 }
 export type GroupsSliceType = {
   groupsCreated: Array<Group>;
   groupsInMember: Array<Group>;
 };
 export type ProfileStatsProps = {
-  title:string;
-  value:string;
-}
+  title: string;
+  value: string;
+};
 export type EditProfileLinkProps = {
-  image:string;
-  name:string;
-}
+  image: string;
+  name: string;
+};
 export type ProfileImageProps = {
-  location:string;
-  image:string;
-  name:string;
-  email:string;
-  joined_on_date:string;
-}
+  location: string;
+  image: string;
+  name: string;
+  email: string;
+  joined_on_date: string;
+};
 export type EditProfileType = {
-  image:string;
-  firstName:string;
-  lastName:string;
-  address:string;
-  bio:string;
-}
+  image: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  bio: string;
+};
+export type PersonalInfoType = {
+  birthday: any;
+  gender: string;
+  lookingFor: string[];
+  lifeStages: string[];
+};
+export type LookingForType = {
+  data: { value: string; active: boolean }[];
+  setData: (
+    value: string,
+    data: { value: string; active: boolean }[],
+    cb: string
+  ) => void;
+  title: string;
+  subTitle: string;
+  cb: string;
+};

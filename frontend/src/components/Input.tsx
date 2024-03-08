@@ -17,9 +17,10 @@ import {
   LocalizationProvider,
   TimePicker,
 } from "@mui/x-date-pickers";
+import dayjs, { Dayjs } from "dayjs";
 import moment from "moment";
 import { VisibilityOff, Visibility } from "@mui/icons-material";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   DateAndTimePickerProps,
   InputProps,
@@ -108,7 +109,9 @@ export const DescriptionField: FC<InputProps & TextFieldProps> = ({
     </FormControl>
   );
 };
-export const SelectField: FC<SelectFieldProps & { onChange?: Function }> = ({
+export const SelectField: FC<
+  SelectFieldProps & { onChange?: Function; getValues?: any }
+> = ({
   register,
   id,
   errors,
@@ -116,8 +119,14 @@ export const SelectField: FC<SelectFieldProps & { onChange?: Function }> = ({
   label,
   defaultValue,
   onChange,
+  getValues,
   ...rest
 }) => {
+  const [value, setValue] = useState(defaultValue);
+  useEffect(() => {
+    const val = getValues(id);
+    setValue(val);
+  }, [getValues]);
   return (
     <FormControl className="w-full">
       <InputLabel id={id}>{label}</InputLabel>
@@ -127,9 +136,11 @@ export const SelectField: FC<SelectFieldProps & { onChange?: Function }> = ({
         color="primary"
         className="w-full"
         label={label}
+        value={value}
         defaultValue={defaultValue}
         {...register(id, {
           onChange: (e: SelectChangeEvent) => {
+            setValue(e.target.value);
             onChange && onChange(e.target.value);
           },
         })}
@@ -156,29 +167,34 @@ export const DateField: FC<DateAndTimePickerProps> = ({
   setValue,
   label,
   setError,
+  getValues,
 }) => {
-  const [date, setDate] = useState<moment.Moment | null>(moment());
-
-  const onChange = (date: moment.Moment | null) => {
+  const [date, setDate] = useState<Dayjs | null>(
+    dayjs(moment().format("YYYY-MM-DD"))
+  );
+  const dat = getValues(id);
+  useEffect(() => {
+    if (dat) {
+      setDate(dayjs(moment(dat).format("YYYY-MM-DD")));
+      setValue(id, moment(dat).format("YYYY-MM-DD"));
+    }
+  }, [dat]);
+  const onChange = (date: Dayjs | null) => {
     if (date) {
       const dateOnlyString = date.format("YYYY-MM-DD");
       setValue(id, dateOnlyString);
-      setDate(date);
+      setDate(dayjs(date.format()));
       setError(id, undefined);
     }
   };
-
   return (
     <div>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        {/*   @ts-ignore */}
         <DatePicker
           className="w-full"
-          {...register(id, {
-            value: date,
-          })}
+          value={date}
+          {...register(id)}
           label={label}
-          // @ts-ignore
           onChange={onChange}
         />
       </LocalizationProvider>
@@ -202,7 +218,7 @@ export const TimeField: FC<DateAndTimePickerProps> = ({
   const [time, setTime] = useState<moment.Moment | null>(moment());
   const onChange = (time: moment.Moment) => {
     if (time) {
-      const timeString = time.format("HH:mm"); 
+      const timeString = time.format("HH:mm");
       setValue(id, timeString);
       setTime(time);
       setError(id, undefined);

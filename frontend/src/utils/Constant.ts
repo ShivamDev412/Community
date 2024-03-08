@@ -54,13 +54,13 @@ export const Settings = [
     id: "edit-profile",
     label: "Edit Profile",
     Logo: FaUserEdit,
-    path: RouteEndpoints.PROFILE,
+    path: RouteEndpoints.EDIT_PROFILE,
   },
   {
     id: "personal-info",
     label: "Personal Info",
     Logo: CgNotes,
-    path: RouteEndpoints.PROFILE,
+    path: RouteEndpoints.PROFILE_INFO,
   },
   {
     id: "account-management",
@@ -74,4 +74,24 @@ export const Settings = [
     Logo: FaStar,
     path: RouteEndpoints.PROFILE,
   },
+];
+export const GenderType = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "non-binary", label: "Non-Binary" },
+  { value: "others", label: "Others" },
+];
+export const LookingFor = [
+  { value: "Practice Hobbies", active: false },
+  { value: "Socialize", active: false },
+  { value: "Make Friend", active: false },
+  { value: "Professionally Network", active: false },
+];
+export const LifeStages = [
+  { value: "Recent Graduate", active: false },
+  { value: "Student", active: false },
+  { value: "New In Town", active: false },
+  { value: "Newly Retired", active: false },
+  { value: "New Parent", active: false },
+  { value: "Career Change", active: false },
 ];

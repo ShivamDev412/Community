@@ -15,6 +15,7 @@ export const RouteEndpoints = {
     EDIT_EVENT:"/edit-event/:id",
     CREATE_EVENT:"/create-event",
     CREATE_GROUP:"/create-group",
+    PROFILE_INFO:"/personal-info"
 }
 export const Endpoints = {
     LOGIN:"/login",
@@ -31,7 +32,8 @@ export const Endpoints = {
     CREATE_EVENT:"/create-event",
     CREATE_GROUP:"/create-group",
     SEARCH:"/search",
-    EDIT_PROFILE:"/edit-profile"
+    EDIT_PROFILE:"/edit-profile",
+    UPDATE_PERSONAL_INFO:"/update-personal-info",
 }
 export const API_ENDPOINTS = {
     USER: "/api/user",

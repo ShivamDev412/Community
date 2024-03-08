@@ -5,7 +5,7 @@ export const getUserById = async (
   id: string
 ): Promise<QueryResultRow | null> => {
   const result =
-    await sql`SELECT user_id, name, email, location, age, joined_on, image, bio, dob, sex, joined_on FROM users WHERE user_id = ${id}`;
+    await sql`SELECT user_id, name, email, location, joined_on, image, bio, dob, sex, joined_on, looking_for, life_state FROM users WHERE user_id = ${id}`;
   if (result && result.length > 0) {
     return result[0];
   }
@@ -158,6 +158,28 @@ export const updateUserProfileById = async (
           image = ${image},
           bio = ${bio},
           location = ${location},
+          updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = ${userId};
+    `;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
+  }
+};
+export const updateUserProfileInfo= async (
+  userId: string,
+  dob: Date | any,
+  sex: string | any,
+  lookingFor: string[] | any,
+  lifeState: string[] | any,
+): Promise<void> => {
+  try {
+    await sql`
+      UPDATE users
+      SET dob = ${dob},
+          sex = ${sex},
+          looking_for = ${lookingFor},
+          life_state = ${lifeState},
           updated_at = CURRENT_TIMESTAMP
       WHERE user_id = ${userId};
     `;

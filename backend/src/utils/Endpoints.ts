@@ -10,6 +10,7 @@ export const ENDPOINTS = {
     CREATE_EVENT:"/create-event",
     SEARCH:"/search",
     EDIT_PROFILE:"/edit-profile",
+    UPDATE_PERSONAL_INFO:"/update-personal-info",
 };
 
 export const API_ENDPOINTS = {

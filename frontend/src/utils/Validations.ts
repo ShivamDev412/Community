@@ -1,4 +1,5 @@
 import { z } from "zod";
+import moment from "moment";
 
 export const LoginSchema = z.object({
   email: z
@@ -111,6 +112,21 @@ export const EditProfileSchema = z.object({
     .string()
     .min(1, "Last Name is required")
     .regex(/^[a-zA-Z]+$/, "Name should only contain letters"),
-  address: z.string().min(1, { message: "Address is required" }),
+  address: z.any().optional(),
   bio: z.string().optional(),
+});
+
+export const PersonalInfoSchema = z.object({
+  birthday: z.string().refine((value) => {
+    // if (!value) return true; 
+    const birthDate = moment(value, 'YYYY-MM-DD', true); 
+    if (!birthDate.isValid()) return false; 
+    const age = moment().diff(birthDate, 'years');
+    return age >= 18 && age <= 60;
+  }, {
+    message: "You must be at least 18 years old and at most 60 years old.",
+  }).optional(),
+  gender: z.string().optional(),
+  lookingFor: z.array(z.string()).optional(),
+  lifeStages: z.array(z.string()).optional()
 });

@@ -24,6 +24,19 @@ export const postApi = async (url: string, data: any) => {
     throw error;
   }
 };
+export const putApi = async (url: string, data: any) => {
+  try {
+    const response = await axios.put(url, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 export const postApiFile = async (url: string, data: any) => {
   try {
     const response = await axios.post(url, data, {

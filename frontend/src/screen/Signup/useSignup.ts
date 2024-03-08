@@ -44,7 +44,17 @@ export const useSignup = () => {
       );
       if (response.success) {
         Toast(response.message, "success");
-        dispatch(setUser(response.data));
+        dispatch(
+          setUser({
+            ...response.data,
+            bio: "",
+            dob: "",
+            life_state: [],
+            location: "",
+            looking_for: [],
+            sex: "",
+          })
+        );
         navigate(RouteEndpoints.HOME);
         reset();
         clearErrors();

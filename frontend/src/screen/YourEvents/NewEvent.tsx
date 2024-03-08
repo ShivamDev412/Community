@@ -85,7 +85,7 @@ const NewEvent = () => {
             errors={errors}
             setValue={setValue}
             setError={setError}
-            // control={control}
+         
           />
           <TimeField
             id={"time"}

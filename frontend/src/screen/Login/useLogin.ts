@@ -29,10 +29,27 @@ export const useLogin = () => {
   });
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     try {
-      const response = await postApi(`${API_ENDPOINTS.AUTH}${RouteEndpoints.LOGIN}`, data);
+      const response = await postApi(
+        `${API_ENDPOINTS.AUTH}${RouteEndpoints.LOGIN}`,
+        data
+      );
       if (response.success) {
         Toast(response.message, "success");
-        dispatch(setUser(response.data));
+        dispatch(
+          setUser({
+            ...response.data,
+            bio: response.data.bio ? response.data.bio : "",
+            dob: response.data.dob ? response.data.dob : "",
+            life_state: response.data.life_stage
+              ? response.data.life_stage
+              : [],
+            location: response.data.location ? response.data.location : "",
+            looking_for: response.data.looking_for
+              ? response.data.looking_for
+              : [],
+            sex: response.data.sex ? response.data.sex : "",
+          })
+        );
         navigate(RouteEndpoints.HOME);
         reset();
         clearErrors();
@@ -42,7 +59,7 @@ export const useLogin = () => {
       const type = message.includes("Password") ? "password" : "email";
       setError(type, {
         type: "manual",
-        message: error.response.data.message,
+        message: error.response?.data?.message,
       });
     }
   };
