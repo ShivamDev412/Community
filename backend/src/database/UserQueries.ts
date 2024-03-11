@@ -205,11 +205,77 @@ export const updateUserPassword = async (
   try {
     await sql`
       UPDATE users
-      SET password = ${password}
+      SET password = ${password},
+      updated_at = CURRENT_TIMESTAMP
       WHERE user_id = ${userId};
+      
     `;
   } catch (error) {
     console.error("Error updating user password:", error);
+    throw error;
+  }
+};
+export const getAllCategoriesQuery = async (): Promise<any[]> => {
+  try {
+    const result = await sql`
+      SELECT * FROM categories;
+    `;
+    return result;
+  } catch (error) {
+    console.error("Error fetching all categories:", error);
+    throw error;
+  }
+};
+export const getAllInterestsQuery = async (
+  categoryId: string
+): Promise<any[]> => {
+  try {
+    const result = await sql`
+      SELECT * FROM interests WHERE category_id = ${categoryId};
+    `;
+    return result;
+  } catch (error) {
+    console.error("Error fetching all interests:", error);
+    throw error;
+  }
+};
+export const addUserInterest = async (
+  userId: string,
+  interestId: string
+): Promise<void> => {
+  try {
+    await sql`
+      INSERT INTO user_interests (user_id, interest_id)
+      VALUES (${userId}, ${interestId});
+    `;
+  } catch (error) {
+    console.error("Error adding user interest:", error);
+    throw error;
+  }
+};
+export const getUserInterests = async (userId: string): Promise<any[]> => {
+  try {
+    const result = await sql`
+      SELECT interests.interest_id, interests.name
+      FROM interests
+      JOIN user_interests ON interests.interest_id = user_interests.interest_id
+      WHERE user_interests.user_id = ${userId};
+    `;
+    return result;
+  } catch (error) {
+    console.error("Error getting user interests:", error);
+    throw error;
+  }
+}
+
+export const removeUserInterest = async (userId: string, interestId: string): Promise<void> => {
+  try {
+    await sql`
+      DELETE FROM user_interests
+      WHERE user_id = ${userId} AND interest_id = ${interestId};
+    `;
+  } catch (error) {
+    console.error("Error removing user interest:", error);
     throw error;
   }
 };

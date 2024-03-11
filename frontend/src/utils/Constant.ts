@@ -75,7 +75,7 @@ export const Settings = [
     id: "interests",
     label: "Interests",
     Logo: FaStar,
-    path: RouteEndpoints.PROFILE,
+    path: RouteEndpoints.INTERESTS,
   },
 ];
 export const GenderType = [

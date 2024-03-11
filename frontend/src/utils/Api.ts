@@ -50,3 +50,16 @@ export const postApiFile = async (url: string, data: any) => {
     throw error;
   }
 };
+export const deleteApi = async (url: string) => {
+  try {
+    const response = await axios.delete(url, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

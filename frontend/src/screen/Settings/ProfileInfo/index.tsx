@@ -20,8 +20,7 @@ const ProfileInfo = () => {
   } = usePersonalInfo();
   return (
     <EditProfileWrapper>
-      {" "}
-      <section className="my-10 sm:ml-10 w-full xs:pl-[1in] sm:pl-[3.2in] md:pl-[2.5in] lg:pl-[2.8in] xl:pl-[2.5in] 2xl:pl-[3in]">
+      <>
         <div>
           {" "}
           <h1 className="text-[2rem] font-bold">Personal Info</h1>
@@ -68,9 +67,9 @@ const ProfileInfo = () => {
             subTitle={"Select what represents you"}
             cb={"setLifeStages"}
           />
-      <FormAction />
+          <FormAction />
         </FormControl>
-      </section>
+      </>
     </EditProfileWrapper>
   );
 };

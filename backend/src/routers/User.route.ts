@@ -2,8 +2,13 @@ import express from "express";
 import { ENDPOINTS } from "../utils/Endpoints";
 import {
   GetUserData,
+  addUserInterests,
   changePassword,
   editUserProfile,
+  getAllCategories,
+  getInterestsByCategories,
+  getUserAllInterests,
+  removeUserInterests,
   updateUserPersonalInfo,
 } from "../controllers/User.controller";
 import { AuthMiddleware } from "../middlewares/Auth.middleware";
@@ -19,5 +24,10 @@ route.put(
   updateUserPersonalInfo
 );
 route.put(ENDPOINTS.CHANGE_PASSWORD, AuthMiddleware, changePassword);
+route.get(ENDPOINTS.CATEGORIES, AuthMiddleware, getAllCategories);
+route.get(ENDPOINTS.INTERESTS, AuthMiddleware, getInterestsByCategories);
+route.post(ENDPOINTS.ADD_INTERESTS, AuthMiddleware, addUserInterests);
+route.delete(ENDPOINTS.DELETE_INTERESTS, AuthMiddleware, removeUserInterests);
+route.get(ENDPOINTS.GET_USER_INTERESTS, AuthMiddleware, getUserAllInterests);
 
 export default route;

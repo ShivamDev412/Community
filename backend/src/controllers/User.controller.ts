@@ -2,14 +2,23 @@ import { getImage } from "./../utils/UploadToS3";
 import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
 import {
+  addUserInterest,
+  getAllCategoriesQuery,
+  getAllInterestsQuery,
   getUserById,
+  getUserInterests,
   getUserPasswordById,
+  removeUserInterest,
   updateUserPassword,
   updateUserProfileById,
   updateUserProfileInfo,
 } from "../database/UserQueries";
 import { throwError } from "../utils/Error";
-import { EditProfileSchema, PersonalInfoSchema, ChangePasswordSchema} from "../utils/Validation";
+import {
+  EditProfileSchema,
+  PersonalInfoSchema,
+  ChangePasswordSchema,
+} from "../utils/Validation";
 import { uploadToS3 } from "../utils/UploadToS3";
 import moment from "moment";
 import { QueryResultRow } from "pg";
@@ -127,10 +136,13 @@ export const changePassword = async (
   next: NextFunction
 ) => {
   try {
-    const { currentPassword, newPassword, confirmPassword } = ChangePasswordSchema.parse(req.body);
+    const { currentPassword, newPassword, confirmPassword } =
+      ChangePasswordSchema.parse(req.body);
     const userId: string | undefined = req?.user?.userId;
     if (userId) {
-      const existingUser: QueryResultRow | null = await getUserPasswordById(userId);
+      const existingUser: QueryResultRow | null = await getUserPasswordById(
+        userId
+      );
       if (existingUser) {
         const isPasswordCorrect = await bcrypt.compare(
           currentPassword,
@@ -146,6 +158,116 @@ export const changePassword = async (
           message: "Password updated successfully",
         });
       }
+    } else {
+      return throwError(next, "User not found");
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+export const getAllCategories = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId: string | undefined = req?.user?.userId;
+    if (userId) {
+      const categories = await getAllCategoriesQuery();
+      res.status(200).json({
+        success: true,
+        data: categories,
+        message: "Categories fetched successfully",
+      });
+    } else {
+      return throwError(next, "User not found");
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+export const getInterestsByCategories = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId: string | undefined = req?.user?.userId;
+    const { categoryId } = req.params;
+    if (userId) {
+      const interests = await getAllInterestsQuery(categoryId);
+      res.status(200).json({
+        success: true,
+        data: interests,
+        message: "Interests fetched successfully",
+      });
+    } else {
+      return throwError(next, "User not found");
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+export const addUserInterests = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { interestId } = req.body;
+    const userId: string | undefined = req?.user?.userId;
+    if (userId) {
+      await addUserInterest(userId, interestId);
+      const userInterests = await getUserInterests(userId);
+      res.status(200).json({
+        success: true,
+        message: "Interests updated successfully",
+        data: userInterests,
+      });
+    } else {
+      return throwError(next, "User not found");
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+export const removeUserInterests = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { interestId } = req.params;
+    const userId: string | undefined = req?.user?.userId;
+    if (userId) {
+      await removeUserInterest(userId, interestId);
+      const userInterests = await getUserInterests(userId);
+      res.status(200).json({
+        success: true,
+        message: "Interest removed successfully",
+        data: userInterests,
+      });
+    } else {
+      return throwError(next, "User not found");
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+export const getUserAllInterests = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId: string | undefined = req?.user?.userId;
+    if (userId) {
+      const userInterests = await getUserInterests(userId);
+      res.status(200).json({
+        success: true,
+        message: "Interests fetched successfully",
+        data: userInterests,
+      });
     } else {
       return throwError(next, "User not found");
     }

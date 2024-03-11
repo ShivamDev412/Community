@@ -33,6 +33,7 @@ export const InputField: FC<InputProps & TextFieldProps> = ({
   errors,
   label,
   id,
+  disabled = false,
   ...rest
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -52,6 +53,7 @@ export const InputField: FC<InputProps & TextFieldProps> = ({
           {...register(id)}
           className="w-full"
           label={label}
+          disabled={disabled}
         />
       ) : (
         <div className="relative">

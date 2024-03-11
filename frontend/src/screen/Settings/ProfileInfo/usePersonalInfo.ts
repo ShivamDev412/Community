@@ -39,6 +39,7 @@ export const usePersonalInfo = () => {
     },
     resolver: zodResolver(PersonalInfoSchema),
   });
+  console.log(life_state)
   useEffect(() => {
     if (looking_for.length) {
       looking_for.forEach((item) => {

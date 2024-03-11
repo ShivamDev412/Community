@@ -80,6 +80,7 @@ export type InputProps = {
   register: UseFormRegister<any>;
   errors: any;
   id: string;
+  disabled?: boolean;
 };
 export interface SelectFieldProps extends InputProps {
   options: { value: string; label: string }[];

@@ -18,6 +18,7 @@ export const RouteEndpoints = {
   PROFILE_INFO: "/personal-info",
   ACCOUNT_MANAGEMENT: "/account-management",
   CHANGE_PASSWORD: "/account-management/change-password",
+  INTERESTS: "/interests",
 };
 export const Endpoints = {
   LOGIN: "/login",
@@ -37,6 +38,11 @@ export const Endpoints = {
   EDIT_PROFILE: "/edit-profile",
   UPDATE_PERSONAL_INFO: "/update-personal-info",
   CHANGE_PASSWORD: "/change-password",
+  CATEGORIES: "/categories",
+  INTERESTS: "/interests",
+  ADD_INTERESTS:"/add-interests",
+  DELETE_INTERESTS:"/delete-interests",
+  GET_USER_INTERESTS:"/get-user-interests"
 };
 export const API_ENDPOINTS = {
   USER: "/api/user",

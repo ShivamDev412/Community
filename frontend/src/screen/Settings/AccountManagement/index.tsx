@@ -2,7 +2,6 @@ import EditProfileWrapper from "@/Wrappers/EditProfileWrapper";
 import { FormControl } from "@mui/material";
 import { useAccountManagement } from "./useAccountManagement";
 import { InputField } from "@/components/Input";
-import FormAction from "@/components/Settings/FormAction";
 import { RouteEndpoints } from "@/utils/Endpoints";
 import { Link } from "react-router-dom";
 const AccountManagement = () => {
@@ -18,7 +17,7 @@ const AccountManagement = () => {
   } = useAccountManagement();
   return (
     <EditProfileWrapper>
-      <section className="my-10 sm:ml-10 w-full xs:pl-[1in] sm:pl-[3.2in] md:pl-[2.5in] lg:pl-[2.8in] xl:pl-[2.5in] 2xl:pl-[3in]">
+      <>
         <div>
           {" "}
           <h1 className="text-[2rem] font-bold">Account Management</h1>
@@ -33,10 +32,11 @@ const AccountManagement = () => {
             id={"email"}
             label={"Email"}
             type={"text"}
+            disabled={true}
             register={register}
             errors={errors}
           />
-          <FormAction />
+          {/* <FormAction /> */}
           <section>
             <h2 className="text-lg font-bold my-6">Change your password</h2>
             <Link
@@ -53,7 +53,7 @@ const AccountManagement = () => {
             </button>
           </section>
         </FormControl>
-      </section>
+      </>
     </EditProfileWrapper>
   );
 };

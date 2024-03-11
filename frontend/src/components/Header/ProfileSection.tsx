@@ -13,7 +13,7 @@ import { useHeader } from "./useHeader";
 const MenuData: FC<MenuDataProps> = ({ menu, link, setShowDropdown }) => {
   return (
     <MenuItem className="px-6 hover:bg-white hover:text-primary text-gray-600">
-      <Link to={link} onClick={() => setShowDropdown(false)}>
+      <Link to={link} onClick={() => setShowDropdown(false)} className="w-full">
         {menu}
       </Link>
     </MenuItem>
@@ -53,7 +53,7 @@ const ProfileSection = () => {
           />
           <MenuData
             menu="Settings"
-            link={RouteEndpoints.SETTINGS}
+            link={RouteEndpoints.EDIT_PROFILE}
             setShowDropdown={setShowDropdown}
           />
           <MenuItem

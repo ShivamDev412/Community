@@ -44,6 +44,7 @@ export const Login = async (
     });
     const imageUrl = await getImage(existingUser?.image);
     if (imageUrl) {
+      console.log(existingUser)
       res.status(200).json({
         success: true,
         message: "Login successful",
@@ -58,6 +59,8 @@ export const Login = async (
           sex: existingUser.sex,
           age: existingUser.age,
           joined_on: existingUser.joined_on,
+          looking_for:existingUser.looking_for,
+          life_state:existingUser.life_state,
         },
       });
     } else {

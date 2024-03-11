@@ -12,6 +12,11 @@ export const ENDPOINTS = {
     EDIT_PROFILE:"/edit-profile",
     UPDATE_PERSONAL_INFO:"/update-personal-info",
     CHANGE_PASSWORD:"/change-password",
+    CATEGORIES:"/categories",
+    INTERESTS:"/interests/:categoryId",
+    ADD_INTERESTS:"/add-interests",
+    DELETE_INTERESTS:"/delete-interests/:interestId",
+    GET_USER_INTERESTS:"/get-user-interests"
 };
 
 export const API_ENDPOINTS = {
