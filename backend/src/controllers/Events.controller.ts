@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { throwError } from "../utils/Error";
-import { addEvent, getAllTags } from "../database/UserQueries";
+import { addEvent, getAllInterests } from "../database/UserQueries";
 import { uploadToS3 } from "../utils/UploadToS3";
+
+import { promisify } from "util";
 
 export const getTags = async (
   request: Request,
@@ -12,12 +14,14 @@ export const getTags = async (
   if (!userId) {
     return throwError(next, "User not found");
   }
+
   try {
-    const groups = await getAllTags();
+    const interests = await getAllInterests();
+
     response.status(200).json({
       success: true,
       message: "Tags fetched successfully",
-      data: groups,
+      data: interests,
     });
   } catch (error) {
     next(error);
@@ -41,7 +45,7 @@ export const createEvent = async (
       }
       const linkToSend = type === "online" ? link : null;
       const locationToSend = type === "in-person" ? location : null;
-      const tagsToSend = JSON.parse(tags)
+      const tagsToSend = JSON.parse(tags);
       const imageUrl = await uploadToS3(name, file?.buffer, file.mimetype);
       const newEvent = await addEvent(
         name,

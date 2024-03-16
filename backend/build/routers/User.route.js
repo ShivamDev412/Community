@@ -1,0 +1,24 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const Endpoints_1 = require("../utils/Endpoints");
+const User_controller_1 = require("../controllers/User.controller");
+const Auth_middleware_1 = require("../middlewares/Auth.middleware");
+const multer_1 = __importDefault(require("multer"));
+const route = express_1.default.Router();
+const storage = multer_1.default.memoryStorage();
+const upload = (0, multer_1.default)({ storage }).single("image");
+route.get(Endpoints_1.ENDPOINTS.USER, Auth_middleware_1.AuthMiddleware, User_controller_1.GetUserData);
+route.post(Endpoints_1.ENDPOINTS.EDIT_PROFILE, Auth_middleware_1.AuthMiddleware, upload, User_controller_1.editUserProfile);
+route.put(Endpoints_1.ENDPOINTS.UPDATE_PERSONAL_INFO, Auth_middleware_1.AuthMiddleware, User_controller_1.updateUserPersonalInfo);
+route.put(Endpoints_1.ENDPOINTS.CHANGE_PASSWORD, Auth_middleware_1.AuthMiddleware, User_controller_1.changePassword);
+route.get(Endpoints_1.ENDPOINTS.CATEGORIES, Auth_middleware_1.AuthMiddleware, User_controller_1.getAllCategories);
+route.get(Endpoints_1.ENDPOINTS.INTERESTS, Auth_middleware_1.AuthMiddleware, User_controller_1.getInterestsByCategories);
+route.post(Endpoints_1.ENDPOINTS.ADD_INTERESTS, Auth_middleware_1.AuthMiddleware, User_controller_1.addUserInterests);
+route.delete(Endpoints_1.ENDPOINTS.DELETE_INTERESTS, Auth_middleware_1.AuthMiddleware, User_controller_1.removeUserInterests);
+route.get(Endpoints_1.ENDPOINTS.GET_USER_INTERESTS, Auth_middleware_1.AuthMiddleware, User_controller_1.getUserAllInterests);
+route.get(Endpoints_1.ENDPOINTS.GET_USER_GROUPS_ORGANIZER, Auth_middleware_1.AuthMiddleware, User_controller_1.getUserCreatedGroups);
+exports.default = route;

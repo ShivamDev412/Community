@@ -24,6 +24,7 @@ const NewEvent = () => {
     eventType,
     setEventType,
     clearErrors,
+    getValues,
     setError,
   } = useNewEvent();
   return (
@@ -57,6 +58,7 @@ const NewEvent = () => {
             errors={errors}
             options={[...groups]}
             defaultValue={""}
+            getValues={getValues}
           />
           <SelectField
             id={"type"}
@@ -66,6 +68,7 @@ const NewEvent = () => {
             options={[...EventType]}
             onChange={setEventType}
             defaultValue={""}
+            getValues={getValues}
           />
           <MultiSelectField
             id={"tags"}
@@ -85,6 +88,7 @@ const NewEvent = () => {
             errors={errors}
             setValue={setValue}
             setError={setError}
+            getValues={getValues}
          
           />
           <TimeField

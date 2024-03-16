@@ -5,6 +5,7 @@ import {
   addUserInterest,
   getAllCategoriesQuery,
   getAllInterestsQuery,
+  getGroupsCreatedByUser,
   getUserById,
   getUserInterests,
   getUserPasswordById,
@@ -271,6 +272,49 @@ export const getUserAllInterests = async (
     } else {
       return throwError(next, "User not found");
     }
+  } catch (err) {
+    next(err);
+  }
+};
+export const getUserCreatedGroups = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId: string | undefined = req.user?.userId;
+    if (!userId) {
+      return throwError(next, "User not found");
+    }
+    const pageSize = 10;
+
+    let pageNum = parseInt(req.query.page as string, 10) || 1;
+    if (isNaN(pageNum) || pageNum < 1) {
+      pageNum = 1;
+    }
+    const offset = (pageNum - 1) * pageSize;
+    const groups = await getGroupsCreatedByUser(userId, offset);
+    const groupToSend = await Promise.all(
+      groups.map(async (group) => {
+        try {
+          const image = await getImage(group.image);
+          if (image) {
+            return {
+              ...group,
+              image: image,
+            };
+          }
+          return null;
+        } catch (error) {
+          return throwError(next, "Error fetching image:");
+        }
+      })
+    );
+    res.status(200).json({
+      success: true,
+      message: "Groups fetched successfully",
+      data: groupToSend,
+    });
   } catch (err) {
     next(err);
   }

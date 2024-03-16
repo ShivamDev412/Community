@@ -13,7 +13,7 @@ const BackToHome = () => {
       onClick={() => navigation(RouteEndpoints.HOME)}
     >
       <IoMdHome
-        className={`h-7 w-7 transition-all ${
+        className={`h-7 w-7 transition-all hidden sm:block ${
           hovered ? "opacity-100" : "opacity-0"
         }`}
       />{" "}

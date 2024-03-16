@@ -8,6 +8,7 @@ import {
   getAllCategories,
   getInterestsByCategories,
   getUserAllInterests,
+  getUserCreatedGroups,
   removeUserInterests,
   updateUserPersonalInfo,
 } from "../controllers/User.controller";
@@ -29,5 +30,10 @@ route.get(ENDPOINTS.INTERESTS, AuthMiddleware, getInterestsByCategories);
 route.post(ENDPOINTS.ADD_INTERESTS, AuthMiddleware, addUserInterests);
 route.delete(ENDPOINTS.DELETE_INTERESTS, AuthMiddleware, removeUserInterests);
 route.get(ENDPOINTS.GET_USER_INTERESTS, AuthMiddleware, getUserAllInterests);
+route.get(
+  ENDPOINTS.GET_USER_GROUPS_ORGANIZER,
+  AuthMiddleware,
+  getUserCreatedGroups
+);
 
 export default route;

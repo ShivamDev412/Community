@@ -2,28 +2,40 @@ import BackToHome from "@/components/BackToHome";
 import Button from "@/components/Button";
 import { useNavigate } from "react-router-dom";
 import { RouteEndpoints } from "@/utils/Endpoints";
+import { useYourGroup } from "./useYourGroup";
+import GroupsSection from "@/components/YourGroups/GroupsSection";
 
 const YourGroups = () => {
   const navigation = useNavigate();
+  const {
+    groupsCreated,
+    groupsInMember,
+    // pageNumberCreated,
+    // pageNumberInMember,
+  } = useYourGroup();
   return (
-    <section className="w-8/12 mx-auto overflow-x-hidden">
+    <section className="w-11/12 sm:w-8/12 mx-auto overflow-x-hidden h-full">
       <section className="flex items-center justify-between mt-10">
         <div className="flex items-center gap-4">
           <BackToHome />
-          <h1 className="text-[2.5rem] font-bold ">Your Groups</h1>
+          <h1 className="text-2xl font-bold ">Your Groups</h1>
         </div>
-        <div className="w-2/12">
+        <div className="w-fit">
           <Button onClick={() => navigation(RouteEndpoints.CREATE_GROUP)}>
             Start a group
           </Button>
         </div>
       </section>
-      <section className="w-10/12 mx-auto mt-5">
-        <h2 className="text-2xl font-semibold">Members</h2>
-      </section>
-      <section className="w-10/12 mx-auto mt-5">
-        <h2 className="text-2xl font-semibold">Your Groups</h2>
-      </section>
+      <GroupsSection
+        title="Members"
+        data={groupsInMember}
+        noDataText="You are not in any groups"
+      />
+      <GroupsSection
+        title="Organizer"
+        data={groupsCreated}
+        noDataText="You haven't created any groups"
+      />
     </section>
   );
 };

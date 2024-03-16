@@ -6,13 +6,13 @@ import Button from "@/components/Button";
 import SearchLocation from "@/components/SearchLocation";
 
 const NewGroup = () => {
-  const { register, handleSubmit, errors, onSubmit, backToGroup, setValue } = useNewGroup();
+  const { register, handleSubmit, errors, onSubmit, backToGroup, setValue, getValues } = useNewGroup();
   return (
     <>
       <h1 className="mt-10 text-[2rem] text-center font-semibold">
         Create a new group
       </h1>
-      <section className="my-10 w-full sm:w-1/2 mx-auto">
+      <section className="my-10 w-full sm:w-1/2 xl:w-1/4 mx-auto">
         <form
           className="flex flex-col gap-8"
           onSubmit={handleSubmit(onSubmit)}
@@ -38,6 +38,7 @@ const NewGroup = () => {
             errors={errors}
             options={[...GroupType]}
             defaultValue={GroupType[0].value}
+            getValues={getValues}
           />
           <SearchLocation
             id={"location"}

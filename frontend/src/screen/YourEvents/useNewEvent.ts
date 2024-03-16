@@ -40,9 +40,9 @@ export const useNewEvent = () => {
       const res = await getApi(`/api/event${Endpoints.TAGS}`);
       if (res.success) {
         setTags(
-          res.data.map((value: { tag_id: string; name: string }) => {
+          res.data.map((value: { interest_id: string; name: string }) => {
             return {
-              value: value.tag_id,
+              value: value.interest_id,
               label: value.name,
             };
           })
@@ -61,6 +61,7 @@ export const useNewEvent = () => {
     clearErrors,
     control,
     setValue,
+    getValues,
     setError,
     formState: { errors },
   } = useForm<NewEventType>({
@@ -129,5 +130,6 @@ export const useNewEvent = () => {
     setEventType,
     clearErrors,
     setError,
+    getValues,
   };
 };

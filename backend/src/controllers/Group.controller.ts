@@ -2,11 +2,13 @@ import { Request, Response, NextFunction } from "express";
 
 import {
   addUserGroup,
+  checkGroupExists,
   getGroupsByOrganizedBy,
   getUserGroupsQuery,
 } from "../database/UserQueries";
 import { throwError } from "../utils/Error";
 import { uploadToS3 } from "../utils/UploadToS3";
+import getImageDimensions from "../utils/GetImageDimention";
 export const getUserGroups = async (
   req: Request,
   res: Response,
@@ -35,27 +37,39 @@ export const createUserGroup = async (
     const { about, name, group_type, location } = req.body;
     const userId: string | undefined = req?.user?.userId;
     const file = req?.file;
+    const imageBuffer = file?.buffer;
+    const groupExists = await checkGroupExists(name);
+    console.log(groupExists,"groupExists")
+    if (groupExists.length) {
+      return throwError(next, { name: "Group name already exists" });
+    }
+    if (!imageBuffer) {
+      return throwError(next, { image: "Image not provided" });
+    }
+    const dimensions = await getImageDimensions(imageBuffer);
+    if (dimensions.width !== 1920 || dimensions.height !== 1080) {
+      return throwError(next, { image: "Image dimensions must be 1920x1080" });
+    }
     if (!userId) {
       return throwError(next, "User not found");
-    } else {
-      if (!file) {
-        return throwError(next, "Image not provided");
-      }
-      const imageUrl = await uploadToS3(name, file?.buffer, file.mimetype);
-      const newGroup = await addUserGroup(
-        name,
-        group_type,
-        location,
-        userId,
-        about,
-        imageUrl
-      );
-      res.status(200).json({
-        success: true,
-        message: "Group created successfully",
-        data: newGroup,
-      });
     }
+
+    const imageUrl = await uploadToS3(name, imageBuffer, file.mimetype);
+    const newGroup = await addUserGroup(
+      name,
+      group_type,
+      location,
+      userId,
+      about,
+      imageUrl
+    );
+
+    // Send response
+    res.status(200).json({
+      success: true,
+      message: "Group created successfully",
+      data: newGroup,
+    });
   } catch (error) {
     next(error);
   }

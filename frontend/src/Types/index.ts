@@ -93,7 +93,7 @@ export interface MultiSelectFieldProps extends InputProps {
   setValue: Function;
   defaultValue: Array<string>;
 }
-type Group = {
+export type Group = {
   group_id: string;
   name: string;
   group_type?: "public" | "private"; // optional field with enum for group_type
@@ -101,6 +101,8 @@ type Group = {
   organized_by: string;
   about?: string;
   image?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 export interface DateAndTimePickerProps extends InputProps {
   setValue: any;
@@ -111,6 +113,8 @@ export interface DateAndTimePickerProps extends InputProps {
 export type GroupsSliceType = {
   groupsCreated: Array<Group>;
   groupsInMember: Array<Group>;
+  pageNumberCreated:number;
+  pageNumberInMember: number;
 };
 export type ProfileStatsProps = {
   title: string;
@@ -158,4 +162,12 @@ export type ChangePasswordType = {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+export type GroupsProps = {
+  title:string;
+  data:Group[];
+  noDataText:string;
+}
+export type GroupCardProps = {
+  data:Group
 }

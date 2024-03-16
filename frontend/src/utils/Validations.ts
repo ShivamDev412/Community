@@ -28,14 +28,17 @@ export const SignupSchema = z.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()])[a-zA-Z\d!@#$%^&*()]+$/,
       "Password must contain at least one lowercase letter, one uppercase letter, one number and one special character"
     ),
-  image: z.any().refine(
-    (value) => {
-      return value !== null;
-    },
-    {
-      message: "Profile Image is required",
-    }
-  ),
+    image: z.any().refine(
+      (value) => {
+        if (value instanceof FileList) {
+          return value.length > 0; 
+        }
+          value !== null && value !== undefined;
+      },
+      {
+        message: "Profile Image is required",
+      }
+    ),
 });
 export const NewGroupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -43,7 +46,10 @@ export const NewGroupSchema = z.object({
   groupType: z.string().min(1, "Group Type is required"),
   image: z.any().refine(
     (value) => {
-      return value !== null;
+      if (value instanceof FileList) {
+        return value.length > 0; 
+      }
+        value !== null && value !== undefined;
     },
     {
       message: "Group Image is required",
@@ -57,7 +63,10 @@ export const NewEventSchema = z
     name: z.string().min(1, { message: "Event Name is required" }),
     image: z.any().refine(
       (value) => {
-        return value !== null;
+        if (value instanceof FileList) {
+          return value.length > 0; 
+        }
+          value !== null && value !== undefined;
       },
       {
         message: "Event Image is required",
@@ -98,7 +107,10 @@ export const NewEventSchema = z
 export const EditProfileSchema = z.object({
   image: z.any().refine(
     (value) => {
-      return value !== null;
+      if (value instanceof FileList) {
+        return value.length > 0; 
+      }
+        value !== null && value !== undefined;
     },
     {
       message: "Profile Image is required",

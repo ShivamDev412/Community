@@ -16,7 +16,9 @@ export const ENDPOINTS = {
     INTERESTS:"/interests/:categoryId",
     ADD_INTERESTS:"/add-interests",
     DELETE_INTERESTS:"/delete-interests/:interestId",
-    GET_USER_INTERESTS:"/get-user-interests"
+    GET_USER_INTERESTS:"/get-user-interests",
+    GET_USER_GROUPS_ORGANIZER:"/organizer",
+    GET_USER_GROUPS_MEMBER:"/member",
 };
 
 export const API_ENDPOINTS = {

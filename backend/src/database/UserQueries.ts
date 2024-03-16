@@ -101,10 +101,10 @@ export const getGroupsByOrganizedBy = async (
     return [];
   }
 };
-export const getAllTags = async () => {
+export const getAllInterests = async () => {
   try {
     const result = await sql`
-      SELECT * FROM tags;
+      SELECT * FROM interests;
     `;
     return result;
   } catch (error) {
@@ -266,9 +266,12 @@ export const getUserInterests = async (userId: string): Promise<any[]> => {
     console.error("Error getting user interests:", error);
     throw error;
   }
-}
+};
 
-export const removeUserInterest = async (userId: string, interestId: string): Promise<void> => {
+export const removeUserInterest = async (
+  userId: string,
+  interestId: string
+): Promise<void> => {
   try {
     await sql`
       DELETE FROM user_interests
@@ -276,6 +279,37 @@ export const removeUserInterest = async (userId: string, interestId: string): Pr
     `;
   } catch (error) {
     console.error("Error removing user interest:", error);
+    throw error;
+  }
+};
+export const getGroupsCreatedByUser = async (
+  userId: string,
+  offset: number
+): Promise<any[]> => {
+  const limit = 10;
+  try {
+    const result = await sql`
+      SELECT * FROM groups WHERE organized_by = ${userId}
+      ORDER BY created_at DESC
+      LIMIT ${limit} OFFSET ${offset};
+    `;
+    return result;
+  } catch (error) {
+    console.error(`Error getting groups created by user ${userId}:`, error);
+    throw error;
+  }
+};
+export const checkGroupExists = async (groupName: string): Promise<any[]> => {
+  try {
+    const result = await sql`
+    SELECT *
+    FROM groups
+    WHERE name = ${groupName}
+    `;
+
+    return result;
+  } catch (error) {
+    console.error(`Error checking if group ${groupName} exists:`, error);
     throw error;
   }
 };

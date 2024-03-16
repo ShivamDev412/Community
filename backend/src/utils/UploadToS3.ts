@@ -44,7 +44,6 @@ export const uploadToS3 = async (
   try {
     const command = new PutObjectCommand(params);
     await s3.send(command);
-    console.log("randomImageName",randomImageName)
     return randomImageName;
   } catch (error) {
     console.error("Error uploading image to S3:", error);

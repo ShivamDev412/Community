@@ -4,11 +4,16 @@ import { FaCloudUploadAlt } from "react-icons/fa";
 import { twMerge } from "tailwind-merge";
 
 const FileUpload: FC<
-  InputProps & { className?: string; title?: string; getValues?: Function }
+  InputProps & {
+    className?: string;
+    title?: string;
+    getValues?: Function;
+  }
 > = ({ id, register, errors, className, title, getValues }) => {
   const [previewURL, setPreviewURL] = useState<string | null>("");
   useEffect(() => {
     if (getValues) {
+      console.log(getValues(id));
       const image = getValues(id);
       if (image) {
         setPreviewURL(image);
@@ -16,9 +21,11 @@ const FileUpload: FC<
     }
   }, [getValues, id]);
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
+    if (e.target.files?.length) {
       const file = e?.target?.files[0];
       setPreviewURL(URL.createObjectURL(file));
+    } else {
+      setPreviewURL(null);
     }
   };
 
@@ -37,7 +44,7 @@ const FileUpload: FC<
               src={previewURL}
               alt="Preview"
               className={twMerge(
-                "absolute inset-0 object-contain w-full h-full",
+                "absolute inset-0 w-full h-full",
                 className
               )}
             />
@@ -52,6 +59,7 @@ const FileUpload: FC<
           <input
             type="file"
             accept="image/*"
+            
             id={id}
             multiple={false}
             {...register(id, {
