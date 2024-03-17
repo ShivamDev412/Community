@@ -108,12 +108,13 @@ export interface DateAndTimePickerProps extends InputProps {
   setValue: any;
   setError: Function;
   label: string;
-  getValues?:any
+  getValues?: any;
 }
 export type GroupsSliceType = {
   groupsCreated: Array<Group>;
   groupsInMember: Array<Group>;
-  pageNumberCreated:number;
+  groupDetails: GroupDetails;
+  pageNumberCreated: number;
   pageNumberInMember: number;
 };
 export type ProfileStatsProps = {
@@ -156,18 +157,39 @@ export type LookingForType = {
   cb: string;
 };
 export type AccountManagementType = {
-  email:string
-}
+  email: string;
+};
 export type ChangePasswordType = {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
-}
+};
 export type GroupsProps = {
-  title:string;
-  data:Group[];
-  noDataText:string;
-}
+  title: string;
+  data: Group[];
+  noDataText: string;
+};
 export type GroupCardProps = {
-  data:Group
-}
+  data: Group;
+};
+export type GroupDetails = {
+  about: string;
+  created_at: string;
+  group_id: string;
+  group_type: string;
+  image: string;
+  location: string;
+  members: UserType[];
+  name: string;
+  organized_by: {
+    name: string;
+  };
+  updated_at: string;
+};
+export type PrimaryInfoSectionProps = {
+  name: string | undefined;
+  location: string | undefined;
+  membersCount: number | undefined;
+  groupType: string | undefined;
+  organizedBy: string | undefined;
+};

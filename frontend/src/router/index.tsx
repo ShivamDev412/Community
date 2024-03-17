@@ -18,6 +18,10 @@ const {
   ACCOUNT_MANAGEMENT,
   CHANGE_PASSWORD,
   INTERESTS,
+  GROUP_DETAILS,
+  GROUP_DETAILS_MEMBERS,
+  GROUP_DETAILS_EVENTS
+
 } = RouteEndpoints;
 const LoginScreen = lazy(() => import("../screen/Login"));
 const SignupScreen = lazy(() => import("../screen/Signup"));
@@ -36,6 +40,9 @@ const InterestsScreen = lazy(() => import("../screen/Settings/Interests"));
 const ChangePasswordScreen = lazy(
   () => import("../screen/Settings/ChangePassword")
 );
+const GroupDetailsScreen = lazy(() => import("../screen/GroupDetails"))
+const GroupDetailsMembersScreen = lazy(() => import("../screen/GroupDetails/GroupDetailsMembers"))
+const GroupDetailsEventsScreen = lazy(() => import("../screen/GroupDetails/GroupDetailsEvents"))
 const Router = () => {
   return (
     <BrowserRouter>
@@ -59,6 +66,9 @@ const Router = () => {
           <Route path={EDIT_PROFILE} element={<EditProfileScreen />} />
           <Route path={PROFILE} element={<ProfileScreen />} />
           <Route path={YOUR_GROUPS} element={<YourGroupsScreen />} />
+          <Route path={GROUP_DETAILS_MEMBERS} element={<GroupDetailsMembersScreen />} />
+          <Route path={GROUP_DETAILS_EVENTS} element={<GroupDetailsEventsScreen />} />
+          <Route path={GROUP_DETAILS} element={<GroupDetailsScreen />} />
           <Route path={CREATE_GROUP} element={<NewGroupScreen />} />
           <Route path={YOUR_EVENTS} element={<YourEventsScreen />} />
           <Route path={CREATE_EVENT} element={<NewEventScreen />} />

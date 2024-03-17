@@ -30,7 +30,16 @@ export const getUserByEmail = async (
   }
   return null;
 };
-
+export const getUserNameById = async (
+  id: string
+): Promise<QueryResultRow | null> => {
+  const result =
+    await sql`SELECT name FROM users WHERE user_id = ${id}`;
+  if (result && result.length > 0) {
+    return result[0];
+  }
+  return null;
+};
 export const addNewUser = async (
   name: string,
   email: string,
@@ -62,6 +71,13 @@ export const getGroupById = async (groupId: string) => {
   const result = await sql`
     SELECT *
     FROM groups WHERE group_id = ${groupId}
+  `;
+  return result[0];
+};
+export const getGroupByName = async (name: string) => {
+  const result = await sql`
+    SELECT *
+    FROM groups WHERE name = ${name}
   `;
   return result[0];
 };
@@ -313,3 +329,17 @@ export const checkGroupExists = async (groupName: string): Promise<any[]> => {
     throw error;
   }
 };
+export const getAllMembersInGroup = async (groupId: string): Promise<any> => {
+  try {
+      const result = await sql`
+      SELECT u.user_id, u.name, u.email, u.location, u.image, u.bio, u.dob, u.sex, u.looking_for, u.life_state
+      FROM user_groups ug
+      JOIN users u ON ug.user_id = u.user_id
+      WHERE ug.group_id = ${groupId};
+      `;
+      return result;
+  } catch (error) {
+      console.error(`Error getting all members in group ${groupId}:`, error);
+      throw error;
+  }
+}

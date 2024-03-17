@@ -3,11 +3,14 @@ import { Request, Response, NextFunction } from "express";
 import {
   addUserGroup,
   checkGroupExists,
+  getAllMembersInGroup,
+  getGroupByName,
   getGroupsByOrganizedBy,
   getUserGroupsQuery,
+  getUserNameById,
 } from "../database/UserQueries";
 import { throwError } from "../utils/Error";
-import { uploadToS3 } from "../utils/UploadToS3";
+import { getImage, uploadToS3 } from "../utils/UploadToS3";
 import getImageDimensions from "../utils/GetImageDimention";
 export const getUserGroups = async (
   req: Request,
@@ -39,7 +42,7 @@ export const createUserGroup = async (
     const file = req?.file;
     const imageBuffer = file?.buffer;
     const groupExists = await checkGroupExists(name);
-    console.log(groupExists,"groupExists")
+    console.log(groupExists, "groupExists");
     if (groupExists.length) {
       return throwError(next, { name: "Group name already exists" });
     }
@@ -89,6 +92,34 @@ export const getGroupsByOrganizer = async (
       success: true,
       message: "Groups fetched successfully",
       data: groups,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const getGroupDetails = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  try {
+    const name = request?.query?.name;
+    const userId: string | undefined = request?.user?.userId;
+
+    if (!userId) {
+      return throwError(next, "User not found");
+    }
+    if (!name) {
+      return throwError(next, "Group not found");
+    }
+    const group = await getGroupByName(name?.toString());
+    const organized_by = await getUserNameById(group.organized_by);
+    const image = await getImage(group.image);
+    const members = await getAllMembersInGroup(group.group_id);
+    response.status(200).json({
+      success: true,
+      message: "Group details fetched successfully",
+      data: { ...group, organized_by, image, members },
     });
   } catch (error) {
     next(error);

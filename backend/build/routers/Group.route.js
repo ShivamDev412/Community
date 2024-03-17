@@ -14,4 +14,5 @@ const upload = (0, multer_1.default)({ storage }).single("image");
 route.get(Endpoints_1.ENDPOINTS.GROUPS, Auth_middleware_1.AuthMiddleware, Group_controller_1.getUserGroups);
 route.post(Endpoints_1.ENDPOINTS.CREATE_GROUP, Auth_middleware_1.AuthMiddleware, upload, Group_controller_1.createUserGroup);
 route.get(Endpoints_1.ENDPOINTS.GROUPS_ORGANIZED_BY_USER, Auth_middleware_1.AuthMiddleware, Group_controller_1.getGroupsByOrganizer);
+route.get(Endpoints_1.ENDPOINTS.GROUP_DETAILS, Auth_middleware_1.AuthMiddleware, Group_controller_1.getGroupDetails);
 exports.default = route;

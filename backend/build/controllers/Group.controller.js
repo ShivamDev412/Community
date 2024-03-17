@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getGroupsByOrganizer = exports.createUserGroup = exports.getUserGroups = void 0;
+exports.getGroupDetails = exports.getGroupsByOrganizer = exports.createUserGroup = exports.getUserGroups = void 0;
 const UserQueries_1 = require("../database/UserQueries");
 const Error_1 = require("../utils/Error");
 const UploadToS3_1 = require("../utils/UploadToS3");
@@ -89,3 +89,31 @@ const getGroupsByOrganizer = (request, response, next) => __awaiter(void 0, void
     }
 });
 exports.getGroupsByOrganizer = getGroupsByOrganizer;
+const getGroupDetails = (request, response, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _d, _e;
+    try {
+        const name = (_d = request === null || request === void 0 ? void 0 : request.query) === null || _d === void 0 ? void 0 : _d.name;
+        const userId = (_e = request === null || request === void 0 ? void 0 : request.user) === null || _e === void 0 ? void 0 : _e.userId;
+        if (!userId) {
+            return (0, Error_1.throwError)(next, "User not found");
+        }
+        if (!name) {
+            return (0, Error_1.throwError)(next, "Group not found");
+        }
+        const group = yield (0, UserQueries_1.getGroupByName)(name === null || name === void 0 ? void 0 : name.toString());
+        const organized_by = yield (0, UserQueries_1.getUserNameById)(group.organized_by);
+        const image = yield (0, UploadToS3_1.getImage)(group.image);
+        if (!organized_by) {
+            return (0, Error_1.throwError)(next, "Organizer not found");
+        }
+        response.status(200).json({
+            success: true,
+            message: "Group details fetched successfully",
+            data: Object.assign(Object.assign({}, group), { organized_by, image }),
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.getGroupDetails = getGroupDetails;

@@ -4,11 +4,9 @@ import { MdGroups3 } from "react-icons/md";
 import { IoIosNotifications } from "react-icons/io";
 import { IoIosSettings } from "react-icons/io";
 
-import { RouteEndpoints } from "./Endpoints";
+import { Endpoints, RouteEndpoints } from "./Endpoints";
 import { FaUserEdit } from "react-icons/fa";
 import { IoDocument } from "react-icons/io5";
-
-
 
 import { FaStar } from "react-icons/fa6";
 
@@ -97,4 +95,9 @@ export const LifeStages = [
   { value: "Newly Retired", active: false },
   { value: "New Parent", active: false },
   { value: "Career Change", active: false },
+];
+export const GroupTabSection = [
+  { value: "About", link:"/" },
+  { value: "Events", link:"/events" },
+  { value: "Members", link:"/members" },
 ];

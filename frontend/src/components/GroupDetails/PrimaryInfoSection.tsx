@@ -1,0 +1,40 @@
+import { FC } from "react";
+import { FaLocationDot } from "react-icons/fa6";
+import { HiUsers } from "react-icons/hi";
+import { FaUser } from "react-icons/fa";
+import { PrimaryInfoSectionProps } from "@/Types";
+
+const PrimaryInfoSection: FC<PrimaryInfoSectionProps> = ({
+  name,
+  location,
+  membersCount,
+  groupType,
+  organizedBy,
+}) => {
+  return (
+    <div className="w-full sm:w-[45%] flex flex-col xs:gap-2 xl:gap-4">
+      <h1 className="text-2xl lg:text-[2rem] font-bold">{name}</h1>
+      <p className="flex gap-2 items-center">
+        <span>
+          <FaLocationDot className="h-4 w-4" />
+        </span>
+        {location}
+      </p>
+      <div className="flex gap-2 items-center">
+        <p className="flex gap-2 items-center">
+          <HiUsers className="h-5 w-5" />
+          {membersCount}
+          {membersCount === 1 ? "member" : "members"}
+        </p>
+        <span className="bg-gray-400 h-4 w-[1px]"></span>
+        <p>{groupType} Group</p>
+      </div>
+      <p className="flex gap-2 items-center">
+        <FaUser className="h-4 w-4" /> Organized by:{" "}
+        <span className="font-semibold">{organizedBy}</span>
+      </p>
+    </div>
+  );
+};
+
+export default PrimaryInfoSection;

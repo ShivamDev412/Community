@@ -19,7 +19,9 @@ export const RouteEndpoints = {
   ACCOUNT_MANAGEMENT: "/account-management",
   CHANGE_PASSWORD: "/account-management/change-password",
   INTERESTS: "/interests",
-  GROUP_DETAILS: "/groups"
+  GROUP_DETAILS: "/your-groups/:name/",
+  GROUP_DETAILS_MEMBERS:"/your-groups/:name/members",
+  GROUP_DETAILS_EVENTS:"/your-groups/:name/events",
 };
 export const Endpoints = {
   LOGIN: "/login",
@@ -46,6 +48,9 @@ export const Endpoints = {
   GET_USER_INTERESTS:"/get-user-interests",
   GET_USER_GROUPS_ORGANIZER:"/organizer",
   GET_USER_GROUPS_MEMBER:"/member",
+  GROUP_DETAILS:"/details",
+  GROUP_DETAILS_MEMBERS:"/details/members",
+  GROUP_DETAILS_EVENTS:"/details/events",
 };
 export const API_ENDPOINTS = {
   USER: "/api/user",

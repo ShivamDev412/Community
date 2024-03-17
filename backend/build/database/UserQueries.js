@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkGroupExists = exports.getGroupsCreatedByUser = exports.removeUserInterest = exports.getUserInterests = exports.addUserInterest = exports.getAllInterestsQuery = exports.getAllCategoriesQuery = exports.updateUserPassword = exports.updateUserProfileInfo = exports.updateUserProfileById = exports.getEventById = exports.addEvent = exports.getAllInterests = exports.getGroupsByOrganizedBy = exports.addUserGroup = exports.getGroupById = exports.getUserGroupsQuery = exports.addNewUser = exports.getUserByEmail = exports.getUserPasswordById = exports.getUserById = void 0;
+exports.checkGroupExists = exports.getGroupsCreatedByUser = exports.removeUserInterest = exports.getUserInterests = exports.addUserInterest = exports.getAllInterestsQuery = exports.getAllCategoriesQuery = exports.updateUserPassword = exports.updateUserProfileInfo = exports.updateUserProfileById = exports.getEventById = exports.addEvent = exports.getAllInterests = exports.getGroupsByOrganizedBy = exports.addUserGroup = exports.getGroupByName = exports.getGroupById = exports.getUserGroupsQuery = exports.addNewUser = exports.getUserNameById = exports.getUserByEmail = exports.getUserPasswordById = exports.getUserById = void 0;
 const _1 = __importDefault(require("."));
 const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, _1.default) `SELECT user_id, name, email, location, joined_on, image, bio, dob, sex, joined_on, looking_for, life_state FROM users WHERE user_id = ${id}`;
@@ -38,6 +38,14 @@ const getUserByEmail = (email) => __awaiter(void 0, void 0, void 0, function* ()
     return null;
 });
 exports.getUserByEmail = getUserByEmail;
+const getUserNameById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield (0, _1.default) `SELECT name FROM users WHERE user_id = ${id}`;
+    if (result && result.length > 0) {
+        return result[0];
+    }
+    return null;
+});
+exports.getUserNameById = getUserNameById;
 const addNewUser = (name, email, password, imageUrl) => __awaiter(void 0, void 0, void 0, function* () {
     const newUser = yield (0, _1.default) `
       INSERT INTO users (name, email, password, image) 
@@ -68,6 +76,14 @@ const getGroupById = (groupId) => __awaiter(void 0, void 0, void 0, function* ()
     return result[0];
 });
 exports.getGroupById = getGroupById;
+const getGroupByName = (name) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield (0, _1.default) `
+    SELECT *
+    FROM groups WHERE name = ${name}
+  `;
+    return result[0];
+});
+exports.getGroupByName = getGroupByName;
 const addUserGroup = (name, groupType, location, organizedBy, about, image) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield (0, _1.default) `

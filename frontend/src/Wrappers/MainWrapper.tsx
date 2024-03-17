@@ -19,7 +19,7 @@ const MainWrapper: FC<WrapperProps> = ({ children }) => {
       )}
 
       <Header />
-      <main className="font-display flex-1 overflow-y-auto">{children}</main>
+      <main className="font-display flex-1 overflow-y-auto bg-[#fafafa]">{children}</main>
     </div>
   );
 };

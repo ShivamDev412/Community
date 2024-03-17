@@ -19,6 +19,7 @@ export const ENDPOINTS = {
     GET_USER_INTERESTS:"/get-user-interests",
     GET_USER_GROUPS_ORGANIZER:"/organizer",
     GET_USER_GROUPS_MEMBER:"/member",
+    GROUP_DETAILS: "/details"
 };
 
 export const API_ENDPOINTS = {

@@ -4,6 +4,20 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState: GroupsSliceType = {
   groupsCreated: [],
   groupsInMember: [],
+  groupDetails:{
+    about: "",
+    created_at: "",
+    group_id: "",
+    group_type: "",
+    image: "",
+    location: "",
+    members: [],
+    name: "",
+    organized_by: {
+      name: ""
+    },
+    updated_at: "",
+  },
   pageNumberCreated: 1,
   pageNumberInMember: 1,
 };
@@ -24,6 +38,9 @@ const groupsSlice = createSlice({
     setPageNumberInMember: (state, action) => {
       state.pageNumberInMember = action.payload;
     },
+    setGroupDetails: (state, action) => {
+      state.groupDetails = action.payload;
+    },
     clearGroups: (state) => {
       state.groupsCreated = initialState.groupsCreated;
       state.groupsInMember = initialState.groupsInMember;
@@ -39,5 +56,6 @@ export const {
   setPageNumberCreated,
   setPageNumberInMember,
   clearGroups,
+  setGroupDetails
 } = groupsSlice.actions;
 export default groupsSlice.reducer;
