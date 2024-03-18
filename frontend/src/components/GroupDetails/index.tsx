@@ -1,4 +1,6 @@
 import GroupImageSection from "./GroupImageSection";
 import PrimaryInfoSection from "./PrimaryInfoSection";
 import GroupDetailTabSection from "./GroupDetailTabSection";
-export { GroupImageSection, PrimaryInfoSection, GroupDetailTabSection };
+import GroupDescription from "./GroupDescription";
+import OrganizerAndMembers from "./OrganizerAndMembers";
+export { GroupImageSection, PrimaryInfoSection, GroupDetailTabSection, GroupDescription, OrganizerAndMembers };

@@ -179,10 +179,12 @@ export type GroupDetails = {
   group_type: string;
   image: string;
   location: string;
+  membersCount: number;
   members: UserType[];
   name: string;
   organized_by: {
     name: string;
+    image: string;
   };
   updated_at: string;
 };
@@ -192,4 +194,8 @@ export type PrimaryInfoSectionProps = {
   membersCount: number | undefined;
   groupType: string | undefined;
   organizedBy: string | undefined;
+};
+export type ProfileAvatarProps = {
+  image: string;
+  name: string;
 };

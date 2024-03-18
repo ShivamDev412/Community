@@ -1,4 +1,4 @@
-import { setLocation } from "@/redux/slice/homeSlice";
+import { setCoord, setLocation } from "@/redux/slice/homeSlice";
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/Store";
@@ -14,10 +14,10 @@ import { getApi } from "@/utils/Api";
 import { handleLocation } from "@/utils/CommonFunctions/handleLocation";
 
 export const useHeader = () => {
-  const [coord, setCoord] = useState({
-    lat: 0,
-    lon: 0,
-  });
+  // const [coord, setCoord] = useState({
+  //   lat: 0,
+  //   lon: 0,
+  // });
   const [event, setEvent] = useState("");
   const [place, setPlace] = useState("");
   const dispatch = useDispatch();
@@ -27,7 +27,7 @@ export const useHeader = () => {
   const [isLeftInputFocused, setIsLeftInputFocused] = useState(false);
   const [isRightInputFocused, setIsRightInputFocused] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const { location } = useSelector((state: RootState) => state.home);
+  const { location, coord } = useSelector((state: RootState) => state.home);
 
   const {
     placesService,
@@ -81,9 +81,8 @@ export const useHeader = () => {
     }
   };
   useEffect(() => {
-    if (coord.lat !== 0 && coord.lon !== 0) fetchCity();
+    if (coord?.lat === 0 && coord?.lon === 0) fetchCity();
   }, [coord]);
-
 
   useEffect(() => {
     const fetchCoordinates = () => {
@@ -92,7 +91,7 @@ export const useHeader = () => {
           (position) => {
             const latitude = position.coords.latitude;
             const longitude = position.coords.longitude;
-            setCoord({ lat: latitude, lon: longitude });
+            dispatch(setCoord({ lat: latitude, lon: longitude }));
           },
           () => console.log("Unable to retrieve your location")
         );

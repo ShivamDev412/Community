@@ -13,23 +13,23 @@ export const useGroupDetails = () => {
   const location = useLocation();
   const groupName = location.pathname.split("/")[2];
   useEffect(() => {
-    getGroupDetails();
-  }, []);
-  const getGroupDetails = async () => {
-    try {
-      dispatch(setLoading(true));
-      const res = await getApi(
-        `${API_ENDPOINTS.GROUP}${Endpoints.GROUP_DETAILS}?name=${groupName}`
-      );
-      if (res.success) {
-        dispatch(setGroupDetails(res.data));
+    const getGroupDetails = async () => {
+      try {
+        dispatch(setLoading(true));
+        const res = await getApi(
+          `${API_ENDPOINTS.GROUP}${Endpoints.GROUP_DETAILS}?name=${groupName}`
+        );
+        if (res.success) {
+          dispatch(setGroupDetails(res.data));
+          dispatch(setLoading(false));
+        }
+      } catch {
+        Toast("Something went wrong", "error");
         dispatch(setLoading(false));
       }
-    } catch {
-      Toast("Something went wrong", "error");
-      dispatch(setLoading(false));
-    }
-  };
+    };
+    getGroupDetails();
+  }, []);
   return {
     groupDetails,
     groupName,

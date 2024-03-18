@@ -1,9 +1,7 @@
 import sql from ".";
 import { QueryResultRow } from "pg";
 
-export const getUserById = async (
-  id: string
-): Promise<QueryResultRow | null> => {
+const getUserById = async (id: string): Promise<QueryResultRow | null> => {
   const result =
     await sql`SELECT user_id, name, email, location, joined_on, image, bio, dob, sex, joined_on, looking_for, life_state FROM users WHERE user_id = ${id}`;
   if (result && result.length > 0) {
@@ -11,7 +9,7 @@ export const getUserById = async (
   }
   return null;
 };
-export const getUserPasswordById = async (
+const getUserPasswordById = async (
   userId: string
 ): Promise<QueryResultRow | null> => {
   const result =
@@ -21,7 +19,7 @@ export const getUserPasswordById = async (
   }
   return null;
 };
-export const getUserByEmail = async (
+const getUserByEmail = async (
   email: string
 ): Promise<QueryResultRow | null> => {
   const result = await sql`SELECT * FROM users WHERE email = ${email}`;
@@ -30,17 +28,14 @@ export const getUserByEmail = async (
   }
   return null;
 };
-export const getUserNameById = async (
-  id: string
-): Promise<QueryResultRow | null> => {
-  const result =
-    await sql`SELECT name FROM users WHERE user_id = ${id}`;
+const getUserNameById = async (id: string): Promise<QueryResultRow | null> => {
+  const result = await sql`SELECT name, image FROM users WHERE user_id = ${id}`;
   if (result && result.length > 0) {
     return result[0];
   }
   return null;
 };
-export const addNewUser = async (
+const addNewUser = async (
   name: string,
   email: string,
   password: string,
@@ -56,7 +51,7 @@ export const addNewUser = async (
   }
   return newUser[0];
 };
-export const getUserGroupsQuery = async (
+const getUserGroupsQuery = async (
   userId: string
 ): Promise<QueryResultRow[]> => {
   const result = await sql`
@@ -67,21 +62,21 @@ export const getUserGroupsQuery = async (
   `;
   return result;
 };
-export const getGroupById = async (groupId: string) => {
+const getGroupById = async (groupId: string) => {
   const result = await sql`
     SELECT *
     FROM groups WHERE group_id = ${groupId}
   `;
   return result[0];
 };
-export const getGroupByName = async (name: string) => {
+const getGroupByName = async (name: string) => {
   const result = await sql`
     SELECT *
     FROM groups WHERE name = ${name}
   `;
   return result[0];
 };
-export const addUserGroup = async (
+const addUserGroup = async (
   name: string,
   groupType: string,
   location: string,
@@ -102,7 +97,7 @@ export const addUserGroup = async (
     return null;
   }
 };
-export const getGroupsByOrganizedBy = async (
+const getGroupsByOrganizedBy = async (
   organizedBy: string
 ): Promise<QueryResultRow[]> => {
   try {
@@ -117,7 +112,7 @@ export const getGroupsByOrganizedBy = async (
     return [];
   }
 };
-export const getAllInterests = async () => {
+const getAllInterests = async () => {
   try {
     const result = await sql`
       SELECT * FROM interests;
@@ -128,7 +123,7 @@ export const getAllInterests = async () => {
     return [];
   }
 };
-export const addEvent = async (
+const addEvent = async (
   name: string,
   image: string,
   details: string,
@@ -154,7 +149,7 @@ export const addEvent = async (
     return null;
   }
 };
-export const getEventById = async (
+const getEventById = async (
   eventId: string
 ): Promise<QueryResultRow | null> => {
   try {
@@ -169,7 +164,7 @@ export const getEventById = async (
     return null;
   }
 };
-export const updateUserProfileById = async (
+const updateUserProfileById = async (
   userId: string,
   name: string,
   image: string,
@@ -191,7 +186,7 @@ export const updateUserProfileById = async (
     throw error;
   }
 };
-export const updateUserProfileInfo = async (
+const updateUserProfileInfo = async (
   userId: string,
   dob: Date | any,
   sex: string | any,
@@ -213,7 +208,7 @@ export const updateUserProfileInfo = async (
     throw error;
   }
 };
-export const updateUserPassword = async (
+const updateUserPassword = async (
   userId: string,
   password: string
 ): Promise<void> => {
@@ -231,7 +226,7 @@ export const updateUserPassword = async (
     throw error;
   }
 };
-export const getAllCategoriesQuery = async (): Promise<any[]> => {
+const getAllCategoriesQuery = async (): Promise<any[]> => {
   try {
     const result = await sql`
       SELECT * FROM categories;
@@ -242,9 +237,7 @@ export const getAllCategoriesQuery = async (): Promise<any[]> => {
     throw error;
   }
 };
-export const getAllInterestsQuery = async (
-  categoryId: string
-): Promise<any[]> => {
+const getAllInterestsQuery = async (categoryId: string): Promise<any[]> => {
   try {
     const result = await sql`
       SELECT * FROM interests WHERE category_id = ${categoryId};
@@ -255,7 +248,7 @@ export const getAllInterestsQuery = async (
     throw error;
   }
 };
-export const addUserInterest = async (
+const addUserInterest = async (
   userId: string,
   interestId: string
 ): Promise<void> => {
@@ -269,7 +262,7 @@ export const addUserInterest = async (
     throw error;
   }
 };
-export const getUserInterests = async (userId: string): Promise<any[]> => {
+const getUserInterests = async (userId: string): Promise<any[]> => {
   try {
     const result = await sql`
       SELECT interests.interest_id, interests.name
@@ -284,7 +277,7 @@ export const getUserInterests = async (userId: string): Promise<any[]> => {
   }
 };
 
-export const removeUserInterest = async (
+const removeUserInterest = async (
   userId: string,
   interestId: string
 ): Promise<void> => {
@@ -298,7 +291,7 @@ export const removeUserInterest = async (
     throw error;
   }
 };
-export const getGroupsCreatedByUser = async (
+const getGroupsCreatedByUser = async (
   userId: string,
   offset: number
 ): Promise<any[]> => {
@@ -315,7 +308,7 @@ export const getGroupsCreatedByUser = async (
     throw error;
   }
 };
-export const checkGroupExists = async (groupName: string): Promise<any[]> => {
+const checkGroupExists = async (groupName: string): Promise<any[]> => {
   try {
     const result = await sql`
     SELECT *
@@ -329,17 +322,62 @@ export const checkGroupExists = async (groupName: string): Promise<any[]> => {
     throw error;
   }
 };
-export const getAllMembersInGroup = async (groupId: string): Promise<any> => {
+const getMemberCountInGroup = async (groupId: string): Promise<number> => {
   try {
-      const result = await sql`
-      SELECT u.user_id, u.name, u.email, u.location, u.image, u.bio, u.dob, u.sex, u.looking_for, u.life_state
-      FROM user_groups ug
-      JOIN users u ON ug.user_id = u.user_id
-      WHERE ug.group_id = ${groupId};
+    const result = await sql`
+          SELECT COUNT(*) AS member_count
+          FROM user_groups
+          WHERE group_id = ${groupId};
       `;
-      return result;
+    return result[0]?.member_count || 0;
   } catch (error) {
-      console.error(`Error getting all members in group ${groupId}:`, error);
-      throw error;
+    console.error(`Error getting member count in group ${groupId}:`, error);
+    throw error;
   }
-}
+};
+const getMembersDetail = async (groupId: string): Promise<Array<any>> => {
+  try {
+    const result = await sql`
+    SELECT u.user_id, u.name, u.email, u.image
+    FROM user_groups ug
+    JOIN users u ON ug.user_id = u.user_id
+    WHERE ug.group_id = ${groupId};
+      `;
+    return result;
+  } catch (error) {
+    console.error(`Error getting members detail in group ${groupId}:`, error);
+    throw error;
+  }
+};
+export {
+  // * GET QUERIES //
+  getUserById,
+  getUserPasswordById,
+  getUserByEmail,
+  getUserNameById,
+  getMembersDetail,
+  getMemberCountInGroup,
+  getGroupsCreatedByUser,
+  getUserGroupsQuery,
+  getUserInterests,
+  addUserInterest,
+  getAllInterestsQuery,
+  getAllCategoriesQuery,
+  getGroupByName,
+  getGroupsByOrganizedBy,
+  getAllInterests,
+  checkGroupExists,
+
+  //* ADD QUERIES //
+  addNewUser,
+  addEvent,
+
+  // * UPDATE QUERIES //
+  updateUserPassword,
+  updateUserProfileById,
+  addUserGroup,
+  updateUserProfileInfo,
+
+  //* DELETE QUERIES //
+  removeUserInterest,
+};

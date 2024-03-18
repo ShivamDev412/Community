@@ -12,7 +12,7 @@ const PrimaryInfoSection: FC<PrimaryInfoSectionProps> = ({
   organizedBy,
 }) => {
   return (
-    <div className="w-full sm:w-[45%] flex flex-col xs:gap-2 xl:gap-4">
+    <div className="w-full sm:w-[45%] flex flex-col xs:gap-2 xl:gap-4 mt-4">
       <h1 className="text-2xl lg:text-[2rem] font-bold">{name}</h1>
       <p className="flex gap-2 items-center">
         <span>
@@ -23,9 +23,11 @@ const PrimaryInfoSection: FC<PrimaryInfoSectionProps> = ({
       <div className="flex gap-2 items-center">
         <p className="flex gap-2 items-center">
           <HiUsers className="h-5 w-5" />
-          {membersCount}
-          {membersCount === 1 ? "member" : "members"}
+          {Number(membersCount)
+            ? `${membersCount} ${Number(membersCount) === 1 ? "member" : "members"}`
+            : "No members"}
         </p>
+
         <span className="bg-gray-400 h-4 w-[1px]"></span>
         <p>{groupType} Group</p>
       </div>

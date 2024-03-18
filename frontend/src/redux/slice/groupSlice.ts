@@ -4,17 +4,19 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState: GroupsSliceType = {
   groupsCreated: [],
   groupsInMember: [],
-  groupDetails:{
+  groupDetails: {
     about: "",
     created_at: "",
     group_id: "",
     group_type: "",
     image: "",
     location: "",
+    membersCount: 0,
     members: [],
     name: "",
     organized_by: {
-      name: ""
+      name: "",
+      image:"",
     },
     updated_at: "",
   },
@@ -56,6 +58,6 @@ export const {
   setPageNumberCreated,
   setPageNumberInMember,
   clearGroups,
-  setGroupDetails
+  setGroupDetails,
 } = groupsSlice.actions;
 export default groupsSlice.reducer;

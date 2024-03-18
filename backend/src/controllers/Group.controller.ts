@@ -3,15 +3,17 @@ import { Request, Response, NextFunction } from "express";
 import {
   addUserGroup,
   checkGroupExists,
-  getAllMembersInGroup,
+  getMemberCountInGroup,
   getGroupByName,
   getGroupsByOrganizedBy,
   getUserGroupsQuery,
   getUserNameById,
+  getMembersDetail,
 } from "../database/UserQueries";
 import { throwError } from "../utils/Error";
 import { getImage, uploadToS3 } from "../utils/UploadToS3";
 import getImageDimensions from "../utils/GetImageDimention";
+import { getAllImages } from "../Types/GetAllImages";
 export const getUserGroups = async (
   req: Request,
   res: Response,
@@ -114,12 +116,24 @@ export const getGroupDetails = async (
     }
     const group = await getGroupByName(name?.toString());
     const organized_by = await getUserNameById(group.organized_by);
+    const organizedByImage = await getImage(organized_by?.image);
     const image = await getImage(group.image);
-    const members = await getAllMembersInGroup(group.group_id);
+    const membersCount = await getMemberCountInGroup(group.group_id);
+    const members = await getMembersDetail(group.group_id);
+    const membersToSend = await getAllImages(members, next);
     response.status(200).json({
       success: true,
       message: "Group details fetched successfully",
-      data: { ...group, organized_by, image, members },
+      data: {
+        ...group,
+        organized_by: {
+          name: organized_by?.name,
+          image: organizedByImage,
+        },
+        image,
+        membersCount,
+        members: membersToSend,
+      },
     });
   } catch (error) {
     next(error);
