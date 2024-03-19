@@ -51,6 +51,7 @@ export const Endpoints = {
   GROUP_DETAILS:"/details",
   GROUP_DETAILS_MEMBERS:"/details/members",
   GROUP_DETAILS_EVENTS:"/details/events",
+  USER_EVENTS:"/user-events"
 };
 export const API_ENDPOINTS = {
   USER: "/api/user",

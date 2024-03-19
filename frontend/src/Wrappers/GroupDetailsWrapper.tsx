@@ -10,7 +10,7 @@ const GroupDetailWrapper = ({ children }: { children: React.ReactNode }) => {
   const { groupDetails } = useGroupDetails();
   return (
     <>
-      <section className="pb-4 border-b border-gray-300">
+      <section className="pb-4 border-b border-gray-300 overflow-x-hidden">
         <section className="w-11/12 sm:w-10/12 lg:w-9/12 2xl:w-6/12 mx-auto overflow-x-hidden h-full mt-5">
           <section className="flex flex-wrap justify-between xs:gap-4 sm:gap-0">
             <GroupImageSection

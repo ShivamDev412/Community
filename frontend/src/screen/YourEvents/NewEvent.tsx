@@ -32,7 +32,7 @@ const NewEvent = () => {
       <h1 className="mt-10 text-[2rem] text-center font-semibold">
         Create new event
       </h1>
-      <section className="my-10 w-full sm:w-1/2 mx-auto">
+      <section className="my-10 w-full sm:w-1/2 xl:w-1/4 mx-auto">
         <form
           className="flex flex-col gap-8"
           onSubmit={handleSubmit(onSubmit)}

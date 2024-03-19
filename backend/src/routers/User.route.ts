@@ -9,6 +9,7 @@ import {
   getInterestsByCategories,
   getUserAllInterests,
   getUserCreatedGroups,
+  getUserEvents,
   removeUserInterests,
   updateUserPersonalInfo,
 } from "../controllers/User.controller";
@@ -35,5 +36,6 @@ route.get(
   AuthMiddleware,
   getUserCreatedGroups
 );
+route.get(ENDPOINTS.USER_EVENTS, AuthMiddleware, getUserEvents);
 
 export default route;

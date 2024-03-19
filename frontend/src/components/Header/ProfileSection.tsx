@@ -34,7 +34,7 @@ const ProfileSection = () => {
             name?.split(" ")[1]?.split("")[0]
           }`}</Avatar>
         </MenuButton>
-        <Menu className="bg-white rounded-lg border w-[2in] shadow-md py-3">
+        <Menu className="bg-white rounded-lg border w-[2in] shadow-md py-3 z-10">
           <MenuData
             menu="Your Groups"
             link={RouteEndpoints.YOUR_GROUPS}

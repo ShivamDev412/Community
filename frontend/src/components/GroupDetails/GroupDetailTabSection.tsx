@@ -11,7 +11,7 @@ const GroupDetailTabSection = () => {
           to={getLink(value.link)}
           className={`${
             `/${path}` === value.link ? "text-cyan-500" : "text-black"
-          } text-lg` }
+          } text-lg font-semibold` }
         >
           {value.value}
         </Link>

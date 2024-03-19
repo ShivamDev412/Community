@@ -1,6 +1,8 @@
 import { GroupDetails } from "@/Types";
 import { FC } from "react";
 import ProfileAvatar from "../ProfileAvatar";
+import { RouteEndpoints } from "@/utils/Endpoints";
+import { Link } from "react-router-dom";
 
 const OrganizerAndMembers: FC<{ groupDetails: GroupDetails }> = ({
   groupDetails,
@@ -20,13 +22,23 @@ const OrganizerAndMembers: FC<{ groupDetails: GroupDetails }> = ({
         </div>
       </div>
       <div>
-        <h3 className="font-bold text-xl mt-10">Members ({groupDetails.membersCount})</h3>
-        <div className="flex items-center gap-4 mt-5">
-          {groupDetails.members.map((member) => (
+        <div className="mt-10 flex justify-between">
+          <h3 className="font-bold text-xl ">
+            Members ({groupDetails.membersCount})
+          </h3>
+          <Link
+            to={`${RouteEndpoints.YOUR_GROUPS}/${groupDetails.name}/members`}
+            className="text-cyan-500"
+          >
+            See All
+          </Link>
+        </div>
+        <div className="flex items-center gap-4 mt-5 flex-wrap">
+          {groupDetails.members.slice(0, 15).map((member) => (
             <ProfileAvatar
               key={member.user_id}
-              image={member?.image ? member.image : ""}
-              name={member?.name}
+              image={member?.image || ""}
+              name={member?.name || ""}
             />
           ))}
         </div>

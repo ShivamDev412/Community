@@ -13,8 +13,8 @@ const Links = ({ link, title }: { link: string; title: string }) => {
 };
 const Footer = () => {
   return (
-    <footer className="w-full bg-zinc-800 py-10">
-      <section className="w-11/12 sm:w-10/12 lg:w-9/12 2xl:w-6/12 mx-auto mt-5">
+    <footer className="w-full bg-zinc-800 py-10 overflow-hidden">
+      <section className="w-11/12 sm:w-10/12 lg:w-9/12 2xl:w-6/12 mx-auto">
         <section className="flex flex-wrap justify-between">
           <div className="text-white">
             <h3 className="text-lg font-semibold">Your Account</h3>

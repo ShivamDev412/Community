@@ -11,8 +11,8 @@ import {
 const Profile = () => {
   const { image, name, location, email, joined_on_date } = useProfile();
   return (
-    <section className="overflow-x-hidden bg-[#f8f8f9] h-full">
-      <section className="flex justify-between flex-wrap mt-10 xs:w-11/12 sm:w-8/12 mx-auto">
+    <section className="overflow-x-hidden bg-[#f8f8f9] h-full pb-10">
+      <section className="flex justify-between flex-wrap xs:w-11/12 w-11/12 sm:w-10/12 lg:w-9/12 2xl:w-6/12 mx-auto overflow-x-hidden h-full mt-5 pb-10">
         <section className="xs:w-full sm:w-[30%] xl:w-4/12">
           <section className="bg-white p-6 rounded-lg">
             <ProfileImage
@@ -34,7 +34,7 @@ const Profile = () => {
           <EditProfileLink image={image} name={name} />
         </section>
 
-        <section className="xs:w-full sm:w-8/12">
+        <section className="xs:w-full sm:w-[60%]">
           <MyInterests />
           <Groups />
         </section>

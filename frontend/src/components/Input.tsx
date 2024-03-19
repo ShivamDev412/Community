@@ -181,6 +181,8 @@ export const DateField: FC<DateAndTimePickerProps> = ({
     if (dat) {
       setDate(dayjs(moment(dat).format("YYYY-MM-DD")));
       setValue(id, moment(dat).format("YYYY-MM-DD"));
+    } else {
+      setValue(id, moment().format("YYYY-MM-DD"));
     }
   }, [dat]);
   const onChange = (date: Dayjs | null) => {
@@ -265,16 +267,7 @@ export const MultiSelectField: FC<
   ...rest
 }) => {
   const [selectedData, setSelectedData] = useState<Array<string>>([]);
-  const ITEM_HEIGHT = 48;
-  const ITEM_PADDING_TOP = 8;
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-        width: 250,
-      },
-    },
-  };
+
   return (
     <FormControl className="w-full">
       <InputLabel id={id}>{label}</InputLabel>
@@ -314,7 +307,14 @@ export const MultiSelectField: FC<
         {...rest}
         input={<OutlinedInput label={label} />}
         renderValue={(selected) => selected.join(", ")}
-        MenuProps={MenuProps}
+        MenuProps={{
+          PaperProps: {
+            style: {
+              maxHeight: '80%',
+              overflowY: 'auto', 
+            },
+          },
+        }}
       >
         {options.map((value) => (
           <MenuItem key={value.value} value={value.label}>

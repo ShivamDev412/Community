@@ -110,7 +110,19 @@ export const useNewEvent = () => {
       }
     } catch (e: any) {
       dispatch(setLoading(false));
-      Toast(e.message, "error");
+      if (e.response.data.message.hasOwnProperty("name")) {
+        setError("name", {
+          type: "manual",
+          message: e.response.data.message.name,
+        });
+      } else if (e.response.data.message.hasOwnProperty("image")) {
+        setError("image", {
+          type: "manual",
+          message: e.response.data.message.image,
+        });
+      } else {
+        Toast(e.response.data.message, "error");
+      }
     }
   };
   const backToEvent = () => {

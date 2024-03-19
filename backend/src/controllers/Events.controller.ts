@@ -1,9 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { throwError } from "../utils/Error";
-import { addEvent, getAllInterests } from "../database/UserQueries";
+import {
+  addEvent,
+  checkEventExists,
+  getAllInterests,
+} from "../database/UserQueries";
 import { uploadToS3 } from "../utils/UploadToS3";
 
 import { promisify } from "util";
+import getImageDimensions from "../utils/GetImageDimention";
 
 export const getTags = async (
   request: Request,
@@ -37,6 +42,18 @@ export const createEvent = async (
       request.body;
     const userId: string | undefined = request?.user?.userId;
     const file = request?.file;
+    const imageBuffer = file?.buffer;
+    const eventExists = await checkEventExists(name);
+    if (eventExists.length) {
+      return throwError(next, { name: "Event name already exists" });
+    }
+    if (!imageBuffer) {
+      return throwError(next, { image: "Image not provided" });
+    }
+    const dimensions = await getImageDimensions(imageBuffer);
+    if (dimensions.width !== 1920 || dimensions.height !== 1080) {
+      return throwError(next, { image: "Image dimensions must be 1920x1080" });
+    }
     if (!userId) {
       return throwError(next, "User not found");
     } else {

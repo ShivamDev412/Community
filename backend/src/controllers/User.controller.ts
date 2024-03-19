@@ -5,9 +5,15 @@ import {
   addUserInterest,
   getAllCategoriesQuery,
   getAllInterestsQuery,
+  getEventMembersCountById,
+  getEventsCreatedByUser,
+  getEventsRSVPByUser,
+  getGroupNameAndLocationById,
   getGroupsCreatedByUser,
+  getPastEventsAttendedByUser,
   getUserById,
   getUserInterests,
+  getUserNameById,
   getUserPasswordById,
   removeUserInterest,
   updateUserPassword,
@@ -314,6 +320,69 @@ export const getUserCreatedGroups = async (
       success: true,
       message: "Groups fetched successfully",
       data: groupToSend,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+export const getUserEvents = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId: string | undefined = req.user?.userId;
+    if (!userId) {
+      return throwError(next, "User not found");
+    }
+    const pageSize = 10;
+    let tab = req.query.tab as string;
+    let pageNum = parseInt(req.query.page as string, 10) || 1;
+    if (isNaN(pageNum) || pageNum < 1) {
+      pageNum = 1;
+    }
+    const offset = (pageNum - 1) * pageSize;
+    let events:QueryResultRow[] = [];
+    switch (tab) {
+      case "attending":
+        events = await getEventsRSVPByUser(userId, offset);
+        break;
+      case "hosting":
+        events = await getEventsCreatedByUser(userId, offset);
+        break;
+      case "past":
+        events = await getPastEventsAttendedByUser(userId, offset);
+        break;
+    }
+    const eventsToSend = await Promise.all(
+      events.map(async (event) => {
+        const { host_id, group_id, updated_at, ...rest } = event;
+        const host = await getUserNameById(host_id);
+        const hostImage = await getImage(host?.image);
+        try {
+          const image = await getImage(event.image);
+          if (image) {
+            return {
+              ...rest,
+              image: image,
+              host: {
+                ...host,
+                image: hostImage,
+              },
+              members: await getEventMembersCountById(event.event_id),
+              group: await getGroupNameAndLocationById(event.group_id),
+            };
+          }
+          return null;
+        } catch (error: any) {
+          return throwError(next, "Error fetching image: " + error.message);
+        }
+      })
+    );
+    res.status(200).json({
+      success: true,
+      message: "Events fetched successfully",
+      data: eventsToSend,
     });
   } catch (err) {
     next(err);

@@ -44,7 +44,6 @@ export const createUserGroup = async (
     const file = req?.file;
     const imageBuffer = file?.buffer;
     const groupExists = await checkGroupExists(name);
-    console.log(groupExists, "groupExists");
     if (groupExists.length) {
       return throwError(next, { name: "Group name already exists" });
     }

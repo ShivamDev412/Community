@@ -195,7 +195,42 @@ export type PrimaryInfoSectionProps = {
   groupType: string | undefined;
   organizedBy: string | undefined;
 };
+export interface EventType {
+  event_id: string;
+  name: string;
+  image: string;
+  details: string;
+  event_date: string;
+  event_time: string;
+  event_type: "online" | "in-person";
+  link: string;
+  address: string | null;
+  tags: string[];
+  created_at: string;
+  host: {
+    name: string;
+    image: string;
+  };
+  members:number;
+  group: {
+    name: string;
+    location: string;
+  };
+  updated_at: string;
+}
+export type EventsState = {
+  hostingEvents: EventType[];
+  attendingEvents: EventType[];
+  pastEvents: EventType[];
+  hostingPageNumber: number;
+  attendingPageNumber: number;
+  pastPageNumber: number;
+};
 export type ProfileAvatarProps = {
   image: string;
   name: string;
+};
+export type TabPanelComponentProps = {
+  value: string;
+  data: EventType[];
 };

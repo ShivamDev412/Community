@@ -10,7 +10,7 @@ const MainWrapper: FC<WrapperProps> = ({ children }) => {
   const { loading } = useSelector((state: RootState) => state.loading);
   
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
       {loading && (
         <Backdrop
           sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -21,7 +21,7 @@ const MainWrapper: FC<WrapperProps> = ({ children }) => {
       )}
 
       <Header />
-      <main className="flex-1 overflow-y-auto bg-gray-50 py-10">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 pt-[4.5rem] min-h-screen">
         {children}
       </main>
       <Footer />

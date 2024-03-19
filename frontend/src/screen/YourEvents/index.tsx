@@ -2,11 +2,11 @@ import BackToHome from "@/components/BackToHome";
 import { RouteEndpoints } from "@/utils/Endpoints";
 import Button from "@/components/Button";
 import { useYourEvents } from "./useYourEvents";
-
+import { EventTabs } from "@/components/YourEvents";
 const YourEvents = () => {
   const { navigation } = useYourEvents();
   return (
-    <section className="w-11/12 sm:w-8/12 mx-auto overflow-x-hidden h-full">
+    <section className="w-11/12 sm:w-10/12 lg:w-9/12 2xl:w-6/12 mx-auto overflow-x-hidden h-full mt-5 pb-10">
       <section className="flex items-center justify-between mt-10">
         <div className="flex items-center gap-4">
           <BackToHome />
@@ -18,7 +18,9 @@ const YourEvents = () => {
           </Button>
         </div>
       </section>
-      <section></section>
+      <section>
+        <EventTabs/>
+      </section>
     </section>
   );
 };

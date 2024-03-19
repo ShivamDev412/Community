@@ -8,8 +8,8 @@ const EditProfileWrapper: FC<WrapperProps> = ({ children }) => {
   const location = useLocation();
   const routePath = location.pathname.split("/")[1];
   return (
-    <section className="h-full flex w-full">
-      <section className="h-full w-[15%] sm:w-[50%] md:w-[32%] lg:w-[25%] xl:w-[18%] 2xl:w-[15%] bg-stone-100 overflow-hidden fixed">
+    <section className="h-full flex w-full align-top">
+      <aside className="min-h-full w-[15%] sm:w-[50%] md:w-[32%] lg:w-[25%] xl:w-[20%] 2xl:w-[15%] bg-stone-100 overflow-hidden">
         <div className="p-6 mx-auto">
           <h2 className="xs:hidden md:block font-bold text-[1.4rem]">
             Settings
@@ -40,8 +40,8 @@ const EditProfileWrapper: FC<WrapperProps> = ({ children }) => {
             </div>
           ))}
         </div>
-      </section>
-      <section className="my-10 sm:ml-10 w-full xs:pl-[1in] sm:pl-[3.2in] md:pl-[2.5in] lg:pl-[2.8in] xl:pl-[2.5in] 2xl:pl-[3in]">
+      </aside>
+      <section className="my-10 xs:ml-5 sm:ml-10 w-full">
         {children}
       </section>
     </section>

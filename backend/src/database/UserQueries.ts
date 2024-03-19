@@ -1,7 +1,7 @@
 import sql from ".";
 import { QueryResultRow } from "pg";
-
-const getUserById = async (id: string): Promise<QueryResultRow | null> => {
+import { Row, RowList } from "postgres";
+const getUserById = async (id: string) => {
   const result =
     await sql`SELECT user_id, name, email, location, joined_on, image, bio, dob, sex, joined_on, looking_for, life_state FROM users WHERE user_id = ${id}`;
   if (result && result.length > 0) {
@@ -28,7 +28,7 @@ const getUserByEmail = async (
   }
   return null;
 };
-const getUserNameById = async (id: string): Promise<QueryResultRow | null> => {
+const getUserNameById = async (id: string)=> {
   const result = await sql`SELECT name, image FROM users WHERE user_id = ${id}`;
   if (result && result.length > 0) {
     return result[0];
@@ -40,7 +40,7 @@ const addNewUser = async (
   email: string,
   password: string,
   imageUrl: string
-): Promise<QueryResultRow | null> => {
+) => {
   const newUser: QueryResultRow = await sql`
       INSERT INTO users (name, email, password, image) 
       VALUES (${name}, ${email}, ${password}, ${imageUrl})
@@ -69,6 +69,13 @@ const getGroupById = async (groupId: string) => {
   `;
   return result[0];
 };
+const getGroupNameAndLocationById = async (groupId: string) => {
+  const result = await sql`
+    SELECT name, location
+    FROM groups WHERE group_id = ${groupId}
+  `;
+  return result[0];
+};
 const getGroupByName = async (name: string) => {
   const result = await sql`
     SELECT *
@@ -83,7 +90,7 @@ const addUserGroup = async (
   organizedBy: string,
   about: string,
   image: string
-): Promise<QueryResultRow | null> => {
+) => {
   try {
     const result = await sql`
       INSERT INTO groups (name, group_type, location, organized_by, about, image)
@@ -99,7 +106,7 @@ const addUserGroup = async (
 };
 const getGroupsByOrganizedBy = async (
   organizedBy: string
-): Promise<QueryResultRow[]> => {
+) => {
   try {
     const result = await sql`
       SELECT * 
@@ -115,7 +122,7 @@ const getGroupsByOrganizedBy = async (
 const getAllInterests = async () => {
   try {
     const result = await sql`
-      SELECT * FROM interests;
+    SELECT * FROM interests ORDER BY LOWER(name);
     `;
     return result;
   } catch (error) {
@@ -135,7 +142,7 @@ const addEvent = async (
   link: string,
   address: string,
   tags: string[]
-): Promise<QueryResultRow | null> => {
+) => {
   try {
     const result = await sql`
       INSERT INTO events (name, image, details, host_id, group_id, event_date, event_time, event_type, link, address, tags)
@@ -151,7 +158,7 @@ const addEvent = async (
 };
 const getEventById = async (
   eventId: string
-): Promise<QueryResultRow | null> => {
+) => {
   try {
     const result = await sql`
       SELECT *
@@ -226,7 +233,7 @@ const updateUserPassword = async (
     throw error;
   }
 };
-const getAllCategoriesQuery = async (): Promise<any[]> => {
+const getAllCategoriesQuery = async ()=> {
   try {
     const result = await sql`
       SELECT * FROM categories;
@@ -237,7 +244,7 @@ const getAllCategoriesQuery = async (): Promise<any[]> => {
     throw error;
   }
 };
-const getAllInterestsQuery = async (categoryId: string): Promise<any[]> => {
+const getAllInterestsQuery = async (categoryId: string)=> {
   try {
     const result = await sql`
       SELECT * FROM interests WHERE category_id = ${categoryId};
@@ -251,7 +258,7 @@ const getAllInterestsQuery = async (categoryId: string): Promise<any[]> => {
 const addUserInterest = async (
   userId: string,
   interestId: string
-): Promise<void> => {
+) => {
   try {
     await sql`
       INSERT INTO user_interests (user_id, interest_id)
@@ -262,7 +269,7 @@ const addUserInterest = async (
     throw error;
   }
 };
-const getUserInterests = async (userId: string): Promise<any[]> => {
+const getUserInterests = async (userId: string) => {
   try {
     const result = await sql`
       SELECT interests.interest_id, interests.name
@@ -280,7 +287,7 @@ const getUserInterests = async (userId: string): Promise<any[]> => {
 const removeUserInterest = async (
   userId: string,
   interestId: string
-): Promise<void> => {
+) => {
   try {
     await sql`
       DELETE FROM user_interests
@@ -308,7 +315,7 @@ const getGroupsCreatedByUser = async (
     throw error;
   }
 };
-const checkGroupExists = async (groupName: string): Promise<any[]> => {
+const checkGroupExists = async (groupName: string)=> {
   try {
     const result = await sql`
     SELECT *
@@ -322,7 +329,21 @@ const checkGroupExists = async (groupName: string): Promise<any[]> => {
     throw error;
   }
 };
-const getMemberCountInGroup = async (groupId: string): Promise<number> => {
+const checkEventExists = async (eventName: string) => {
+  try {
+    const result = await sql`
+    SELECT *
+    FROM events
+    WHERE name = ${eventName}
+    `;
+
+    return result;
+  } catch (error) {
+    console.error(`Error checking if event ${eventName} exists:`, error);
+    throw error;
+  }
+};
+const getMemberCountInGroup = async (groupId: string) => {
   try {
     const result = await sql`
           SELECT COUNT(*) AS member_count
@@ -335,7 +356,7 @@ const getMemberCountInGroup = async (groupId: string): Promise<number> => {
     throw error;
   }
 };
-const getMembersDetail = async (groupId: string): Promise<Array<any>> => {
+const getMembersDetail = async (groupId: string) => {
   try {
     const result = await sql`
     SELECT u.user_id, u.name, u.email, u.image
@@ -349,6 +370,89 @@ const getMembersDetail = async (groupId: string): Promise<Array<any>> => {
     throw error;
   }
 };
+const getEventsCreatedByUser = async (
+  userId: string,
+  offset: number
+) => {
+  const limit = 10;
+  try {
+    const result = await sql`
+      SELECT * FROM events WHERE host_id = ${userId}
+      ORDER BY created_at DESC
+      LIMIT ${limit} OFFSET ${offset};
+    `;
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+const getEventsRSVPByUser = async (
+  userId: string,
+  offset: number
+): Promise<QueryResultRow[]> => {
+  try {
+    const limit = 10;
+    const result: QueryResultRow[] = await sql`
+      SELECT e.*
+      FROM events e
+      JOIN user_events ue ON e.event_id = ue.event_id
+      WHERE ue.user_id = ${userId}
+      LIMIT ${limit} OFFSET ${offset};
+    `;
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+const getPastEventsAttendedByUser = async (
+  userId: string,
+  offset: number
+) => {
+  const limit = 10;
+  try {
+    const result: QueryResultRow[] = await sql`
+      SELECT e.*
+      FROM events e
+      JOIN user_events ue ON e.event_id = ue.event_id
+      WHERE ue.user_id = ${userId}
+        AND e.event_date < CURRENT_DATE
+      LIMIT ${limit} OFFSET ${offset};
+    `;
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getEventMembersCountById = async (eventId: string) => {
+  try {
+    const result = await sql`
+      SELECT COUNT(ue.user_id) AS num_attendees
+      FROM events e
+      LEFT JOIN user_events ue ON e.event_id = ue.event_id
+      WHERE e.event_id = ${eventId}
+      GROUP BY e.event_id;
+    `;
+    return Number(result[0].num_attendees);
+  } catch (error) {
+    console.error("Error executing query:", error);
+    throw error;
+  }
+};
+const addUserToEvent = async (userId: string, eventId: string) => {
+  try {
+    const result = await sql`
+      INSERT INTO user_events (user_id, event_id)
+      VALUES (${userId}, ${eventId})
+      RETURNING *;
+    `;
+    return result;
+  } catch (error) {
+    console.error('Error adding user to event:', error);
+    throw error;
+  }
+};
+
 export {
   // * GET QUERIES //
   getUserById,
@@ -367,10 +471,17 @@ export {
   getGroupsByOrganizedBy,
   getAllInterests,
   checkGroupExists,
-
+  checkEventExists,
+  getEventsCreatedByUser,
+  getEventsRSVPByUser,
+  getPastEventsAttendedByUser,
+  getGroupById,
+  getGroupNameAndLocationById,
+  getEventMembersCountById,
   //* ADD QUERIES //
   addNewUser,
   addEvent,
+  addUserToEvent,
 
   // * UPDATE QUERIES //
   updateUserPassword,

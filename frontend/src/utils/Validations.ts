@@ -28,17 +28,17 @@ export const SignupSchema = z.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()])[a-zA-Z\d!@#$%^&*()]+$/,
       "Password must contain at least one lowercase letter, one uppercase letter, one number and one special character"
     ),
-    image: z.any().refine(
-      (value) => {
-        if (value instanceof FileList) {
-          return value.length > 0; 
-        }
-          value !== null && value !== undefined;
-      },
-      {
-        message: "Profile Image is required",
+  image: z.any().refine(
+    (value) => {
+      if (value instanceof FileList) {
+        return value.length > 0;
       }
-    ),
+      value !== null && value !== undefined;
+    },
+    {
+      message: "Profile Image is required",
+    }
+  ),
 });
 export const NewGroupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -47,9 +47,9 @@ export const NewGroupSchema = z.object({
   image: z.any().refine(
     (value) => {
       if (value instanceof FileList) {
-        return value.length > 0; 
+        return value.length > 0;
       }
-        value !== null && value !== undefined;
+      value !== null && value !== undefined;
     },
     {
       message: "Group Image is required",
@@ -64,9 +64,9 @@ export const NewEventSchema = z
     image: z.any().refine(
       (value) => {
         if (value instanceof FileList) {
-          return value.length > 0; 
+          return value.length > 0;
         }
-          value !== null && value !== undefined;
+        value !== null && value !== undefined;
       },
       {
         message: "Event Image is required",
@@ -83,7 +83,19 @@ export const NewEventSchema = z
         message: "At least one tag is required",
       }
     ),
-    date: z.string().min(1, { message: "Event Date is required" }),
+    date: z
+    .string()
+    .min(1, { message: "Event Date is required" })
+    .refine(
+      (value) => {
+        const eventDate = new Date(value);
+        const today = new Date();
+        const differenceInMilliseconds = eventDate.getTime() - today.getTime();
+        const differenceInDays = Math.floor(differenceInMilliseconds / (1000 * 60 * 60 * 24));
+        return differenceInDays >= 2;
+      },
+      { message: "Event Date has to be at least two days from today" }
+    ),
     time: z.string().min(1, { message: "Event Time is required" }),
     address: z
       .string()
@@ -108,9 +120,9 @@ export const EditProfileSchema = z.object({
   image: z.any().refine(
     (value) => {
       if (value instanceof FileList) {
-        return value.length > 0; 
+        return value.length > 0;
       }
-        value !== null && value !== undefined;
+      value !== null && value !== undefined;
     },
     {
       message: "Profile Image is required",
@@ -164,7 +176,7 @@ export const ChangePasswordSchema = z
     confirmPassword: z.string().min(1, "Confirm Password is required"),
   })
   .superRefine(({ confirmPassword, newPassword, currentPassword }, ctx) => {
-    if(currentPassword === newPassword) {
+    if (currentPassword === newPassword) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Your old password and new password should not be same",

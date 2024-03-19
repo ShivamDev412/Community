@@ -12,6 +12,7 @@ import { clearGroups } from "@/redux/slice/groupSlice";
 import axios from "axios";
 import { getApi } from "@/utils/Api";
 import { handleLocation } from "@/utils/CommonFunctions/handleLocation";
+import { setLoading } from "@/redux/slice/loadingSlice";
 
 export const useHeader = () => {
   // const [coord, setCoord] = useState({
@@ -62,26 +63,31 @@ export const useHeader = () => {
   }, [location]);
   const fetchCity = async () => {
     try {
+      dispatch(setLoading(true));
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${
           coord.lat
         },${coord.lon}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_ID!}`
       );
       const data = response.data;
-
       if (data.status === "OK") {
         const addressComponents = data.results[0].address_components;
         dispatch(setLocation(handleLocation(addressComponents)));
-      } else {
-        throw new Error(data.error_message || "Failed to fetch city name");
+        dispatch(setLoading(false));
       }
-    } catch (error) {
-      console.error("Error fetching city name:", error);
+    } catch (error:any) {
+      dispatch(setLoading(false));
+      Toast(error.message, "error");
       throw error;
     }
   };
   useEffect(() => {
-    if (coord?.lat === 0 && coord?.lon === 0) fetchCity();
+    if (!location.city && !location.state) {
+      if (coord.lat && coord.lon) {
+       
+        fetchCity();
+      }
+    }
   }, [coord]);
 
   useEffect(() => {
