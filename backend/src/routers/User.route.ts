@@ -6,6 +6,7 @@ import {
   changePassword,
   editUserProfile,
   getAllCategories,
+  getEventDetails,
   getInterestsByCategories,
   getUserAllInterests,
   getUserCreatedGroups,
@@ -37,5 +38,6 @@ route.get(
   getUserCreatedGroups
 );
 route.get(ENDPOINTS.USER_EVENTS, AuthMiddleware, getUserEvents);
+route.get(ENDPOINTS.USER_EVENTS_DETAILS, AuthMiddleware, getEventDetails);
 
 export default route;

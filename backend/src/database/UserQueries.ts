@@ -28,8 +28,8 @@ const getUserByEmail = async (
   }
   return null;
 };
-const getUserNameById = async (id: string)=> {
-  const result = await sql`SELECT name, image FROM users WHERE user_id = ${id}`;
+const getUserNameById = async (id: string) => {
+  const result = await sql`SELECT name, image, user_id FROM users WHERE user_id = ${id}`;
   if (result && result.length > 0) {
     return result[0];
   }
@@ -76,6 +76,13 @@ const getGroupNameAndLocationById = async (groupId: string) => {
   `;
   return result[0];
 };
+const getGroupNameImageTypeAndLocationById = async (groupId: string) => {
+  const result = await sql`
+    SELECT name, image, group_type, location
+    FROM groups WHERE group_id = ${groupId}
+  `;
+  return result[0];
+};
 const getGroupByName = async (name: string) => {
   const result = await sql`
     SELECT *
@@ -104,9 +111,7 @@ const addUserGroup = async (
     return null;
   }
 };
-const getGroupsByOrganizedBy = async (
-  organizedBy: string
-) => {
+const getGroupsByOrganizedBy = async (organizedBy: string) => {
   try {
     const result = await sql`
       SELECT * 
@@ -156,9 +161,7 @@ const addEvent = async (
     return null;
   }
 };
-const getEventById = async (
-  eventId: string
-) => {
+const getEventById = async (eventId: string) => {
   try {
     const result = await sql`
       SELECT *
@@ -233,7 +236,7 @@ const updateUserPassword = async (
     throw error;
   }
 };
-const getAllCategoriesQuery = async ()=> {
+const getAllCategoriesQuery = async () => {
   try {
     const result = await sql`
       SELECT * FROM categories;
@@ -244,7 +247,7 @@ const getAllCategoriesQuery = async ()=> {
     throw error;
   }
 };
-const getAllInterestsQuery = async (categoryId: string)=> {
+const getAllInterestsQuery = async (categoryId: string) => {
   try {
     const result = await sql`
       SELECT * FROM interests WHERE category_id = ${categoryId};
@@ -255,10 +258,7 @@ const getAllInterestsQuery = async (categoryId: string)=> {
     throw error;
   }
 };
-const addUserInterest = async (
-  userId: string,
-  interestId: string
-) => {
+const addUserInterest = async (userId: string, interestId: string) => {
   try {
     await sql`
       INSERT INTO user_interests (user_id, interest_id)
@@ -284,10 +284,7 @@ const getUserInterests = async (userId: string) => {
   }
 };
 
-const removeUserInterest = async (
-  userId: string,
-  interestId: string
-) => {
+const removeUserInterest = async (userId: string, interestId: string) => {
   try {
     await sql`
       DELETE FROM user_interests
@@ -315,7 +312,7 @@ const getGroupsCreatedByUser = async (
     throw error;
   }
 };
-const checkGroupExists = async (groupName: string)=> {
+const checkGroupExists = async (groupName: string) => {
   try {
     const result = await sql`
     SELECT *
@@ -370,10 +367,7 @@ const getMembersDetail = async (groupId: string) => {
     throw error;
   }
 };
-const getEventsCreatedByUser = async (
-  userId: string,
-  offset: number
-) => {
+const getEventsCreatedByUser = async (userId: string, offset: number) => {
   const limit = 10;
   try {
     const result = await sql`
@@ -404,10 +398,7 @@ const getEventsRSVPByUser = async (
     throw error;
   }
 };
-const getPastEventsAttendedByUser = async (
-  userId: string,
-  offset: number
-) => {
+const getPastEventsAttendedByUser = async (userId: string, offset: number) => {
   const limit = 10;
   try {
     const result: QueryResultRow[] = await sql`
@@ -448,10 +439,33 @@ const addUserToEvent = async (userId: string, eventId: string) => {
     `;
     return result;
   } catch (error) {
-    console.error('Error adding user to event:', error);
+    console.error("Error adding user to event:", error);
     throw error;
   }
 };
+const getEventDetailsById = async (eventId: string) => {
+  try {
+    const result = await sql`SELECT * FROM events WHERE event_id = ${eventId}`;
+    return result[0];
+  } catch (error: any) {
+    throw error;
+  }
+};
+const getEventMembers = async (eventId: string) => {
+  try {
+    const result = await sql`
+      SELECT u.user_id, u.name, u.email, u.image
+      FROM users u
+      JOIN user_events ue ON u.user_id = ue.user_id
+      WHERE ue.event_id = ${eventId};
+    `;
+    console.log(result,'result');
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
 
 export {
   // * GET QUERIES //
@@ -478,6 +492,9 @@ export {
   getGroupById,
   getGroupNameAndLocationById,
   getEventMembersCountById,
+  getEventDetailsById,
+  getEventMembers,
+  getGroupNameImageTypeAndLocationById,
   //* ADD QUERIES //
   addNewUser,
   addEvent,

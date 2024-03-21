@@ -211,7 +211,7 @@ export interface EventType {
     name: string;
     image: string;
   };
-  members:number;
+  members: number;
   group: {
     name: string;
     location: string;
@@ -233,4 +233,52 @@ export type ProfileAvatarProps = {
 export type TabPanelComponentProps = {
   value: string;
   data: EventType[];
+};
+type EventMembers = {
+  user_id: string;
+  name: string;
+  email: string;
+  image: string;
+  type: string;
+};
+export type EventDetailType = {
+  event_id: string;
+  name: string;
+  details: string;
+  event_date: string;
+  event_time: string;
+  event_type: "online" | "in-person";
+  link: string | null;
+  address: string | null;
+  tags: string[];
+  created_at: string;
+  image: string;
+  members: EventMembers[];
+  host: { name: string; image: string; user_id: string };
+  group: { name: string; image: string; location: string; group_type: string };
+};
+export type EventDetailsHeaderSectionProps = {
+  eventName: string;
+  eventType: string;
+  eventDate: string;
+  hostProfilePic: string;
+  hostName: string;
+};
+export type EventDetailBannerImageProps = {
+  image: string;
+  name: string;
+};
+export type EventGroupDetailsProp = {
+  groupImage: string;
+  groupName: string;
+  groupType: string;
+};
+export type EventTimeAndLocationProps = {
+  eventDate: string;
+  eventTime: string;
+  eventLink: string | null;
+  eventAddress: string | null;
+};
+export type EventAttendeesProps = {
+  members: EventMembers[];
 };

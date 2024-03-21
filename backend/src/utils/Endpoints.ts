@@ -20,7 +20,8 @@ export const ENDPOINTS = {
     GET_USER_GROUPS_ORGANIZER:"/organizer",
     GET_USER_GROUPS_MEMBER:"/member",
     GROUP_DETAILS: "/details",
-    USER_EVENTS:"/user-events"
+    USER_EVENTS:"/user-events",
+    USER_EVENTS_DETAILS:"/event-details/:eventId"
 };
 
 export const API_ENDPOINTS = {

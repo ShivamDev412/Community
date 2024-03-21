@@ -5,10 +5,13 @@ import {
   addUserInterest,
   getAllCategoriesQuery,
   getAllInterestsQuery,
+  getEventDetailsById,
+  getEventMembers,
   getEventMembersCountById,
   getEventsCreatedByUser,
   getEventsRSVPByUser,
   getGroupNameAndLocationById,
+  getGroupNameImageTypeAndLocationById,
   getGroupsCreatedByUser,
   getPastEventsAttendedByUser,
   getUserById,
@@ -342,7 +345,7 @@ export const getUserEvents = async (
       pageNum = 1;
     }
     const offset = (pageNum - 1) * pageSize;
-    let events:QueryResultRow[] = [];
+    let events: QueryResultRow[] = [];
     switch (tab) {
       case "attending":
         events = await getEventsRSVPByUser(userId, offset);
@@ -383,6 +386,74 @@ export const getUserEvents = async (
       success: true,
       message: "Events fetched successfully",
       data: eventsToSend,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+export const getEventDetails = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    console.log("dd");
+    const userId: string | undefined = req.user?.userId;
+    if (!userId) {
+      return throwError(next, "User not found");
+    }
+    const eventId = req.params.eventId;
+    const [event, eventMembers] = await Promise.all([
+      getEventDetailsById(eventId),
+      getEventMembers(eventId),
+    ]);
+    const { image, host_id, updated_at, group_id, ...rest } = event;
+
+    const [eventImage, host, group, members] = await Promise.all([
+      getImage(image),
+      getUserNameById(host_id),
+      getGroupNameImageTypeAndLocationById(group_id),
+      Promise.all(
+        eventMembers.map(async (user) => {
+          try {
+            const image = await getImage(user.image);
+            return image ? { ...user, image } : null;
+          } catch (error) {
+            throw new Error("Error fetching image");
+          }
+        })
+      ),
+    ]);
+    const hostImage = host ? await getImage(host.image) : null;
+    const groupImage = group ? await getImage(group.image) : null;
+    const membersToSend = members.map(member => ({
+      ...member,
+      image: member?.image || null,
+      type: "member",
+    }));
+    
+    membersToSend.unshift({
+      ...host,
+      image: hostImage || null,
+      type: "host",
+    });    
+
+    res.status(200).json({
+      success: true,
+      message: "Event details fetched successfully",
+      data: {
+        ...rest,
+        image: eventImage,
+        members: membersToSend,
+        host: {
+          ...host,
+          image: hostImage,
+        },
+        group: {
+          ...group,
+          image: groupImage,
+        },
+      },
     });
   } catch (err) {
     next(err);

@@ -20,8 +20,8 @@ const {
   INTERESTS,
   GROUP_DETAILS,
   GROUP_DETAILS_MEMBERS,
-  GROUP_DETAILS_EVENTS
-
+  GROUP_DETAILS_EVENTS,
+  EVENT_DETAILS
 } = RouteEndpoints;
 const LoginScreen = lazy(() => import("../screen/Login"));
 const SignupScreen = lazy(() => import("../screen/Signup"));
@@ -43,6 +43,7 @@ const ChangePasswordScreen = lazy(
 const GroupDetailsScreen = lazy(() => import("../screen/GroupDetails"))
 const GroupDetailsMembersScreen = lazy(() => import("../screen/GroupDetails/GroupDetailsMembers"))
 const GroupDetailsEventsScreen = lazy(() => import("../screen/GroupDetails/GroupDetailsEvents"))
+const EventDetailsScreen = lazy(() => import("../screen/EventDetails"))
 const Router = () => {
   return (
     <BrowserRouter>
@@ -70,6 +71,7 @@ const Router = () => {
           <Route path={GROUP_DETAILS_EVENTS} element={<GroupDetailsEventsScreen />} />
           <Route path={GROUP_DETAILS} element={<GroupDetailsScreen />} />
           <Route path={CREATE_GROUP} element={<NewGroupScreen />} />
+          <Route path={EVENT_DETAILS} element={<EventDetailsScreen />} />
           <Route path={YOUR_EVENTS} element={<YourEventsScreen />} />
           <Route path={CREATE_EVENT} element={<NewEventScreen />} />
           <Route path={HOME} element={<HomeScreen />} />

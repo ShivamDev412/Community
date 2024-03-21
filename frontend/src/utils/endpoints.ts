@@ -22,6 +22,7 @@ export const RouteEndpoints = {
   GROUP_DETAILS: "/your-groups/:name/",
   GROUP_DETAILS_MEMBERS:"/your-groups/:name/members",
   GROUP_DETAILS_EVENTS:"/your-groups/:name/events",
+  EVENT_DETAILS:"/your-events/events/:eventId"
 };
 export const Endpoints = {
   LOGIN: "/login",
@@ -51,7 +52,8 @@ export const Endpoints = {
   GROUP_DETAILS:"/details",
   GROUP_DETAILS_MEMBERS:"/details/members",
   GROUP_DETAILS_EVENTS:"/details/events",
-  USER_EVENTS:"/user-events"
+  USER_EVENTS:"/user-events",
+  USER_EVENTS_DETAILS:"/event-details"
 };
 export const API_ENDPOINTS = {
   USER: "/api/user",
