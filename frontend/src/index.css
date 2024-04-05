@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+#root {
+  min-height: 100vw;
+  min-height: 100vh;
+}
+ body {
+  overflow-x: hidden !important;
+}
+body::-webkit-scrollbar {
+  width: 8px;
+}
+ 
+body::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px #581080;
+  border-radius: 10px;
+}
+ 
+body::-webkit-scrollbar-thumb {
+  background-color: #581080CC;
+  outline: 1px solid slategrey;
+  border-radius: 10px;
+}
