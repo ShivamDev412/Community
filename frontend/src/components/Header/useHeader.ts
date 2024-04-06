@@ -113,7 +113,7 @@ export const useHeader = () => {
   const handleSetPlace = (city: string, state: string) => {
     setPlace(`${city}, ${state}`);
   };
-
+// 
   const handleLocationSelect = (paceId:String, place: string) => {
     console.log(paceId);
     placesService?.getDetails(
