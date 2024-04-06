@@ -3,12 +3,12 @@ import ReactDOM from "react-dom/client";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { ToastContainer } from "react-toastify";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import App from "../App.tsx";
-import "../index.css";
-import store from "../redux/Store.ts";
+import App from "./App.tsx";
+import "./index.css";
+import store from "./redux/Store.ts";
 import { PersistGate } from "redux-persist/integration/react";
 import { Provider } from "react-redux";
-import { persistor } from "../redux/Store.ts";
+import { persistor } from "./redux/Store.ts";
 
 const theme = createTheme({
   palette: {

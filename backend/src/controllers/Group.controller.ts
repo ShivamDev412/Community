@@ -106,7 +106,7 @@ export const updateUserGroup = async (
   next: NextFunction
 ) => {
   try {
-    const { about, name, group_type, location, image } = req.body;
+    const { about, name, group_type, location, image, locationId } = req.body;
 
     const groupId = req?.params?.groupId;
     const userId: string | undefined = req?.user?.userId;
@@ -146,6 +146,13 @@ export const updateUserGroup = async (
     compressedImageUrl = compressedImageUrl
       ? compressedImageUrl
       : groupData.compressed_image;
+    let latitude;
+    let longitude;
+    const locationCoord = await getLatitudeAndLongitude(locationId);
+    if (locationCoord) {
+      latitude = locationCoord.latitude;
+      longitude = locationCoord.longitude;
+    }
     const updatedGroup = await updateUserGroupQuery(
       groupId,
       name,
@@ -153,7 +160,9 @@ export const updateUserGroup = async (
       location,
       about,
       imageUrl,
-      compressedImageUrl
+      compressedImageUrl,
+      latitude,
+      longitude
     );
     res.status(201).json({
       success: true,

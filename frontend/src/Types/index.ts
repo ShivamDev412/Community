@@ -214,6 +214,7 @@ export interface EventType {
   event_id: string;
   name: string;
   image: string;
+  compressed_image:string,
   details: string;
   event_date: string;
   event_time: string;

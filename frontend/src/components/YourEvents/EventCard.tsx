@@ -2,6 +2,7 @@ import { EventType } from "@/Types";
 import { FC } from "react";
 import moment from "moment";
 import { Link } from "react-router-dom";
+import LazyLoadedImageComponent from "../LazyLoadedImageComponent";
 
 const EventCard: FC<{ data: EventType }> = ({ data }) => {
   const eventDate = moment(data?.event_date).utc().format("ddd, MMM D");
@@ -10,10 +11,10 @@ const EventCard: FC<{ data: EventType }> = ({ data }) => {
     <Link to={`/event/${data?.event_id}`}>
       <div className="flex gap-4 mb-10">
         <div className="w-[20%] h-[1in]">
-          <img
-            src={data?.image}
+          <LazyLoadedImageComponent
+            image={data?.image}
+            compressedImage={data?.compressed_image}
             alt={`${name}_image`}
-            className="w-full h-full rounded-lg"
           />
         </div>
         <div>

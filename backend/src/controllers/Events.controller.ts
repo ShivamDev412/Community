@@ -230,6 +230,7 @@ export const updateEvent = async (
       location,
       link,
       image,
+      locationId,
     } = request.body;
     const userId: string | undefined = request?.user?.userId;
     if (!userId) {
@@ -276,7 +277,16 @@ export const updateEvent = async (
     const linkToSend = type === "online" ? link : null;
     const locationToSend = type === "in-person" ? location : null;
     const tagsToSend = JSON.parse(tags);
-
+    let latitude = 0;
+      let longitude = 0;
+      if(type === "in-person"){
+        const locationCoord = await getLatitudeAndLongitude(locationId);
+        
+        if (locationCoord) {
+          latitude = locationCoord.latitude;
+          longitude = locationCoord.longitude;
+        }
+      }
     const newEvent = await updateEventQuery(
       eventId,
       name,
@@ -291,7 +301,9 @@ export const updateEvent = async (
       type,
       linkToSend,
       locationToSend,
-      tagsToSend
+      tagsToSend,
+      latitude,
+      longitude
     );
     if (!newEvent) {
       return throwError(next, "Event not created");

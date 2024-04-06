@@ -182,7 +182,9 @@ const updateUserGroupQuery = async (
   location: string,
   about: string,
   image: string,
-  compressedImage: string
+  compressedImage: string,
+  latitude: number,
+  longitude: number
 ) => {
   try {
     const result = await sql`
@@ -194,6 +196,8 @@ const updateUserGroupQuery = async (
         about = ${about},
         image = ${image},
         compressed_image = ${compressedImage},
+        latitude = ${latitude},
+        longitude = ${longitude},
         updated_at = CURRENT_TIMESTAMP
       WHERE
         group_id = ${groupId}
@@ -274,7 +278,9 @@ const updateEventQuery = async (
   eventType: string,
   link: string,
   address: string,
-  tags: string[]
+  tags: string[],
+  latitude: number,
+  longitude: number
 ) => {
   try {
     const result = await sql`
@@ -292,7 +298,9 @@ const updateEventQuery = async (
         event_type = ${eventType},
         link = ${link},
         address = ${address},
-        tags = ${tags}
+        tags = ${tags},
+        latitude = ${latitude},
+        longitude = ${longitude}
       WHERE event_id = ${eventId}
       RETURNING event_id;
     `;
