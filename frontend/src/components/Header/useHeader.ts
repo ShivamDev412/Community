@@ -115,6 +115,7 @@ export const useHeader = () => {
   };
 
   const handleLocationSelect = (paceId:String, place: string) => {
+    console.log(paceId);
     placesService?.getDetails(
       {
         placeId: place,
