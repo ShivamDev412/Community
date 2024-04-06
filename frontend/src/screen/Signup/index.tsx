@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import AuthWrapper from "@/Wrappers/AuthWrapper";
 import { InputField } from "@/components/Input";
 import { Endpoints } from "@/utils/Endpoints";
-import Divider from "@/components/Divider";
+
 import { useSignup } from "./useSignup";
 import FileUpload from "@/components/UploadFile";
-import { DevTool } from "@hookform/devtools";
-import GoogleAuth from "@/components/GoogleAuth";
+
+import SocialSignupSection from "@/components/SocialSignupSection";
 
 function Signup() {
   const {
@@ -15,8 +15,6 @@ function Signup() {
     handleSubmit,
     onSubmit,
     errors,
-    control,
-    setValue,
     getValues,
   } = useSignup();
   return (
@@ -84,13 +82,7 @@ function Signup() {
             </Link>
           </p>
         </FormControl>
-        <DevTool control={control} />
-        <section className="mt-4 flex flex-col w-full">
-          <Divider />
-          <div className="w-1/2 mx-auto flex justify-center mt-5">
-            <GoogleAuth setGoogleData={setValue} />
-          </div>
-        </section>
+        <SocialSignupSection />
       </section>
     </AuthWrapper>
   );

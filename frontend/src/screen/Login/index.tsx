@@ -1,10 +1,10 @@
 import { FormControl, Button } from "@mui/material";
-import AuthWrapper from "../../Wrappers/AuthWrapper";
-import { InputField } from "../../components/Input";
+import AuthWrapper from "@/Wrappers/AuthWrapper";
+import { InputField } from "@/components/Input";
 import { Link } from "react-router-dom";
-import { Endpoints } from "../../utils/Endpoints";
-import Divider from "../../components/Divider";
+import { Endpoints } from "@/utils/Endpoints";
 import { useLogin } from "./useLogin";
+import SocialSignupSection from "@/components/SocialSignupSection";
 
 function Login() {
   const { register, handleSubmit, onSubmit, errors, getValues } = useLogin();
@@ -25,7 +25,6 @@ function Login() {
             register={register}
             errors={errors}
             getValues={getValues}
-
           />
           <InputField
             id={"password"}
@@ -53,9 +52,7 @@ function Login() {
             </Link>
           </p>
         </FormControl>
-        <section className="mt-4 flex flex-col w-full">
-          <Divider />
-        </section>
+        <SocialSignupSection />
       </section>
     </AuthWrapper>
   );

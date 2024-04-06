@@ -9,6 +9,7 @@ import { RouteMiddleware } from "./middlewares/Route.middleware";
 import errorHandler from "./middlewares/ErrorHandler.middleware";
 import {GoogleMiddleware, GithubMiddleware, FacebookMiddleware} from "./middlewares/Passport.middleware";
 import session from "express-session";
+// const GoogleStrategy = require("passport-google-oauth2").Strategy;
 dotenv.config();
 
 const PORT = process.env.NODE_PORT || 4000;

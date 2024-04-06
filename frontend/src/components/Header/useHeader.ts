@@ -63,7 +63,7 @@ export const useHeader = () => {
   }, [location]);
   const fetchCity = async () => {
     try {
-      dispatch(setLoading(true));
+      // dispatch(setLoading(true));
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${
           coord.lat
@@ -73,8 +73,8 @@ export const useHeader = () => {
       if (data.status === "OK") {
         const addressComponents = data.results[0].address_components;
         dispatch(setLocation(handleLocation(addressComponents)));
-        dispatch(setLoading(false));
       }
+      dispatch(setLoading(false));
     } catch (error:any) {
       dispatch(setLoading(false));
       Toast(error.message, "error");
@@ -114,13 +114,14 @@ export const useHeader = () => {
     setPlace(`${city}, ${state}`);
   };
 
-  const handleLocationSelect = (placeId: string) => {
+  const handleLocationSelect = (paceId:String, place: string) => {
     placesService?.getDetails(
       {
-        placeId: placeId,
+        placeId: place,
         fields: ["address_components"],
       },
       (placeDetails: any) => {
+        
         const locationData = handleLocation(placeDetails.address_components);
         if (locationData.location.city && locationData.location.state) {
           dispatch(setLocation(locationData));

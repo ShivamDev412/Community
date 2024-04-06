@@ -4,11 +4,11 @@ import {
   Login,
   Signup,
   deleteAllUsers,
-  facebookCallback,
-  facebookLogin,
+  // facebookCallback,
+  // facebookLogin,
   forgotPassword,
-  githubCallback,
-  githubLogin,
+  // githubCallback,
+  // githubLogin,
   googleCallback,
   googleLogin,
   verifyTokenAndSetPassword,
@@ -24,9 +24,9 @@ route.post(ENDPOINTS.FORGOT_PASSWORD, forgotPassword);
 route.post(ENDPOINTS.RESET_PASSWORD, verifyTokenAndSetPassword)
 route.get(ENDPOINTS.GOOGLE_LOGIN, googleLogin)
 route.get(ENDPOINTS.GOOGLE_CALLBACK, googleCallback)
-route.get(ENDPOINTS.GITHUB_LOGIN,githubLogin);
-route.get(ENDPOINTS.GITHUB_CALLBACK, githubCallback);
-route.get(ENDPOINTS.FACEBOOK_LOGIN,facebookLogin);
-route.get(ENDPOINTS.FACEBOOK_CALLBACK, facebookCallback);
+// route.get(ENDPOINTS.GITHUB_LOGIN,githubLogin);
+// route.get(ENDPOINTS.GITHUB_CALLBACK, githubCallback);
+// route.get(ENDPOINTS.FACEBOOK_LOGIN,facebookLogin);
+// route.get(ENDPOINTS.FACEBOOK_CALLBACK, facebookCallback);
 
 export default route;

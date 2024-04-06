@@ -270,8 +270,8 @@ export const googleCallback = (req: any, res: any) => {
       return;
     } else {
       const token = generateToken({
-        id: req.user[0].user_id,
-        email: req.user[0].email,
+        id: req.user.user_id,
+        email: req.user.email,
       });
       res.cookie("community-auth-token", token, {
         httpOnly: false,

@@ -9,6 +9,7 @@ import Toast from "@/utils/Toast";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slice/userSlice";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { setLoading } from "@/redux/slice/loadingSlice";
 export const useLogin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ export const useLogin = () => {
   });
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     try {
+      dispatch(setLoading(true));
       const response = await postApi(
         `${API_ENDPOINTS.AUTH}${RouteEndpoints.LOGIN}`,
         data
@@ -55,6 +57,7 @@ export const useLogin = () => {
         navigate(RouteEndpoints.HOME);
         reset();
         clearErrors();
+        dispatch(setLoading(false));
       }
     } catch (error: any) {
       const message = error.response.data.message;
@@ -63,6 +66,7 @@ export const useLogin = () => {
         type: "manual",
         message: error.response?.data?.message,
       });
+      dispatch(setLoading(false));
     }
   };
 

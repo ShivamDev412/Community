@@ -16,10 +16,6 @@ import {
   uploadToS3,
 } from "../utils/UploadToS3";
 import getImageDimensions from "../utils/GetImageDimention";
-import { google } from "googleapis";
-import path from "path";
-// import { createEventWithGoogleMeet } from "../utils/CreateEventWithGoogle";
-import { JWT } from "google-auth-library";
 import { getLatitudeAndLongitude } from "../utils/GetLatitudeAndLongitude";
 
 export const getTags = async (

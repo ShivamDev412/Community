@@ -32,16 +32,15 @@ const GoogleMiddleware = () => {
         };
         try {
           const existingUser = await getUserByGoogleId(profile.id);
-          if (existingUser === null) {
-           const newUser = await addUserWithGoogleId(
+          if (!existingUser) {
+            const newUser = await addUserWithGoogleId(
               defaultUser.name,
               defaultUser.email,
               defaultUser.image,
               defaultUser.google_id
             );
-            return cb(null, newUser);
+            return cb(null, newUser && newUser[0]);
           } else {
-            console.log("else", existingUser);
             return cb(null, existingUser);
           }
         } catch (error) {
@@ -50,16 +49,8 @@ const GoogleMiddleware = () => {
       }
     )
   );
-
-  passport.serializeUser((user: any, done: any) => {
-    console.log("serializeUser", user);
-    done(null, user);
-  });
-
-  passport.deserializeUser((user: any, done: any) => {
-    console.log("deserializeUser", user);
-    done(null, user);
-  });
+  passport.serializeUser((user: any, done: any) => done(null, user));
+  passport.deserializeUser((user: any, done: any) => done(null, user));
 };
 const GithubMiddleware = () => {
   passport.use(

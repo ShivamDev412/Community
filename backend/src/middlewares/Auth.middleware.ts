@@ -20,12 +20,12 @@ export const AuthMiddleware = (
   next: NextFunction
 ) => {
   const token = request.cookies["community-auth-token"];
-  if (!token) return throwError(next, "No token provided");
+  if (!token) throwError(next, "No token found");
   jwt.verify(
     token,
     process.env.JWT_SECRET_KEY! as string,
-    (err: any, decoded: any) => {
-      if (err) return throwError(next, "Invalid token");
+    (err: jwt.VerifyErrors | null, decoded: any) => {
+      if (err) throwError(next, "Invalid token");
       request.user = decoded;
       next();
     }

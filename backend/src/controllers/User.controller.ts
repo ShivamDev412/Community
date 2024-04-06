@@ -40,7 +40,10 @@ export const GetUserData = async (
     if (userId) {
       const user = await getUserById(userId);
 
-      res.status(200).json(user);
+      res.status(200).json({
+        success: true,
+        data: user,
+      });
     } else {
       return throwError(next, "User not found");
     }
