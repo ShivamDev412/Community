@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://shiv41297:jxUa7EWYQm4y@ep-billowing-thunder-a5029b6q.us-east-2.aws.neon.tech/community?sslmode=require"
+}
+
+model User {
+  id                    String              @id @default(cuid())
+  name                  String
+  email                 String              @unique
+  password              String?           
+  location              String?
+  joined_on             DateTime            @default(now())
+  created_at            DateTime            @default(now())
+  updated_at            DateTime            @default(now())
+  image                 String?
+  compressed_image      String?
+  bio                   String?
+  dob                   DateTime?
+  sex                   String?
+  looking_for           String[]
+  life_state            String[]
+  google_id             String?             @unique
+  Event                 Event[]
+  password_reset_tokens PasswordResetToken?
+  events                UserEvent?
+  groups                UserGroup?
+  interests             UserInterest?
+}
+
+model PasswordResetToken {
+  user_id      String   @id
+  token        String
+  token_expiry DateTime
+  user         User     @relation(fields: [user_id], references: [id])
+}
+
+model Group {
+  id               String     @id @default(cuid())
+  name             String     @unique
+  group_type       String?
+  location         String?
+  latitude         Float?
+  longitude        Float?
+  organized_by     String
+  about            String?
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @default(now())
+  image            String?
+  compressed_image String?
+  events           Event[]
+  users            UserGroup?
+}
+
+model Event {
+  id               String     @id @default(cuid())
+  name             String     @unique
+  image            String?
+  compressed_image String?
+  details          String?
+  host_id          String
+  group_id         String
+  event_date       DateTime
+  event_time       DateTime
+  event_end_time   DateTime
+  latitude         Float?
+  longitude        Float?
+  event_type       String
+  link             String?
+  address          String?
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @default(now())
+  group            Group      @relation(fields: [group_id], references: [id])
+  host             User       @relation(fields: [host_id], references: [id])
+  tags             Interest[] @relation("EventInterests")
+  user_events      UserEvent?
+}
+
+model Category {
+  id               String            @id @default(cuid())
+  name             String            @unique
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @default(now())
+  CategoryInterest CategoryInterest?
+  interests        Interest[]
+}
+
+model Interest {
+  id               String            @id @default(cuid())
+  name             String            @unique
+  category_id      String
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @default(now())
+  CategoryInterest CategoryInterest?
+  category         Category          @relation(fields: [category_id], references: [id])
+  users            UserInterest?
+  events           Event[]           @relation("EventInterests")
+}
+
+// model Tag {
+//   id         String    @id @default(cuid())
+//   name       String
+//   created_at DateTime  @default(now())
+//   updated_at DateTime  @default(now())
+//   eventId    String?
+//   events     EventTag?
+//   Event      Event?    @relation(fields: [eventId], references: [id])
+// }
+
+model UserInterest {
+  user_id     String   @unique
+  interest_id String   @unique
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+  interest    Interest @relation(fields: [interest_id], references: [id])
+  user        User     @relation(fields: [user_id], references: [id])
+}
+
+model UserGroup {
+  user_id    String   @unique
+  group_id   String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  group      Group    @relation(fields: [group_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id])
+}
+
+model UserEvent {
+  user_id    String   @unique
+  event_id   String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  event      Event    @relation(fields: [event_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id])
+}
+
+// model EventTag {
+//   event_id   String   @unique
+//   tag_id     String   @unique
+//   created_at DateTime @default(now())
+//   updated_at DateTime @default(now())
+//   event      Event    @relation(fields: [event_id], references: [id])
+//   tag        Tag      @relation(fields: [tag_id], references: [id])
+// }
+
+model CategoryInterest {
+  category_id String   @unique
+  interest_id String   @unique
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+  category    Category @relation(fields: [category_id], references: [id])
+  interest    Interest @relation(fields: [interest_id], references: [id])
+}

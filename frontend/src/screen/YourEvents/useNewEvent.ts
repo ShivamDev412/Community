@@ -28,10 +28,9 @@ export const useNewEvent = () => {
   const { groupsCreated } = useSelector((state: RootState) => state.groups);
   useEffect(() => {
     if (eventDetails) {
-      debugger;
       setEventType(eventDetails.event_type);
     }
-  },[eventDetails])
+  }, [eventDetails]);
   useEffect(() => {
     if (!isEditableEvent) {
       reset();
@@ -42,7 +41,7 @@ export const useNewEvent = () => {
     if (groupsCreated.length) {
       setGroups(
         groupsCreated.map((value) => ({
-          value: value.group_id,
+          value: value.id,
           label: value.name,
         }))
       );
@@ -56,9 +55,9 @@ export const useNewEvent = () => {
       const res = await getApi(`/api/event${Endpoints.TAGS}`);
       if (res.success) {
         setTags(
-          res.data.map((value: { interest_id: string; name: string }) => {
+          res.data.map((value: { id: string; name: string }) => {
             return {
-              value: value.interest_id,
+              value: value.id,
               label: value.name,
             };
           })
@@ -85,7 +84,7 @@ export const useNewEvent = () => {
       name: isEditableEvent ? eventDetails?.name : "",
       image: isEditableEvent ? eventDetails?.image : null,
       details: isEditableEvent ? eventDetails?.details : "",
-      group: isEditableEvent ? eventDetails?.group.group_id : "",
+      group: isEditableEvent ? eventDetails?.group.id : "",
       date: isEditableEvent
         ? eventDetails?.event_date
         : dayjs().format("YYYY-MM-DD"),
@@ -99,7 +98,7 @@ export const useNewEvent = () => {
       tags: isEditableEvent ? eventDetails?.tags : [],
       link: isEditableEvent ? eventDetails?.link || undefined : "",
       address: isEditableEvent ? eventDetails?.address || undefined : "",
-      locationId:eventType === "in-person" ? "" : undefined,      
+      locationId: eventType === "in-person" ? "" : undefined,
     },
     resolver: zodResolver(NewEventSchema),
   });
@@ -118,6 +117,13 @@ export const useNewEvent = () => {
     }
   };
   const onSubmit: SubmitHandler<FormField> = async (data) => {
+    const tagsToSend = tags
+      .filter((value) => data.tags.includes(value.label))
+      .map((value) => {
+        return {
+          id: value.value,
+        };
+      });
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("details", data.details);
@@ -125,14 +131,14 @@ export const useNewEvent = () => {
     formData.append("time", data.time);
     formData.append("event_end_time", data.event_end_time);
     formData.append("type", data.type);
-    formData.append("tags", JSON.stringify(data.tags));
+    formData.append("tags", JSON.stringify(tagsToSend));
     formData.append(
       "image",
       typeof data?.image[0] === "object" ? data?.image[0] : data.image
     );
     formData.append("group", data.group);
 
-    formData.append("locationId",data.locationId ? data.locationId : "")
+    formData.append("locationId", data.locationId ? data.locationId : "");
     if (data.type === "in-person") {
       data?.address && formData.append("location", data?.address);
     } else {

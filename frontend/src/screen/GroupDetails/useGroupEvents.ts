@@ -19,7 +19,7 @@ export const useGroupEvents = () => {
     dispatch(setLoading(true));
     try {
       const res = await getApi(
-        `${API_ENDPOINTS.GROUP}${Endpoints.GET_EVENTS_IN_GROUP}?groupId=${groupDetails.group_id}`
+        `${API_ENDPOINTS.GROUP}${Endpoints.GET_EVENTS_IN_GROUP}?groupId=${groupDetails.id}`
       );
       if (res.success) {
      

@@ -335,6 +335,7 @@ export const MultiSelectField: FC<
           value: selectedData,
           onChange: (e: SelectChangeEvent<string[]>) => {
             if (e.target.value.length !== 0) {
+            
               clearErrors(id);
             }
             if (e.target.value.length === 0) {

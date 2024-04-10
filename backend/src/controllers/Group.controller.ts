@@ -24,6 +24,7 @@ import {
 import getImageDimensions from "../utils/GetImageDimention";
 import { getAllImages } from "../Types/GetAllImages";
 import { getLatitudeAndLongitude } from "../utils/GetLatitudeAndLongitude";
+import db from "../database/db.config";
 export const getUserGroups = async (
   req: Request,
   res: Response,
@@ -34,9 +35,19 @@ export const getUserGroups = async (
     if (!userId) {
       return throwError(next, "User not found");
     } else {
-      const userGroups = await getUserGroupsQuery(userId);
-
-      res.status(200).json(userGroups);
+      const userGroups = await db.userGroup.findMany({
+        where: {
+          user_id: userId,
+        },
+        include: {
+          group: true,
+        },
+      });
+      res.status(200).json({
+        success: true,
+        message: "User groups fetched successfully",
+        data: userGroups,
+      });
     }
   } catch (error) {
     next(error);
@@ -53,7 +64,11 @@ export const createUserGroup = async (
     const userId: string | undefined = req?.user?.userId;
     const file = req?.file;
     const imageBuffer = file?.buffer;
-    const groupExists = await checkGroupExists(name);
+    const groupExists = await db.group.findMany({
+      where: {
+        name,
+      },
+    });
     if (groupExists.length) {
       return throwError(next, { name: "Group name already exists" });
     }
@@ -80,17 +95,19 @@ export const createUserGroup = async (
       imageBuffer,
       file.mimetype
     );
-    const newGroup = await addUserGroup(
-      name,
-      group_type,
-      location,
-      userId,
-      about,
-      imageUrl,
-      compressedImageUrl,
-      latitude,
-      longitude
-    );
+    const newGroup = await db.group.create({
+      data: {
+        name,
+        group_type,
+        location,
+        organized_by: userId,
+        about,
+        image: imageUrl,
+        compressed_image: compressedImageUrl,
+        latitude,
+        longitude,
+      },
+    });
     res.status(200).json({
       success: true,
       message: "Group created successfully",
@@ -153,17 +170,21 @@ export const updateUserGroup = async (
       latitude = locationCoord.latitude;
       longitude = locationCoord.longitude;
     }
-    const updatedGroup = await updateUserGroupQuery(
-      groupId,
-      name,
-      group_type,
-      location,
-      about,
-      imageUrl,
-      compressedImageUrl,
-      latitude,
-      longitude
-    );
+    const updatedGroup = await db.group.update({
+      where: {
+        id: groupId,
+      },
+      data: {
+        name,
+        group_type,
+        location,
+        about,
+        image: imageUrl,
+        compressed_image: compressedImageUrl,
+        latitude,
+        longitude,
+      },
+    });
     res.status(201).json({
       success: true,
       message: "Group updated successfully",
@@ -183,7 +204,11 @@ export const getGroupsByOrganizer = async (
     return throwError(next, "User not found");
   }
   try {
-    const groups = await getGroupsByOrganizedBy(userId);
+    const groups = await db.group.findMany({
+      where: {
+        organized_by: userId,
+      },
+    });
     response.status(200).json({
       success: true,
       message: "Groups fetched successfully",
@@ -208,36 +233,69 @@ export const getGroupDetails = async (
     if (!name) {
       return throwError(next, "Group not found");
     }
-    const group = await getGroupByName(name?.toString());
-    const organized_by = await getUserNameById(group.organized_by);
-    const organizedByImage = organized_by?.image.includes("https://")
-      ? organized_by?.image
-      : await getImage(organized_by?.image);
-    const compressedOrganizedByImage = organized_by?.image.includes("https://")
-      ? organized_by?.image
-      : await getImage(organized_by?.compressed_image);
-    const image = await getImage(group.image);
-    const compressedImage = await getImage(group.compressed_image);
-    const membersCount = await getMemberCountInGroup(group.group_id);
-    const members = await getMembersDetail(group.group_id);
-    const membersToSend = await getAllImages(members, next);
-    response.status(200).json({
-      success: true,
-      message: "Group details fetched successfully",
-      data: {
-        ...group,
-        organized_by: {
-          id: group.organized_by,
-          name: organized_by?.name,
-          image: organizedByImage,
-          compressed_image: compressedOrganizedByImage,
-        },
-        image,
-        compressed_image: compressedImage,
-        membersCount,
-        members: membersToSend,
+    const group = await db.group.findFirst({
+      where: {
+        name: name?.toString(),
       },
     });
+    if (group) {
+      const organizedBy = await db.user.findFirst({
+        where: {
+          id: group.organized_by,
+        },
+        select: {
+          name: true,
+          image: true,
+          compressed_image: true,
+          id: true,
+        },
+      });
+      if (organizedBy) {
+        const organizedByImage =
+          organizedBy.image && organizedBy.image.includes("https://")
+            ? organizedBy.image
+            : organizedBy.image
+            ? await getImage(organizedBy.image)
+            : null;
+        const compressedOrganizedByImage =
+          organizedBy.compressed_image &&
+          organizedBy.compressed_image.includes("https://")
+            ? organizedBy.compressed_image
+            : organizedBy.compressed_image
+            ? await getImage(organizedBy.compressed_image)
+            : null;
+        const image = await getImage(group.image || "");
+        const compressedImage = await getImage(group.compressed_image || "");
+        const membersCount = await db.userGroup.count({
+          where: {
+            group_id: group.id,
+          },
+        });
+        const members = await db.userGroup.findMany({
+          where: {
+            group_id: group.id,
+          },
+        });
+        const membersToSend = await getAllImages(members, next);
+        response.status(200).json({
+          success: true,
+          message: "Group details fetched successfully",
+          data: {
+            ...group,
+            organized_by: {
+              id: group.organized_by,
+              name: organizedBy?.name,
+              image: organizedByImage,
+              compressed_image: compressedOrganizedByImage,
+            },
+            image,
+            compressed_image: compressedImage,
+            membersCount,
+            members: membersToSend,
+          },
+        });
+      }
+    }
   } catch (error) {
     next(error);
   }
@@ -249,7 +307,7 @@ export const getAllEventsInGroup = async (
 ) => {
   try {
     const userId: string | undefined = request?.user?.userId;
-    const groupId = request?.query?.groupId;
+    const groupId:any = request?.query?.groupId;
     if (!userId) {
       return throwError(next, "User not found");
     }
@@ -258,7 +316,11 @@ export const getAllEventsInGroup = async (
     }
 
     const eventsWithImages = await getAllImages(
-      await getAllEventsByGroupId(groupId),
+      await db.event.findMany({
+        where: {
+          group_id: groupId,
+        }
+      }),
       next
     );
 

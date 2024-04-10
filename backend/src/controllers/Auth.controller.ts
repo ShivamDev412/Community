@@ -5,28 +5,23 @@ import {
   LoginSchema,
   ResetPasswordSchema,
 } from "../utils/Validation";
-import {
-  getUserByEmail,
-  addNewUser,
-  getUserById,
-  storeToken,
-  getToken,
-  updateUserPassword,
-} from "../database/UserQueries";
 // @ts-ignore
 import passport from "passport";
 import { generateToken } from "../utils/GenerateToken";
-import { QueryResultRow } from "pg";
-import sql from "../database";
+// import sql from "../database";
 import { throwError } from "../utils/Error";
 import {
   uploadToS3,
   getImage,
   uploadCompressedImageToS3,
 } from "../utils/UploadToS3";
-import GenerateOTP from "../utils/GenerateOTP";
-import { sendToMail } from "../utils/SendEmail";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { sendToMail } from "../services/SendEmail";
+import jwt from "jsonwebtoken";
+import db from "../database/db.config";
+import dotenv from "dotenv";
+import ForgotPasswordTemplate from "../emailTemplates/ForgotPasswordTemplate";
+import { DecodedToken } from "../Types/Auth.type";
+dotenv.config();
 export const Login = async (
   req: Request,
   res: Response,
@@ -35,53 +30,62 @@ export const Login = async (
   try {
     const { email, password } = LoginSchema.parse(req.body);
 
-    const existingUser: QueryResultRow | null = await getUserByEmail(email);
+    const existingUser = await db.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
     if (!existingUser) {
       throwError(next, "No user with that email exists");
       return;
-    }
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
-    if (!isPasswordCorrect) {
-      throwError(next, "Password is incorrect");
-      return;
-    }
-    const token = generateToken({
-      id: existingUser.user_id.toString(),
-      email: existingUser.email,
-    });
-    res.cookie("community-auth-token", token, {
-      httpOnly: false,
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7 * 30),
-    });
-    const imageUrl = await getImage(existingUser?.image);
-    const compressedImageUrl = await getImage(existingUser.compressed_image);
-    if (imageUrl) {
-   
-      res.status(200).json({
-        success: true,
-        message: "Login successful",
-        data: {
-          userId: existingUser.user_id,
-          email: existingUser.email,
-          name: existingUser.name,
-          image: imageUrl,
-          compressedImage: compressedImageUrl,
-          bio: existingUser.bio,
-          location: existingUser.location,
-          dob: existingUser.dob,
-          sex: existingUser.sex,
-          age: existingUser.age,
-          joined_on: existingUser.joined_on,
-          looking_for: existingUser.looking_for,
-          life_state: existingUser.life_state,
-        },
-      });
     } else {
-      throwError(next, "Failed to login");
+      const isPasswordCorrect = await bcrypt.compare(
+        password,
+        existingUser?.password || ""
+      );
+      if (!isPasswordCorrect) {
+        throwError(next, "Password is incorrect");
+        return;
+      }
+      const token = generateToken({
+        id: existingUser.id.toString(),
+        email: existingUser.email,
+      });
+      res.cookie("community-auth-token", token, {
+        httpOnly: false,
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7 * 30),
+      });
+      const imageUrl = await getImage(existingUser?.image || "");
+      const compressedImageUrl = await getImage(
+        existingUser.compressed_image || ""
+      );
+      if (imageUrl) {
+        res.status(200).json({
+          success: true,
+          message: "Login successful",
+          data: {
+            userId: existingUser.id,
+            email: existingUser.email,
+            name: existingUser.name,
+            image: imageUrl,
+            compressedImage: compressedImageUrl,
+            bio: existingUser.bio,
+            location: existingUser.location,
+            dob: existingUser.dob,
+            sex: existingUser.sex,
+            age: existingUser.dob
+              ? new Date().getFullYear() -
+                new Date(existingUser.dob).getFullYear()
+              : 0,
+            joined_on: existingUser.joined_on,
+            looking_for: existingUser.looking_for,
+            life_state: existingUser.life_state,
+          },
+        });
+      } else {
+        throwError(next, "Failed to login");
+      }
     }
   } catch (error) {
     next(error);
@@ -99,51 +103,60 @@ export const Signup = async (
     if (!file) {
       return throwError(next, "Profile Image not provided");
     }
-    const isUserExists: QueryResultRow | null = await getUserByEmail(email);
+    const isUserExists = await db.user.findUnique({
+      where: {
+        email,
+      },
+    });
     if (isUserExists) {
       throwError(next, "User with this email already exists");
       return;
     }
+    const hashedPassword = await bcrypt.hash(password, 10);
     const image = await uploadToS3(name, file?.buffer, file.mimetype);
     const compressedImage = await uploadCompressedImageToS3(
       name,
       file?.buffer,
       file.mimetype
     );
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUserRow: QueryResultRow | null = await addNewUser(
-      name,
-      email,
-      hashedPassword,
-      image,
-      compressedImage
-    );
-
-    if (!newUserRow) {
-      throwError(next, "Failed to create user");
-      return;
-    }
-    const user = await getUserById(newUserRow.user_id);
-    const token = generateToken({
-      id: newUserRow.user_id,
-      email: newUserRow.email,
+    const newUser = await db.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        image,
+        compressed_image: compressedImage,
+      },
     });
-    res.cookie("community-auth-token", token, {
-      httpOnly: false,
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7 * 30),
+    const user = await db.user.findUnique({
+      where: {
+        id: newUser.id,
+      },
     });
-    const imageUrl = await getImage(user?.image);
-    const compressedImageUrl = await getImage(user?.compressed_image);
-    if (imageUrl) {
-      res.status(200).json({
-        success: true,
-        message: "Signup successful",
-        data: {
-          ...user,
-          image: imageUrl,
-          compressedImage: compressedImageUrl,
-        },
+    if (user?.id && user?.email) {
+      const token = generateToken({
+        id: user.id,
+        email: user.email,
       });
+      res.cookie("community-auth-token", token, {
+        httpOnly: false,
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7 * 30),
+      });
+      const imageUrl = await getImage(user?.image || "");
+      const compressedImageUrl = await getImage(user?.compressed_image || "");
+      if (imageUrl) {
+        res.status(200).json({
+          success: true,
+          message: "Signup successful",
+          data: {
+            ...user,
+            image: imageUrl,
+            compressedImage: compressedImageUrl,
+          },
+        });
+      } else {
+        throwError(next, "Failed to create user");
+      }
     } else {
       throwError(next, "Failed to create user");
     }
@@ -151,20 +164,20 @@ export const Signup = async (
     next(error);
   }
 };
-export const deleteAllUsers = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    await sql`DELETE FROM users`;
-    res
-      .status(200)
-      .json({ success: true, message: "All users deleted successfully" });
-  } catch (error) {
-    next(error);
-  }
-};
+// export const deleteAllUsers = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     await sql`DELETE FROM users`;
+//     res
+//       .status(200)
+//       .json({ success: true, message: "All users deleted successfully" });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 export const forgotPassword = async (
   req: Request,
   res: Response,
@@ -172,7 +185,11 @@ export const forgotPassword = async (
 ) => {
   try {
     const { email } = req.body;
-    const user = await getUserByEmail(email);
+    const user = await db.user.findUnique({
+      where: {
+        email,
+      },
+    });
     if (!user) {
       throwError(next, "No user with that email exists");
       return;
@@ -185,17 +202,7 @@ export const forgotPassword = async (
     const info = await sendToMail(
       email,
       "Password Reset Request",
-      `
-        <div style="font-family: Arial, sans-serif; color: #333; background-color: #f9f9f9; padding: 20px;">
-          <div style="background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <h2 style="color: #333;">Password Reset Request</h2>
-            <p style="margin-bottom: 20px;">You've requested to reset your password. Click the link below to proceed:</p>
-            <p style="margin-bottom: 20px;"><a href="http://localhost:5173/reset-password?token=${token}" style="color: #007bff; text-decoration: none;">Reset Password</a></p>
-            <p style="margin-bottom: 20px;">This link will expire in <strong>10 minutes</strong>.</p>
-            <p style="margin-bottom: 20px;">If you didn't request a password reset, you can safely ignore this email.</p>
-          </div>
-        </div>
-      `
+      ForgotPasswordTemplate(token)
     );
     if (info)
       res.status(200).json({
@@ -207,12 +214,6 @@ export const forgotPassword = async (
   }
 };
 
-interface DecodedToken extends JwtPayload {
-  email: string;
-  iat: number;
-  exp: number;
-}
-
 export const verifyTokenAndSetPassword = async (
   req: Request,
   res: Response,
@@ -221,7 +222,11 @@ export const verifyTokenAndSetPassword = async (
   try {
     const { email, newPassword, confirmPassword, token } =
       ResetPasswordSchema.parse(req.body);
-    const user = await getUserByEmail(email);
+    const user = await db.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
     if (!user) {
       throwError(next, "No user with that email exists");
@@ -249,8 +254,14 @@ export const verifyTokenAndSetPassword = async (
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await updateUserPassword(user.user_id, hashedPassword);
-
+    await db.user.update({
+      where: {
+        email,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
     res
       .status(200)
       .json({ success: true, message: "Password updated successfully" });
@@ -270,7 +281,7 @@ export const googleCallback = (req: any, res: any) => {
       return;
     } else {
       const token = generateToken({
-        id: req.user.user_id,
+        id: req.user.id,
         email: req.user.email,
       });
       res.cookie("community-auth-token", token, {

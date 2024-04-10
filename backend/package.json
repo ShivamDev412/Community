@@ -6,7 +6,8 @@
   "scripts": {
     "start:dev": "npx nodemon",
     "build": "rimraf ./build && tsc",
-    "start": "npm run build && node build/index.js"
+    "start": "npm run build && node build/index.js",
+    "seed": "ts-node prisma/seeds/user.ts"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +25,7 @@
     "@types/pg": "^8.11.0",
     "dotenv": "^16.4.4",
     "nodemon": "^3.0.3",
+    "prisma": "^5.12.1",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
@@ -31,6 +33,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.525.0",
     "@aws-sdk/s3-request-presigner": "^3.525.0",
+    "@prisma/client": "5.12.1",
     "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
