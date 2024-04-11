@@ -98,7 +98,7 @@ export const useNewEvent = () => {
       tags: isEditableEvent ? eventDetails?.tags : [],
       link: isEditableEvent ? eventDetails?.link || undefined : "",
       address: isEditableEvent ? eventDetails?.address || undefined : "",
-      locationId: eventType === "in-person" ? "" : undefined,
+  
     },
     resolver: zodResolver(NewEventSchema),
   });
@@ -137,8 +137,6 @@ export const useNewEvent = () => {
       typeof data?.image[0] === "object" ? data?.image[0] : data.image
     );
     formData.append("group", data.group);
-
-    formData.append("locationId", data.locationId ? data.locationId : "");
     if (data.type === "in-person") {
       data?.address && formData.append("location", data?.address);
     } else {

@@ -20,19 +20,28 @@ const MenuData: FC<MenuDataProps> = ({ menu, link, setShowDropdown }) => {
   );
 };
 const ProfileSection = () => {
-  const { name } = useSelector((state: RootState) => state.user);
+  const { name, image } = useSelector((state: RootState) => state.user);
   const { logout } = useHeader();
   const [showDropdown, setShowDropdown] = useState(false);
   return (
     <div>
       <Dropdown open={showDropdown}>
         <MenuButton>
-          <Avatar
-            className="bg-primary"
-            onClick={() => setShowDropdown(!showDropdown)}
-          >{`${name?.split(" ")[0]?.split("")[0]}${
-            name?.split(" ")[1]?.split("")[0]
-          }`}</Avatar>
+          {image ? (
+            <Avatar
+              alt={`${name}_profile_picture`}
+              src={image}
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="h-[3rem] w-[3rem]"
+            />
+          ) : (
+            <Avatar
+              className="bg-primary h-[3rem] w-[3rem]"
+              onClick={() => setShowDropdown(!showDropdown)}
+            >{`${name?.split(" ")[0]?.split("")[0]}${
+              name?.split(" ")[1]?.split("")[0]
+            }`}</Avatar>
+          )}
         </MenuButton>
         <Menu className="bg-white rounded-lg border w-[2in] shadow-md py-3 z-10">
           <MenuData

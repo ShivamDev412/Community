@@ -10,7 +10,7 @@ const GroupsSection: FC<GroupsProps> = ({ title, data, noDataText }) => {
         {data.length ? (
           <>
             {data.map((value) => (
-              <GroupCard data={value} key={value.group_id} />
+              <GroupCard data={value} key={value.name} />
             ))}
           </>
         ) : (

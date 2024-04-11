@@ -1,25 +1,6 @@
 import { getImage, uploadCompressedImageToS3 } from "./../utils/UploadToS3";
 import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
-import {
-  addUserInterest,
-  getAllCategoriesQuery,
-  getAllInterestsQuery,
-  getEventMembersCountById,
-  getEventsCreatedByUser,
-  getEventsRSVPByUser,
-  getGroupNameAndLocationById,
-  getGroupsCreatedByUser,
-  getPastEventsAttendedByUser,
-  getUserById,
-  getUserInterests,
-  getUserNameById,
-  getUserPasswordById,
-  removeUserInterest,
-  updateUserPassword,
-  updateUserProfileById,
-  updateUserProfileInfo,
-} from "../database/UserQueries";
 import { throwError } from "../utils/Error";
 import {
   EditProfileSchema,
@@ -465,7 +446,7 @@ export const getUserEvents = async (
         events = await db.event.findMany({
           where: {
             event_date: {
-              lt: new Date(),
+              lt: moment().subtract(24, 'hours').toDate()
             },
           },
           skip: offset,

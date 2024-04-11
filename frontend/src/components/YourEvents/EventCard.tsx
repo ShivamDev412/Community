@@ -6,7 +6,7 @@ import LazyLoadedImageComponent from "../LazyLoadedImageComponent";
 
 const EventCard: FC<{ data: EventType }> = ({ data }) => {
   const eventDate = moment(data?.event_date).utc().format("ddd, MMM D");
-  const eventTime = moment(data?.event_time, "HH:mm:ss").utc().format("h:mm a");
+  const eventTime = moment(data?.event_time).utc().format("h:mm A");
   return (
     <Link to={`/event/${data?.id}`}>
       <div className="flex gap-4 mb-10">

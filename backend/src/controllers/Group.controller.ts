@@ -1,27 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-
-import {
-  addUserGroup,
-  checkGroupExists,
-  getMemberCountInGroup,
-  getGroupByName,
-  getGroupsByOrganizedBy,
-  getUserGroupsQuery,
-  getUserNameById,
-  getMembersDetail,
-  getAllEventsByGroupId,
-  getEventMembersCountById,
-  getEventMembers,
-  updateUserGroupQuery,
-  getGroupById,
-} from "../database/UserQueries";
 import { throwError } from "../utils/Error";
 import {
   getImage,
   uploadCompressedImageToS3,
   uploadToS3,
 } from "../utils/UploadToS3";
-import getImageDimensions from "../utils/GetImageDimention";
+import getImageDimensions from "../utils/GetImageDimension";
 import { getAllImages } from "../Types/GetAllImages";
 import { getLatitudeAndLongitude } from "../utils/GetLatitudeAndLongitude";
 import db from "../database/db.config";
@@ -60,7 +44,7 @@ export const createUserGroup = async (
   next: NextFunction
 ) => {
   try {
-    const { about, name, group_type, location, locationId } = req.body;
+    const { about, name, group_type, location } = req.body;
     const userId: string | undefined = req?.user?.userId;
     const file = req?.file;
     const imageBuffer = file?.buffer;
@@ -84,7 +68,7 @@ export const createUserGroup = async (
     }
     let latitude;
     let longitude;
-    const locationCoord = await getLatitudeAndLongitude(locationId);
+    const locationCoord = await getLatitudeAndLongitude(location);
     if (locationCoord) {
       latitude = locationCoord.latitude;
       longitude = locationCoord.longitude;
@@ -123,16 +107,25 @@ export const updateUserGroup = async (
   next: NextFunction
 ) => {
   try {
-    const { about, name, group_type, location, image, locationId } = req.body;
+    const { about, name, group_type, location, image } = req.body;
 
     const groupId = req?.params?.groupId;
     const userId: string | undefined = req?.user?.userId;
     const file = req?.file;
     const imageBuffer = file?.buffer;
-    const groupData = await getGroupById(groupId);
-    if (groupData.name !== name) {
-      const groupExists = await checkGroupExists(name);
-      if (groupExists.length) {
+    const groupData = await db.group.findFirst({
+      where: {
+        id: groupId,
+      }
+    });
+    console.log(groupData, name);
+    if (groupData?.name !== name) {
+      const groupExists = await db.group.findUnique({
+        where: {
+          name
+        }
+      });
+      if (groupExists) {
         return throwError(next, { name: "Group name already exists" });
       }
     }
@@ -159,13 +152,13 @@ export const updateUserGroup = async (
         file.mimetype
       );
     }
-    imageUrl = imageUrl ? imageUrl : groupData.image;
+    imageUrl = imageUrl ? imageUrl : groupData?.image ? groupData?.image : "";
     compressedImageUrl = compressedImageUrl
       ? compressedImageUrl
-      : groupData.compressed_image;
+      : groupData?.compressed_image ? groupData?.compressed_image : "";
     let latitude;
     let longitude;
-    const locationCoord = await getLatitudeAndLongitude(locationId);
+    const locationCoord = await getLatitudeAndLongitude(location);
     if (locationCoord) {
       latitude = locationCoord.latitude;
       longitude = locationCoord.longitude;
@@ -327,12 +320,19 @@ export const getAllEventsInGroup = async (
     const eventIds = eventsWithImages.map((event) => event.event_id);
     const members = await Promise.all(
       eventIds.map(async (eventId) => {
-        const eventMembers = await getEventMembers(eventId);
+        const eventMembers = await db.userEvent.findMany({
+          where: {
+            event_id: eventId
+          },
+          include: {
+            user: true
+          }
+        });
         const membersWithImages = await Promise.all(
           eventMembers.map(async (member) => ({
             ...member,
-            image: await getImage(member.image),
-            compressed_image: await getImage(member.compressed_image),
+            image: await getImage(member?.user?.image || ""),
+            compressed_image: await getImage(member.user.compressed_image || ""),
           }))
         );
         return membersWithImages;

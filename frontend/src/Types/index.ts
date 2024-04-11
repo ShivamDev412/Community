@@ -62,7 +62,6 @@ export type NewGroupType = {
   location: string;
   groupType: string;
   image: File | string | null;
-  locationId: string;
 };
 export type NewEventType = {
   name: string;
@@ -76,7 +75,6 @@ export type NewEventType = {
   tags: string[];
   link?: string;
   address?: string;
-  locationId: string;
 };
 
 export type InputProps = {
@@ -191,6 +189,8 @@ export type GroupDetails = {
   image: string;
   compressed_image:string,
   location: string;
+  latitude: number;
+  longitude: number;
   membersCount: number;
   members: UserType[];
   name: string;

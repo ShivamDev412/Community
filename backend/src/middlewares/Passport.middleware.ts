@@ -3,10 +3,6 @@ import passport from "passport";
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const GitHubStrategy = require("passport-github2").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
-import {
-  addUserWithGoogleId,
-  getUserByGoogleId,
-} from "../database/UserQueries";
 import db from "../database/db.config";
 
 const GoogleMiddleware = () => {

@@ -1,25 +1,24 @@
 import axios from "axios";
 
-export const getLatitudeAndLongitude = async (locationId: string) => {
+export const getLatitudeAndLongitude = async (address: string) => {
   try {
-    if (locationId) {
+    if (address) {
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${locationId}&fields=geometry&key=${process.env.GOOGLE_PLACES_API_KEY}`
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${process.env.GOOGLE_PLACES_API_KEY}`
       );
-      console.log(response.data);
+
       if (
         response.data &&
-        response.data.result &&
-        response.data.result.geometry &&
-        response.data.result.geometry.location
+        response.data.results &&
+        response.data.results.length > 0
       ) {
-        const { lat, lng } = response.data.result.geometry.location;
+        const { lat, lng } = response.data.results[0].geometry.location;
         return { latitude: lat, longitude: lng };
       } else {
-        throw new Error("Invalid response from Google Places API");
+        throw new Error("No results found for the provided address");
       }
     } else {
-      throw new Error("Location ID is not provided");
+      throw new Error("Address is not provided");
     }
   } catch (error) {
     console.error("Error fetching latitude and longitude:", error);

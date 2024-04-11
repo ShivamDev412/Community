@@ -31,6 +31,8 @@ export const useNewGroup = () => {
           image: "",
           compressed_image: "",
           location: "",
+          latitude: 0,
+          longitude: 0,
           membersCount: 0,
           members: [],
           name: "",
@@ -62,12 +64,12 @@ export const useNewGroup = () => {
       location: isEditGroup ? groupDetails?.location : "",
       groupType: isEditGroup ? groupDetails?.group_type : "",
       image: isEditGroup ? groupDetails?.image : "",
-      locationId:"",
+  
     },
     resolver: zodResolver(NewGroupSchema),
   });
-  // 
-  
+  //
+
   const addAndUpdateApi = async (type: string, formData: FormData) => {
     switch (type) {
       case "add":
@@ -77,7 +79,7 @@ export const useNewGroup = () => {
         );
       case "update":
         return await putApiFile(
-          `${API_ENDPOINTS.GROUP}${Endpoints.UPDATE_GROUP}/${groupDetails.group_id}`,
+          `${API_ENDPOINTS.GROUP}${Endpoints.UPDATE_GROUP}/${groupDetails.id}`,
           formData
         );
     }
@@ -87,8 +89,7 @@ export const useNewGroup = () => {
       ...data,
       about: data.description,
       group_type: data.groupType,
-      image: data.image[0],
-      locationId: data.locationId,
+      image: data.image[0]
     };
 
     const formData = new FormData();
@@ -100,7 +101,6 @@ export const useNewGroup = () => {
     formData.append("group_type", dataToSend.groupType);
     formData.append("location", dataToSend.location);
     formData.append("about", dataToSend.description);
-    formData.append("locationId", dataToSend.locationId ? dataToSend.locationId : "");
     try {
       dispatch(setLoading(true));
       const res = await addAndUpdateApi(

@@ -14,7 +14,7 @@ const TabPanelComponent: FC<TabPanelComponentProps> = ({
   return (
     <TabPanel value={value}>
       {data?.map((event) => (
-        <EventCard data={event} key={event?.event_id} />
+        <EventCard data={event} key={event?.id} />
       ))}
     </TabPanel>
   );

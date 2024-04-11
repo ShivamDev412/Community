@@ -11,7 +11,6 @@ import SearchLocation from "@/components/SearchLocation";
 import FileUpload from "@/components/UploadFile";
 import Button from "@/components/Button";
 import { EventType } from "@/utils/Constant";
-import { DevTool } from "@hookform/devtools";
 const NewEvent = () => {
   const {
     register,
@@ -28,7 +27,6 @@ const NewEvent = () => {
     getValues,
     setError,
     isEditableEvent,
-    control,
   } = useNewEvent();
   return (
     <>
@@ -151,7 +149,6 @@ const NewEvent = () => {
             </Button>
           </div>
         </form>
-        <DevTool control={control} />
       </section>
     </>
   );

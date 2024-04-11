@@ -1,21 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { throwError } from "../utils/Error";
 import {
-  addEvent,
-  checkEventExists,
-  getAllInterests,
-  getEventDetailsById,
-  getEventMembers,
-  getGroupNameImageTypeAndLocationById,
-  getUserNameById,
-  updateEventQuery,
-} from "../database/UserQueries";
-import {
   getImage,
   uploadCompressedImageToS3,
   uploadToS3,
 } from "../utils/UploadToS3";
-import getImageDimensions from "../utils/GetImageDimention";
+import getImageDimensions from "../utils/GetImageDimension";
 import { getLatitudeAndLongitude } from "../utils/GetLatitudeAndLongitude";
 import db from "../database/db.config";
 
@@ -58,7 +48,6 @@ export const createEvent = async (
       group,
       location,
       link,
-      locationId,
     } = request.body;
     console.log(request.body);
     const userId: string | undefined = request?.user?.userId;
@@ -97,7 +86,7 @@ export const createEvent = async (
       let latitude = 0;
       let longitude = 0;
       if (type === "in-person") {
-        const locationCoord = await getLatitudeAndLongitude(locationId);
+        const locationCoord = await getLatitudeAndLongitude(location);
         if (locationCoord) {
           latitude = locationCoord.latitude;
           longitude = locationCoord.longitude;
@@ -132,7 +121,7 @@ export const createEvent = async (
           },
         },
       });
-      if (!addEvent) {
+      if (!newEvent) {
         return throwError(next, "Event not created");
       }
       response.status(200).json({
@@ -285,7 +274,6 @@ export const updateEvent = async (
       location,
       link,
       image,
-      locationId,
     } = request.body;
     const userId: string | undefined = request?.user?.userId;
     if (!userId) {
@@ -294,11 +282,19 @@ export const updateEvent = async (
     const eventId = request.params.eventId;
     const file = request?.file;
     const imageBuffer = file?.buffer;
-    const event = await getEventDetailsById(eventId);
+    const event = await db.event.findUnique({
+      where: {
+        id: eventId,
+      }
+    });
     // Check if event name already exists and is not the same event
-    if (event.name !== name) {
-      const eventExists = await checkEventExists(name);
-      if (eventExists.length) {
+    if (event?.name !== name) {
+      const eventExists = await db.event.findFirst({
+        where: {
+          id: eventId,
+        }
+      });
+      if (eventExists) {
         return throwError(next, { name: "Event name already exists" });
       }
     }
@@ -324,10 +320,10 @@ export const updateEvent = async (
       );
     }
     // If image URL is provided, use it instead of image buffer
-    imageUrl = imageUrl ? imageUrl : event.image;
+    imageUrl = imageUrl ? imageUrl : event?.image || "";
     compressedImageUrl = compressedImageUrl
       ? compressedImageUrl
-      : event.compressed_image;
+      : event?.compressed_image || "";
 
     const linkToSend = type === "online" ? link : null;
     const locationToSend = type === "in-person" ? location : null;
@@ -335,7 +331,7 @@ export const updateEvent = async (
     let latitude = 0;
     let longitude = 0;
     if (type === "in-person") {
-      const locationCoord = await getLatitudeAndLongitude(locationId);
+      const locationCoord = await getLatitudeAndLongitude(location);
 
       if (locationCoord) {
         latitude = locationCoord.latitude;
@@ -352,12 +348,11 @@ export const updateEvent = async (
         host_id: userId,
         group_id: group,
         event_date: `${date}T00:00:00Z`,
-        event_time: new Date(`${date}T${time}:00Z`).toISOString(), // Convert event time to ISO-8601 string
+        event_time: new Date(`${date}T${time}:00Z`).toISOString(),
         event_end_time: new Date(`${date}T${event_end_time}:00Z`).toISOString(),
         event_type: type,
         link: linkToSend,
         address: locationToSend,
-        // tagsToSend,
         latitude,
         longitude,
       },

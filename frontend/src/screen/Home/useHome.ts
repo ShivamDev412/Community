@@ -19,6 +19,7 @@ export const useHome = () => {
         dispatch(
           setUser({
             ...response.data,
+            id: response.data.id,
             bio: response.data.bio ? response.data.bio : "",
             dob: response.data.dob ? response.data.dob : "",
             life_state: response.data.life_state
