@@ -11,7 +11,7 @@ model User {
   id                    String              @id @default(cuid())
   name                  String
   email                 String              @unique
-  password              String?           
+  password              String?
   location              String?
   joined_on             DateTime            @default(now())
   created_at            DateTime            @default(now())
@@ -39,20 +39,21 @@ model PasswordResetToken {
 }
 
 model Group {
-  id               String     @id @default(cuid())
-  name             String     @unique
-  group_type       String?
-  location         String?
-  latitude         Float?
-  longitude        Float?
-  organized_by     String
-  about            String?
-  created_at       DateTime   @default(now())
-  updated_at       DateTime   @default(now())
-  image            String?
-  compressed_image String?
-  events           Event[]
-  users            UserGroup?
+  id                    String     @id @default(cuid())
+  name                  String     @unique
+  group_type            String?
+  location              String?
+  latitude              Float?
+  longitude             Float?
+  organized_by          String
+  about                 String?
+  created_at            DateTime   @default(now())
+  updated_at            DateTime   @default(now())
+  image                 String?
+  compressed_image      String?
+  events                Event[]
+  users                 UserGroup?
+  deletion_request_date DateTime?
 }
 
 model Event {

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import schedule from "node-schedule";
 import { throwError } from "../utils/Error";
 import {
   getImage,
@@ -116,14 +117,14 @@ export const updateUserGroup = async (
     const groupData = await db.group.findFirst({
       where: {
         id: groupId,
-      }
+      },
     });
     console.log(groupData, name);
     if (groupData?.name !== name) {
       const groupExists = await db.group.findUnique({
         where: {
-          name
-        }
+          name,
+        },
       });
       if (groupExists) {
         return throwError(next, { name: "Group name already exists" });
@@ -155,7 +156,9 @@ export const updateUserGroup = async (
     imageUrl = imageUrl ? imageUrl : groupData?.image ? groupData?.image : "";
     compressedImageUrl = compressedImageUrl
       ? compressedImageUrl
-      : groupData?.compressed_image ? groupData?.compressed_image : "";
+      : groupData?.compressed_image
+      ? groupData?.compressed_image
+      : "";
     let latitude;
     let longitude;
     const locationCoord = await getLatitudeAndLongitude(location);
@@ -300,7 +303,7 @@ export const getAllEventsInGroup = async (
 ) => {
   try {
     const userId: string | undefined = request?.user?.userId;
-    const groupId:any = request?.query?.groupId;
+    const groupId: any = request?.query?.groupId;
     if (!userId) {
       return throwError(next, "User not found");
     }
@@ -312,7 +315,7 @@ export const getAllEventsInGroup = async (
       await db.event.findMany({
         where: {
           group_id: groupId,
-        }
+        },
       }),
       next
     );
@@ -322,17 +325,19 @@ export const getAllEventsInGroup = async (
       eventIds.map(async (eventId) => {
         const eventMembers = await db.userEvent.findMany({
           where: {
-            event_id: eventId
+            event_id: eventId,
           },
           include: {
-            user: true
-          }
+            user: true,
+          },
         });
         const membersWithImages = await Promise.all(
           eventMembers.map(async (member) => ({
             ...member,
             image: await getImage(member?.user?.image || ""),
-            compressed_image: await getImage(member.user.compressed_image || ""),
+            compressed_image: await getImage(
+              member.user.compressed_image || ""
+            ),
           }))
         );
         return membersWithImages;
@@ -348,6 +353,56 @@ export const getAllEventsInGroup = async (
       success: true,
       message: "Events fetched successfully",
       data: eventsToSend,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const deleteGroup = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  try {
+    const groupId: any = request?.query?.groupId;
+    if (!groupId) {
+      return throwError(next, "Group ID is missing");
+    }
+    await db.group.update({
+      where: { id: groupId },
+      data: {
+        deletion_request_date: new Date(),
+      },
+    });
+    schedule.scheduleJob(new Date(Date.now() + 10 * 60 * 1000), async () => {
+      try {
+        await db.group.delete({
+          where: {
+            id: groupId,
+          },
+        });
+        await db.event.deleteMany({
+          where: {
+            group_id: groupId,
+          },
+        });
+        await db.userGroup.deleteMany({
+          where: {
+            group_id: groupId,
+          },
+        });
+        response.status(200).json({
+          success: true,
+          message: "Group deleted successfully",
+        });
+      } catch (error) {
+        next(error);
+      }
+    });
+
+    response.status(200).json({
+      success: true,
+      message: `Deletion scheduled. Group will be deleted in 10 minutes.`,
     });
   } catch (error) {
     next(error);

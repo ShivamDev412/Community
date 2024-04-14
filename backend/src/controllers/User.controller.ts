@@ -436,13 +436,15 @@ export const getUserEvents = async (
         events = await db.event.findMany({
           where: {
             host_id: userId,
+            event_date: {
+              gte: new Date(),
+            },
           },
           skip: offset,
           take: pageSize,
         });
         break;
       case "past":
-        // Assuming you have a field to indicate past events
         events = await db.event.findMany({
           where: {
             event_date: {
