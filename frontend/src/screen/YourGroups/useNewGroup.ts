@@ -1,5 +1,4 @@
 import { NewGroupType } from "@/Types";
-import { postApiFile, putApiFile } from "@/utils/Api";
 import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
 import { NewGroupSchema } from "@/utils/Validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,8 +11,9 @@ import { setLoading } from "@/redux/slice/loadingSlice";
 import { RootState } from "@/redux/RootReducer";
 import { useEffect } from "react";
 import { setGroupDetails } from "@/redux/slice/groupSlice";
-
+import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 export const useNewGroup = () => {
+  const {axiosPrivateFile} = useAxiosPrivate();
   const location = useLocation();
   const isEditGroup = location.pathname.includes("edit-group");
   const navigation = useNavigate();
@@ -31,6 +31,8 @@ export const useNewGroup = () => {
           image: "",
           compressed_image: "",
           location: "",
+          latitude: 0,
+          longitude: 0,
           membersCount: 0,
           members: [],
           name: "",
@@ -62,22 +64,22 @@ export const useNewGroup = () => {
       location: isEditGroup ? groupDetails?.location : "",
       groupType: isEditGroup ? groupDetails?.group_type : "",
       image: isEditGroup ? groupDetails?.image : "",
-      locationId:"",
+  
     },
     resolver: zodResolver(NewGroupSchema),
   });
-  // 
-  
+  //
+
   const addAndUpdateApi = async (type: string, formData: FormData) => {
     switch (type) {
       case "add":
-        return await postApiFile(
+        return await axiosPrivateFile.post(
           `${API_ENDPOINTS.GROUP}${Endpoints.CREATE_GROUP}`,
           formData
         );
       case "update":
-        return await putApiFile(
-          `${API_ENDPOINTS.GROUP}${Endpoints.UPDATE_GROUP}/${groupDetails.group_id}`,
+        return await axiosPrivateFile.put(
+          `${API_ENDPOINTS.GROUP}${Endpoints.UPDATE_GROUP}/${groupDetails.id}`,
           formData
         );
     }
@@ -87,8 +89,7 @@ export const useNewGroup = () => {
       ...data,
       about: data.description,
       group_type: data.groupType,
-      image: data.image[0],
-      locationId: data.locationId,
+      image: data.image[0]
     };
 
     const formData = new FormData();
@@ -100,16 +101,15 @@ export const useNewGroup = () => {
     formData.append("group_type", dataToSend.groupType);
     formData.append("location", dataToSend.location);
     formData.append("about", dataToSend.description);
-    formData.append("locationId", dataToSend.locationId ? dataToSend.locationId : "");
     try {
       dispatch(setLoading(true));
-      const res = await addAndUpdateApi(
+      const res:any = await addAndUpdateApi(
         isEditGroup ? "update" : "add",
         formData
       );
-      if (res.success) {
+      if (res.data.success) {
         dispatch(setLoading(false));
-        Toast(res.message, "success");
+        Toast(res.data.message, "success");
         navigation(Endpoints.YOUR_GROUPS);
         reset();
         clearErrors();

@@ -3,7 +3,8 @@ import { ENDPOINTS } from "../utils/Endpoints";
 import {
   Login,
   Signup,
-  deleteAllUsers,
+  HandleRefreshToken,
+  // deleteAllUsers,
   // facebookCallback,
   // facebookLogin,
   forgotPassword,
@@ -19,7 +20,8 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage }).single("image");
 route.post(ENDPOINTS.LOGIN, Login);
 route.post(ENDPOINTS.SIGNUP, upload, Signup);
-route.delete("/delete", deleteAllUsers);
+route.get(ENDPOINTS.REFRESH_TOKEN, HandleRefreshToken);
+// route.delete("/delete", deleteAllUsers);
 route.post(ENDPOINTS.FORGOT_PASSWORD, forgotPassword);
 route.post(ENDPOINTS.RESET_PASSWORD, verifyTokenAndSetPassword)
 route.get(ENDPOINTS.GOOGLE_LOGIN, googleLogin)

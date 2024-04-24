@@ -1,6 +1,8 @@
 export const ENDPOINTS = {
     HOME: "/home",
     LOGIN: "/login",
+    LOGOUT: "/logout",
+    REFRESH_TOKEN: "/refresh-token",
     SIGNUP: "/signup",
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
@@ -32,6 +34,7 @@ export const ENDPOINTS = {
     EVENTS_DETAILS:"/event-details/:eventId",
 
     SEARCH:"/search",
+    GET_CITY:"/get-city",
 
     EDIT_PROFILE:"/edit-profile",
     UPDATE_PERSONAL_INFO:"/update-personal-info",

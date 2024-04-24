@@ -4,11 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { SignupSchema } from "@/utils/Validations";
 import { SignupType } from "@/Types";
-import { postApiFile } from "@/utils/Api";
 import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
 import { useDispatch } from "react-redux";
-import { setUser } from "@/redux/slice/userSlice";
+import { axiosPublicFile } from "@/utils/Axios";
+import { setCredentials } from "@/redux/slice/authSlice";
 
 export const useSignup = () => {
   const navigate = useNavigate();
@@ -42,23 +42,13 @@ export const useSignup = () => {
     formData.append("email", data.email);
     formData.append("password", data.password);
     try {
-      const response = await postApiFile(
+      const response:any = await axiosPublicFile.post(
         `${API_ENDPOINTS.AUTH}${Endpoints.SIGNUP}`,
         formData
       );
-      if (response.success) {
-        Toast(response.message, "success");
-        dispatch(
-          setUser({
-            ...response.data,
-            bio: "",
-            dob: "",
-            life_state: [],
-            location: "",
-            looking_for: [],
-            sex: "",
-          })
-        );
+      if (response.data.success) {
+        Toast(response.data.message, "success");
+        dispatch(setCredentials(response.data.data['auth-token']));
         navigate(RouteEndpoints.HOME);
         reset();
         clearErrors();

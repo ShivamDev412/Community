@@ -86,7 +86,6 @@ export const NewGroupSchema = z.object({
     }
   ),
   location: z.string().min(1, "Group Location is required"),
-  locationId: z.string().optional(),
 });
 
 export const NewEventSchema = z
@@ -119,7 +118,7 @@ export const NewEventSchema = z
     event_end_time: z.string().min(1, { message: "Event End Time is required" }),
     address: z.string().optional(),
     link: z.string().optional(),
-    locationId: z.string().optional(),
+
   })
   .superRefine(
     ({ type, address, link, time, event_end_time }, refinementContext) => {

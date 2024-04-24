@@ -3,10 +3,7 @@ import passport from "passport";
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const GitHubStrategy = require("passport-github2").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
-import {
-  addUserWithGoogleId,
-  getUserByGoogleId,
-} from "../database/UserQueries";
+import db from "../database/db.config";
 
 const GoogleMiddleware = () => {
   passport.use(
@@ -31,15 +28,21 @@ const GoogleMiddleware = () => {
           google_id: profile.id,
         };
         try {
-          const existingUser = await getUserByGoogleId(profile.id);
+          const existingUser = await db.user.findFirst({
+            where: {
+              google_id: profile.id,
+            }
+          })
           if (!existingUser) {
-            const newUser = await addUserWithGoogleId(
-              defaultUser.name,
-              defaultUser.email,
-              defaultUser.image,
-              defaultUser.google_id
-            );
-            return cb(null, newUser && newUser[0]);
+            const newUser = await db.user.create({
+              data: {
+                name: defaultUser.name,
+                email: defaultUser.email,
+                image: defaultUser.image,
+                google_id: defaultUser.google_id
+              }
+            })
+            return cb(null, newUser);
           } else {
             return cb(null, existingUser);
           }

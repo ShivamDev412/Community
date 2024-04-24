@@ -1,10 +1,12 @@
-import { deleteApi, getApi, postApi } from "@/utils/Api";
+
 import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
 import { useEffect, useState } from "react";
 import Toast from "@/utils/Toast";
 import { SelectChangeEvent } from "@mui/material";
+import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 
 export const useInterests = () => {
+  const {axiosPrivate} = useAxiosPrivate()
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState<
     { name: string; category_id: string }[]
@@ -17,9 +19,9 @@ export const useInterests = () => {
   >([]);
   const getCategories = async () => {
     try {
-      const res = await getApi(`${API_ENDPOINTS.USER}${Endpoints.CATEGORIES}`);
-      if (res.success) {
-        setCategories(res.data);
+      const res = await axiosPrivate.get(`${API_ENDPOINTS.USER}${Endpoints.CATEGORIES}`);
+      if (res.data.success) {
+        setCategories(res.data.data);
       }
     } catch (err: any) {
       Toast(err.message, "error");
@@ -27,11 +29,11 @@ export const useInterests = () => {
   };
   const getAllUserInterests = async () => {
     try {
-      const res = await getApi(
+      const res = await axiosPrivate.get(
         `${API_ENDPOINTS.USER}${Endpoints.GET_USER_INTERESTS}`
       );
-      if (res.success) {
-        setSelectedInterest(res.data);
+      if (res.data.success) {
+        setSelectedInterest(res.data.data);
       }
     } catch (err: any) {
       Toast(err.message, "error");
@@ -48,11 +50,11 @@ export const useInterests = () => {
     setCategory(e.target.value);
     if (categoryId) {
       try {
-        const res = await getApi(
+        const res = await axiosPrivate.get(
           `${API_ENDPOINTS.USER}${Endpoints.INTERESTS}/${categoryId}`
         );
-        if (res.success) {
-          setInterests(res.data);
+        if (res.data.success) {
+          setInterests(res.data.data);
         }
       } catch (err: any) {
         Toast(err.message, "error");
@@ -72,11 +74,11 @@ export const useInterests = () => {
       interestId: interest.interest_id,
     };
     try {
-      const res = await postApi(
+      const res = await axiosPrivate.post(
         `${API_ENDPOINTS.USER}${Endpoints.ADD_INTERESTS}`,
         dataToSend
       );
-      if (res.success) {
+      if (res.data.success) {
       }
     } catch (err: any) {
       Toast(err.message, "error");
@@ -95,10 +97,10 @@ export const useInterests = () => {
     }
 
     try {
-      const res = await deleteApi(
+      const res = await axiosPrivate.delete(
         `${API_ENDPOINTS.USER}${Endpoints.DELETE_INTERESTS}/${interest.interest_id}`
       );
-      if (res.success) {
+      if (res.data.success) {
         console.log(res.data, "data");
       }
     } catch (err: any) {

@@ -62,7 +62,6 @@ export type NewGroupType = {
   location: string;
   groupType: string;
   image: File | string | null;
-  locationId: string;
 };
 export type NewEventType = {
   name: string;
@@ -76,7 +75,6 @@ export type NewEventType = {
   tags: string[];
   link?: string;
   address?: string;
-  locationId: string;
 };
 
 export type InputProps = {
@@ -98,7 +96,7 @@ export interface MultiSelectFieldProps extends InputProps {
   defaultValue: Array<string>;
 }
 export type Group = {
-  group_id: string;
+  id: string;
   name: string;
   group_type?: "public" | "private"; // optional field with enum for group_type
   location?: string;
@@ -186,11 +184,13 @@ export type GroupCardProps = {
 export type GroupDetails = {
   about: string;
   created_at: string;
-  group_id: string;
+  id: string;
   group_type: string;
   image: string;
   compressed_image:string,
   location: string;
+  latitude: number;
+  longitude: number;
   membersCount: number;
   members: UserType[];
   name: string;
@@ -211,7 +211,7 @@ export type PrimaryInfoSectionProps = {
   organizedBy: string | undefined;
 };
 export interface EventType {
-  event_id: string;
+  id: string;
   name: string;
   image: string;
   compressed_image:string,
@@ -274,7 +274,7 @@ export type EventDetailType = {
   compressed_image:string,
   members: EventMembers[];
   host: { name: string; image: string; user_id: string };
-  group: { name: string; image: string; location: string; group_type: string, group_id: string };
+  group: { name: string; image: string; location: string; group_type: string, id: string };
 };
 export type EventDetailsHeaderSectionProps = {
   eventName: string;

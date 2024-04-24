@@ -1,15 +1,15 @@
+import axios from "@/utils/Axios";
 import { z } from "zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { LoginSchema } from "@/utils/Validations";
 import { LoginType } from "@/Types";
-import { postApi } from "@/utils/Api";
 import { API_ENDPOINTS, RouteEndpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
 import { useDispatch } from "react-redux";
-import { setUser } from "@/redux/slice/userSlice";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { setLoading } from "@/redux/slice/loadingSlice";
+import { setCredentials } from "@/redux/slice/authSlice";
 export const useLogin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -33,27 +33,14 @@ export const useLogin = () => {
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     try {
       dispatch(setLoading(true));
-      const response = await postApi(
+      const response:any = await axios.post(
         `${API_ENDPOINTS.AUTH}${RouteEndpoints.LOGIN}`,
         data
       );
-      if (response.success) {
-        Toast(response.message, "success");
-        dispatch(
-          setUser({
-            ...response.data,
-            bio: response.data.bio ? response.data.bio : "",
-            dob: response.data.dob ? response.data.dob : "",
-            life_state: response.data.life_state
-              ? response.data.life_state
-              : [],
-            location: response.data.location ? response.data.location : "",
-            looking_for: response.data.looking_for
-              ? response.data.looking_for
-              : [],
-            sex: response.data.sex ? response.data.sex : "",
-          })
-        );
+      if (response.data.success) {
+        Toast(response.data.message, "success");
+        dispatch(setCredentials(response.data.data['auth-token']));
+
         navigate(RouteEndpoints.HOME);
         reset();
         clearErrors();

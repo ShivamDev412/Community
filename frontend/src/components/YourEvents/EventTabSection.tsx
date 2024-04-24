@@ -7,26 +7,33 @@ import useEventTab from "./useEventTab";
 import { FC } from "react";
 import { TabPanelComponentProps } from "@/Types";
 import EventCard from "./EventCard";
-const TabPanelComponent: FC<TabPanelComponentProps> = ({
-  value,
-  data,
-}) => {
+const TabPanelComponent: FC<TabPanelComponentProps> = ({ value, data }) => {
+  const noEvents = !data || data.length === 0;
+  const showNoEvents = () => {
+    switch (value) {
+      case "1":
+        return "You are not registered for any events";
+      case "2":
+        return "You haven't hosted any events yet";
+      case "3":
+        return "No past events";
+    }
+  };
   return (
     <TabPanel value={value}>
-      {data?.map((event) => (
-        <EventCard data={event} key={event?.event_id} />
-      ))}
+      {noEvents ? (
+        <div className="w-full flex justify-center h-[2in] items-center">
+          <p className="font-[500] text-lg">{showNoEvents()}</p>
+        </div>
+      ) : (
+        data.map((event) => <EventCard data={event} key={event?.id} />)
+      )}
     </TabPanel>
   );
 };
 export default function EventTabs() {
-  const {
-    value,
-    handleChange,
-    hostingEvents,
-    attendingEvents,
-    pastEvents,
-  } = useEventTab();
+  const { value, handleChange, hostingEvents, attendingEvents, pastEvents } =
+    useEventTab();
   return (
     <section className="w-full mt-5">
       <TabContext value={value}>

@@ -25,7 +25,7 @@ const ResponsiveHeader = () => {
 
   return (
     <div
-      className={`sm:hidden border-b border-gray-200  ${
+      className={`border-b border-gray-200  ${
         openSearch ? "h-[130px]" : "h-[70px] overflow-auto"
       } transition-all duration-300`}
     >

@@ -2,6 +2,7 @@ import express from "express";
 import { ENDPOINTS } from "../utils/Endpoints";
 import {
   GetUserData,
+  LogOut,
   addUserInterests,
   changePassword,
   editUserProfile,
@@ -37,6 +38,6 @@ route.get(
   getUserCreatedGroups
 );
 route.get(ENDPOINTS.USER_EVENTS, AuthMiddleware, getUserEvents);
-
+route.post(ENDPOINTS.LOGOUT, AuthMiddleware, LogOut);
 
 export default route;

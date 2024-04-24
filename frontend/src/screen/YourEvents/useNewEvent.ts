@@ -1,5 +1,5 @@
+import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 import { NewEventType } from "@/Types";
-import { getApi, postApiFile, putApiFile } from "@/utils/Api";
 import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
 import { NewEventSchema } from "@/utils/Validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,7 @@ import { EventDetailsInitialState } from "@/utils/Constant";
 import dayjs from "dayjs";
 
 export const useNewEvent = () => {
+  const { axiosPrivate, axiosPrivateFile } = useAxiosPrivate();
   const navigation = useNavigate();
   const dispatch = useDispatch();
   const [tags, setTags] = useState<Array<{ value: string; label: string }>>([]);
@@ -28,10 +29,9 @@ export const useNewEvent = () => {
   const { groupsCreated } = useSelector((state: RootState) => state.groups);
   useEffect(() => {
     if (eventDetails) {
-      debugger;
       setEventType(eventDetails.event_type);
     }
-  },[eventDetails])
+  }, [eventDetails]);
   useEffect(() => {
     if (!isEditableEvent) {
       reset();
@@ -42,7 +42,7 @@ export const useNewEvent = () => {
     if (groupsCreated.length) {
       setGroups(
         groupsCreated.map((value) => ({
-          value: value.group_id,
+          value: value.id,
           label: value.name,
         }))
       );
@@ -53,12 +53,12 @@ export const useNewEvent = () => {
   const getAllTags = async () => {
     dispatch(setLoading(true));
     try {
-      const res = await getApi(`/api/event${Endpoints.TAGS}`);
-      if (res.success) {
+      const res = await axiosPrivate.get(`/api/event${Endpoints.TAGS}`);
+      if (res.data.success) {
         setTags(
-          res.data.map((value: { interest_id: string; name: string }) => {
+          res.data.data.map((value: { id: string; name: string }) => {
             return {
-              value: value.interest_id,
+              value: value.id,
               label: value.name,
             };
           })
@@ -85,7 +85,7 @@ export const useNewEvent = () => {
       name: isEditableEvent ? eventDetails?.name : "",
       image: isEditableEvent ? eventDetails?.image : null,
       details: isEditableEvent ? eventDetails?.details : "",
-      group: isEditableEvent ? eventDetails?.group.group_id : "",
+      group: isEditableEvent ? eventDetails?.group.id : "",
       date: isEditableEvent
         ? eventDetails?.event_date
         : dayjs().format("YYYY-MM-DD"),
@@ -99,25 +99,31 @@ export const useNewEvent = () => {
       tags: isEditableEvent ? eventDetails?.tags : [],
       link: isEditableEvent ? eventDetails?.link || undefined : "",
       address: isEditableEvent ? eventDetails?.address || undefined : "",
-      locationId:eventType === "in-person" ? "" : undefined,      
     },
     resolver: zodResolver(NewEventSchema),
   });
   const addAndUpdateApi = async (type: string, formData: FormData) => {
     switch (type) {
       case "add":
-        return await postApiFile(
+        return await axiosPrivateFile.post(
           `${API_ENDPOINTS.EVENT}${Endpoints.CREATE_EVENT}`,
           formData
         );
       case "update":
-        return await putApiFile(
+        return await axiosPrivateFile.put(
           `${API_ENDPOINTS.EVENT}${Endpoints.UPDATE_EVENT}/${eventDetails.event_id}`,
           formData
         );
     }
   };
   const onSubmit: SubmitHandler<FormField> = async (data) => {
+    const tagsToSend = tags
+      .filter((value) => data.tags.includes(value.label))
+      .map((value) => {
+        return {
+          id: value.value,
+        };
+      });
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("details", data.details);
@@ -125,14 +131,12 @@ export const useNewEvent = () => {
     formData.append("time", data.time);
     formData.append("event_end_time", data.event_end_time);
     formData.append("type", data.type);
-    formData.append("tags", JSON.stringify(data.tags));
+    formData.append("tags", JSON.stringify(tagsToSend));
     formData.append(
       "image",
       typeof data?.image[0] === "object" ? data?.image[0] : data.image
     );
     formData.append("group", data.group);
-
-    formData.append("locationId",data.locationId ? data.locationId : "")
     if (data.type === "in-person") {
       data?.address && formData.append("location", data?.address);
     } else {
@@ -141,13 +145,13 @@ export const useNewEvent = () => {
 
     try {
       dispatch(setLoading(true));
-      const res = await addAndUpdateApi(
+      const res: any = await addAndUpdateApi(
         isEditableEvent ? "update" : "add",
         formData
       );
-      if (res.success) {
+      if (res.data.success) {
         dispatch(setLoading(false));
-        Toast(res.message, "success");
+        Toast(res.data.message, "success");
         navigation(RouteEndpoints.YOUR_EVENTS);
         reset();
         clearErrors();

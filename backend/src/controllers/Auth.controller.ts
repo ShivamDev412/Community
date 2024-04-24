@@ -5,83 +5,80 @@ import {
   LoginSchema,
   ResetPasswordSchema,
 } from "../utils/Validation";
-import {
-  getUserByEmail,
-  addNewUser,
-  getUserById,
-  storeToken,
-  getToken,
-  updateUserPassword,
-} from "../database/UserQueries";
 // @ts-ignore
 import passport from "passport";
-import { generateToken } from "../utils/GenerateToken";
-import { QueryResultRow } from "pg";
-import sql from "../database";
+import { generateRefreshToken, generateToken } from "../utils/GenerateToken";
 import { throwError } from "../utils/Error";
 import {
   uploadToS3,
   getImage,
   uploadCompressedImageToS3,
 } from "../utils/UploadToS3";
-import GenerateOTP from "../utils/GenerateOTP";
-import { sendToMail } from "../utils/SendEmail";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { sendToMail } from "../services/SendEmail";
+import jwt from "jsonwebtoken";
+import db from "../database/db.config";
+import dotenv from "dotenv";
+import ForgotPasswordTemplate from "../emailTemplates/ForgotPasswordTemplate";
+import { DecodedToken } from "../Types/Auth.type";
+import SetCookies, { ClearCookie } from "../utils/SetCookies";
+dotenv.config();
 export const Login = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
+  const cookies = req.cookies;
   try {
     const { email, password } = LoginSchema.parse(req.body);
 
-    const existingUser: QueryResultRow | null = await getUserByEmail(email);
+    const existingUser = await db.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
     if (!existingUser) {
       throwError(next, "No user with that email exists");
       return;
-    }
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
-    if (!isPasswordCorrect) {
-      throwError(next, "Password is incorrect");
-      return;
-    }
-    const token = generateToken({
-      id: existingUser.user_id.toString(),
-      email: existingUser.email,
-    });
-    res.cookie("community-auth-token", token, {
-      httpOnly: false,
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7 * 30),
-    });
-    const imageUrl = await getImage(existingUser?.image);
-    const compressedImageUrl = await getImage(existingUser.compressed_image);
-    if (imageUrl) {
-   
+    } else {
+      const isPasswordCorrect = await bcrypt.compare(
+        password,
+        existingUser?.password || ""
+      );
+      if (!isPasswordCorrect) {
+        throwError(next, "Password is incorrect");
+        return;
+      }
+      const token = generateToken({
+        id: existingUser.id.toString(),
+        email: existingUser.email,
+      });
+      const newRefreshToken = generateRefreshToken({
+        id: existingUser.id.toString(),
+      });
+      const newRefreshTokenArray = !cookies["community-refresh-token"]
+        ? existingUser.refresh_token
+        : existingUser.refresh_token.filter((token) => {
+            token !== cookies["community-refresh-token"];
+          });
+      if (cookies["community-refresh-token"])
+        ClearCookie(res, "community-refresh-token");
+      await db.user.update({
+        where: {
+          id: existingUser.id,
+        },
+        data: {
+          refresh_token: [...newRefreshTokenArray, newRefreshToken],
+        },
+      });
+      SetCookies(res, "community-refresh-token", newRefreshToken);
       res.status(200).json({
         success: true,
         message: "Login successful",
         data: {
-          userId: existingUser.user_id,
-          email: existingUser.email,
-          name: existingUser.name,
-          image: imageUrl,
-          compressedImage: compressedImageUrl,
-          bio: existingUser.bio,
-          location: existingUser.location,
-          dob: existingUser.dob,
-          sex: existingUser.sex,
-          age: existingUser.age,
-          joined_on: existingUser.joined_on,
-          looking_for: existingUser.looking_for,
-          life_state: existingUser.life_state,
+          "auth-token": token,
         },
       });
-    } else {
-      throwError(next, "Failed to login");
     }
   } catch (error) {
     next(error);
@@ -99,72 +96,183 @@ export const Signup = async (
     if (!file) {
       return throwError(next, "Profile Image not provided");
     }
-    const isUserExists: QueryResultRow | null = await getUserByEmail(email);
+    const isUserExists = await db.user.findUnique({
+      where: {
+        email,
+      },
+    });
     if (isUserExists) {
       throwError(next, "User with this email already exists");
       return;
     }
+    const hashedPassword = await bcrypt.hash(password, 10);
     const image = await uploadToS3(name, file?.buffer, file.mimetype);
     const compressedImage = await uploadCompressedImageToS3(
       name,
       file?.buffer,
       file.mimetype
     );
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUserRow: QueryResultRow | null = await addNewUser(
-      name,
-      email,
-      hashedPassword,
-      image,
-      compressedImage
-    );
-
-    if (!newUserRow) {
-      throwError(next, "Failed to create user");
-      return;
-    }
-    const user = await getUserById(newUserRow.user_id);
-    const token = generateToken({
-      id: newUserRow.user_id,
-      email: newUserRow.email,
+    const newUser = await db.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        image,
+        compressed_image: compressedImage,
+      },
     });
-    res.cookie("community-auth-token", token, {
-      httpOnly: false,
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7 * 30),
-    });
-    const imageUrl = await getImage(user?.image);
-    const compressedImageUrl = await getImage(user?.compressed_image);
-    if (imageUrl) {
+    if (newUser) {
+      const token = generateToken({
+        id: newUser.id,
+        email: newUser.email,
+      });
+      const refreshToken = generateRefreshToken({
+        id: newUser.id.toString(),
+      });
+      await db.user.update({
+        where: {
+          id: newUser.id,
+        },
+        data: {
+          refresh_token: [refreshToken],
+        },
+      });
+      SetCookies(res, "community-refresh-token", refreshToken);
       res.status(200).json({
         success: true,
         message: "Signup successful",
         data: {
-          ...user,
-          image: imageUrl,
-          compressedImage: compressedImageUrl,
+          "auth-token": token,
         },
       });
     } else {
-      throwError(next, "Failed to create user");
+      throwError(next, "Failed to signup");
     }
   } catch (error) {
     next(error);
   }
 };
-export const deleteAllUsers = async (
-  req: Request,
-  res: Response,
+export const HandleRefreshToken = async (
+  request: Request,
+  response: Response,
   next: NextFunction
 ) => {
-  try {
-    await sql`DELETE FROM users`;
-    res
-      .status(200)
-      .json({ success: true, message: "All users deleted successfully" });
-  } catch (error) {
-    next(error);
+  const cookies = request.cookies;
+  const refreshToken = cookies["community-refresh-token"];
+  console.log(request.cookies, "REFRESH_COOKIES");
+  if (!refreshToken) {
+    response.status(401).json({
+      success: false,
+      message: "Refresh token not provided",
+    });
+    return;
+  }
+  const data = jwt.decode(refreshToken) as DecodedToken;
+  console.log(data, "DATA");
+  ClearCookie(response, "community-refresh-token");
+  const user = await db.user.findUnique({
+    where: {
+      id: data?.id,
+    },
+  });
+
+  const existingUser = await db.user.findFirst({
+    where: {
+      refresh_token: {
+        hasSome: [refreshToken],
+      },
+    },
+  });
+  console.log(existingUser, "EXISTING USER");
+  // Detected refresh token reuse
+  if (!existingUser) {
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET!,
+      async (err: any, decode: any) => {
+        if (err) {
+          response.status(403).json({
+            success: false,
+            message: "Invalid refresh token",
+          });
+          // Finding the user whose refresh token is reused
+          const hackedUser = await db.user.findUnique({
+            where: {
+              id: decode?.id,
+            },
+          });
+          // Deleting all the refresh token of the user
+          const result = await db.user?.update({
+            where: {
+              id: hackedUser?.id,
+            },
+            data: {
+              refresh_token: [],
+            },
+          });
+          console.log(result, "HACKED_USER");
+        }
+      }
+    );
+    return response.status(403).json({
+      success: false,
+      message: "Forbidden",
+    });
+  } else {
+    const newRefreshTokenArray = existingUser?.refresh_token.filter((token) => {
+      return token !== refreshToken;
+    });
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET!,
+      async (err: any, decode: any) => {
+        if (err) {
+          console.log("expired refresh token ");
+          const result = await db.user?.update({
+            where: {
+              id: existingUser.id,
+            },
+            data: {
+              refresh_token: [...newRefreshTokenArray],
+            },
+          });
+          console.log(result, "RESULT");
+        }
+        if (err || existingUser.id !== decode?.id) {
+          return response.status(403).json({
+            success: false,
+            message: "Invalid refresh token",
+          });
+        }
+        // Refresh token is valid
+        const accessToken = generateToken({
+          id: existingUser.id,
+          email: existingUser.email,
+        });
+        const newRefreshToken = generateRefreshToken({
+          id: existingUser.id,
+        });
+        const userWithUpdatedRefreshToken = await db.user?.update({
+          where: {
+            id: existingUser.id,
+          },
+          data: {
+            refresh_token: [...newRefreshTokenArray, newRefreshToken],
+          },
+        });
+        if (userWithUpdatedRefreshToken) {
+          SetCookies(response, "community-refresh-token", newRefreshToken);
+          response.status(200).json({
+            success: true,
+            message: "Access token generated successfully",
+            "auth-token": accessToken,
+          });
+        }
+      }
+    );
   }
 };
+
 export const forgotPassword = async (
   req: Request,
   res: Response,
@@ -172,7 +280,11 @@ export const forgotPassword = async (
 ) => {
   try {
     const { email } = req.body;
-    const user = await getUserByEmail(email);
+    const user = await db.user.findUnique({
+      where: {
+        email,
+      },
+    });
     if (!user) {
       throwError(next, "No user with that email exists");
       return;
@@ -185,17 +297,7 @@ export const forgotPassword = async (
     const info = await sendToMail(
       email,
       "Password Reset Request",
-      `
-        <div style="font-family: Arial, sans-serif; color: #333; background-color: #f9f9f9; padding: 20px;">
-          <div style="background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <h2 style="color: #333;">Password Reset Request</h2>
-            <p style="margin-bottom: 20px;">You've requested to reset your password. Click the link below to proceed:</p>
-            <p style="margin-bottom: 20px;"><a href="http://localhost:5173/reset-password?token=${token}" style="color: #007bff; text-decoration: none;">Reset Password</a></p>
-            <p style="margin-bottom: 20px;">This link will expire in <strong>10 minutes</strong>.</p>
-            <p style="margin-bottom: 20px;">If you didn't request a password reset, you can safely ignore this email.</p>
-          </div>
-        </div>
-      `
+      ForgotPasswordTemplate(token)
     );
     if (info)
       res.status(200).json({
@@ -207,12 +309,6 @@ export const forgotPassword = async (
   }
 };
 
-interface DecodedToken extends JwtPayload {
-  email: string;
-  iat: number;
-  exp: number;
-}
-
 export const verifyTokenAndSetPassword = async (
   req: Request,
   res: Response,
@@ -221,7 +317,11 @@ export const verifyTokenAndSetPassword = async (
   try {
     const { email, newPassword, confirmPassword, token } =
       ResetPasswordSchema.parse(req.body);
-    const user = await getUserByEmail(email);
+    const user = await db.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
     if (!user) {
       throwError(next, "No user with that email exists");
@@ -249,8 +349,14 @@ export const verifyTokenAndSetPassword = async (
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await updateUserPassword(user.user_id, hashedPassword);
-
+    await db.user.update({
+      where: {
+        email,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
     res
       .status(200)
       .json({ success: true, message: "Password updated successfully" });
@@ -270,7 +376,7 @@ export const googleCallback = (req: any, res: any) => {
       return;
     } else {
       const token = generateToken({
-        id: req.user.user_id,
+        id: req.user.id,
         email: req.user.email,
       });
       res.cookie("community-auth-token", token, {

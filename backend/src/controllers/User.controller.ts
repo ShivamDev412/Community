@@ -1,25 +1,6 @@
 import { getImage, uploadCompressedImageToS3 } from "./../utils/UploadToS3";
 import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
-import {
-  addUserInterest,
-  getAllCategoriesQuery,
-  getAllInterestsQuery,
-  getEventMembersCountById,
-  getEventsCreatedByUser,
-  getEventsRSVPByUser,
-  getGroupNameAndLocationById,
-  getGroupsCreatedByUser,
-  getPastEventsAttendedByUser,
-  getUserById,
-  getUserInterests,
-  getUserNameById,
-  getUserPasswordById,
-  removeUserInterest,
-  updateUserPassword,
-  updateUserProfileById,
-  updateUserProfileInfo,
-} from "../database/UserQueries";
 import { throwError } from "../utils/Error";
 import {
   EditProfileSchema,
@@ -29,20 +10,71 @@ import {
 import { uploadToS3 } from "../utils/UploadToS3";
 import moment from "moment";
 import { QueryResultRow } from "pg";
+import db from "../database/db.config";
+import { ClearCookie } from "../utils/SetCookies";
 
+export const LogOut = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const userId = req.user?.id;
+  const cookies = req.cookies;
+  const refreshToken = cookies["community-refresh-token"];
+
+  if (!refreshToken) {
+    return throwError(next, "No refresh token found");
+  }
+
+  const existingUser = await db.user.findFirst({
+    where: {
+      id: userId,
+    },
+  });
+
+  const deleteRefreshTokenFromDb = await db.user.update({
+    where: {
+      id: existingUser?.id,
+    },
+    data: {
+      refresh_token: existingUser?.refresh_token.filter((token) => {
+        return token !== refreshToken;
+      }),
+    },
+  });
+  if (!deleteRefreshTokenFromDb) {
+    return throwError(next, "Something went wrong while logging out");
+  } else {
+    ClearCookie(res, "community-refresh-token");
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  }
+};
 export const GetUserData = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req?.user?.userId;
-    if (userId) {
-      const user = await getUserById(userId);
+    const userId: string | undefined = req?.user?.id;
 
+    if (userId) {
+      const user = await db.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+      const imageData = await getImage(user?.image || "");
+      const compressedImageData = await getImage(user?.compressed_image || "");
       res.status(200).json({
         success: true,
-        data: user,
+        data: {
+          ...user,
+          image: imageData,
+          compressed_image: compressedImageData,
+        },
       });
     } else {
       return throwError(next, "User not found");
@@ -62,22 +94,38 @@ export const editUserProfile = async (
     const imageToSend = file
       ? await uploadToS3(name, file?.buffer, file.mimetype)
       : image;
-    const compressedImageToSend = await uploadCompressedImageToS3(name, file?.buffer, file?.mimetype);
-    const userId: string | undefined = req?.user?.userId;
+    const compressedImageToSend = await uploadCompressedImageToS3(
+      name,
+      file?.buffer,
+      file?.mimetype
+    );
+    const userId: string | undefined = req?.user?.id;
     if (userId) {
       const bioToSend = bio ? bio : "";
       if (imageToSend) {
-        await updateUserProfileById(
-          userId,
-          name,
-          imageToSend,
-          compressedImageToSend,
-          JSON.parse(bioToSend),
-          address ? address : ""
-        );
-        const updatedUser = await getUserById(userId);
-        const imageData = file ? await getImage(updatedUser?.image) : image;
-        const compressedImageData = file ? await getImage(updatedUser?.compressed_image) : compressedImageToSend;
+        await db.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            name: name,
+            image: imageToSend,
+            compressed_image: compressedImageToSend,
+            bio: JSON.parse(bioToSend),
+            location: address ? address : "",
+          },
+        });
+        const updatedUser = await db.user.findUnique({
+          where: {
+            id: userId,
+          },
+        });
+        const imageData = file
+          ? await getImage(updatedUser?.image || "")
+          : image;
+        const compressedImageData = file
+          ? await getImage(updatedUser?.compressed_image || "")
+          : compressedImageToSend;
         if (imageData) {
           res.status(201).json({
             success: true,
@@ -115,21 +163,29 @@ export const updateUserPersonalInfo = async (
       if (birthday) {
         formattedBirthday = moment(birthday, "YYYY-MM-DD").format("YYYY-MM-DD");
       }
-      const userId: string | undefined = req?.user?.userId;
+      const userId: string | undefined = req?.user?.id;
       if (userId) {
-        await updateUserProfileInfo(
-          userId,
-          formattedBirthday,
-          gender,
-          lookingFor,
-          lifeStages
-        );
-        const updatedUser = await getUserById(userId);
+        await db.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            dob: formattedBirthday,
+            sex: gender,
+            looking_for: lookingFor,
+            life_state: lifeStages,
+          },
+        });
+        const updatedUser = await db.user.findUnique({
+          where: {
+            id: userId,
+          },
+        });
         res.status(200).json({
           success: true,
           data: {
             ...updatedUser,
-            image: await getImage(updatedUser?.image),
+            image: await getImage(updatedUser?.image || ""),
           },
           message: "Update Info updated successfully",
         });
@@ -151,11 +207,16 @@ export const changePassword = async (
   try {
     const { currentPassword, newPassword, confirmPassword } =
       ChangePasswordSchema.parse(req.body);
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     if (userId) {
-      const existingUser: QueryResultRow | null = await getUserPasswordById(
-        userId
-      );
+      const existingUser: QueryResultRow | null = await db.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          password: true,
+        },
+      });
       if (existingUser) {
         const isPasswordCorrect = await bcrypt.compare(
           currentPassword,
@@ -165,7 +226,14 @@ export const changePassword = async (
           return throwError(next, "Current password is incorrect");
         }
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await updateUserPassword(userId, hashedPassword);
+        await db.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            password: hashedPassword,
+          },
+        });
         res.status(200).json({
           success: true,
           message: "Password updated successfully",
@@ -184,9 +252,9 @@ export const getAllCategories = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     if (userId) {
-      const categories = await getAllCategoriesQuery();
+      const categories = await db.category.findMany();
       res.status(200).json({
         success: true,
         data: categories,
@@ -205,10 +273,14 @@ export const getInterestsByCategories = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     const { categoryId } = req.params;
     if (userId) {
-      const interests = await getAllInterestsQuery(categoryId);
+      const interests = await db.interest.findMany({
+        where: {
+          category_id: categoryId,
+        },
+      });
       res.status(200).json({
         success: true,
         data: interests,
@@ -228,10 +300,22 @@ export const addUserInterests = async (
 ) => {
   try {
     const { interestId } = req.body;
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     if (userId) {
-      await addUserInterest(userId, interestId);
-      const userInterests = await getUserInterests(userId);
+      await db.userInterest.create({
+        data: {
+          user_id: userId,
+          interest_id: interestId,
+        },
+      });
+      const userInterests = await db.userInterest.findMany({
+        where: {
+          user_id: userId,
+        },
+        include: {
+          interest: true,
+        },
+      });
       res.status(200).json({
         success: true,
         message: "Interests updated successfully",
@@ -251,10 +335,22 @@ export const removeUserInterests = async (
 ) => {
   try {
     const { interestId } = req.params;
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     if (userId) {
-      await removeUserInterest(userId, interestId);
-      const userInterests = await getUserInterests(userId);
+      await db.userInterest.delete({
+        where: {
+          interest_id: interestId,
+          user_id: userId,
+        },
+      });
+      const userInterests = await db.userInterest.findMany({
+        where: {
+          user_id: userId,
+        },
+        include: {
+          interest: true,
+        },
+      });
       res.status(200).json({
         success: true,
         message: "Interest removed successfully",
@@ -273,9 +369,16 @@ export const getUserAllInterests = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     if (userId) {
-      const userInterests = await getUserInterests(userId);
+      const userInterests = await db.userInterest.findMany({
+        where: {
+          user_id: userId,
+        },
+        include: {
+          interest: true,
+        },
+      });
       res.status(200).json({
         success: true,
         message: "Interests fetched successfully",
@@ -294,7 +397,7 @@ export const getUserCreatedGroups = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req.user?.userId;
+    const userId: string | undefined = req.user?.id;
     if (!userId) {
       return throwError(next, "User not found");
     }
@@ -305,17 +408,30 @@ export const getUserCreatedGroups = async (
       pageNum = 1;
     }
     const offset = (pageNum - 1) * pageSize;
-    const groups = await getGroupsCreatedByUser(userId, offset);
+    const groups = await db.group.findMany({
+      where: {
+        organized_by: userId,
+      },
+      select: {
+        name: true,
+        image: true,
+        compressed_image: true,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+      skip: offset,
+    });
     const groupToSend = await Promise.all(
       groups.map(async (group) => {
         try {
-          const image = await getImage(group.image);
-          const compressedImage = await getImage(group.compressed_image)
-          if (image && compressedImage) {
+          const image = await getImage(group.image || "");
+          const compressed_image = await getImage(group.compressed_image || "");
+          if (image && compressed_image) {
             return {
               ...group,
-              image: image,
-              compressed_image: compressedImage,
+              image,
+              compressed_image,
             };
           }
           return null;
@@ -339,7 +455,7 @@ export const getUserEvents = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req.user?.userId;
+    const userId: string | undefined = req.user?.id;
     if (!userId) {
       return throwError(next, "User not found");
     }
@@ -350,47 +466,57 @@ export const getUserEvents = async (
       pageNum = 1;
     }
     const offset = (pageNum - 1) * pageSize;
-    let events: QueryResultRow[] = [];
+    let events: any[] = [];
     switch (tab) {
       case "attending":
-        events = await getEventsRSVPByUser(userId, offset);
+        events = await db.event.findMany({
+          where: {
+            user_events: {
+              user_id: userId,
+            },
+          },
+          skip: offset,
+          take: pageSize,
+        });
         break;
       case "hosting":
-        events = await getEventsCreatedByUser(userId, offset);
+        events = await db.event.findMany({
+          where: {
+            host_id: userId,
+            event_date: {
+              gte: new Date(),
+            },
+          },
+          skip: offset,
+          take: pageSize,
+        });
         break;
       case "past":
-        events = await getPastEventsAttendedByUser(userId, offset);
+        events = await db.event.findMany({
+          where: {
+            event_date: {
+              lt: moment().subtract(24, "hours").toDate(),
+            },
+          },
+          skip: offset,
+          take: pageSize,
+        });
         break;
+      default:
+        return throwError(next, "Invalid tab provided");
     }
+
+    // Process events and send response
     const eventsToSend = await Promise.all(
       events.map(async (event) => {
-        const { host_id, group_id, updated_at, ...rest } = event;
-        const host = await getUserNameById(host_id);
-        const hostImage = host?.image.includes("https://") ? host.image : await getImage(host?.image);
-        const hostCompressedImage = host?.image.includes("https://") ? host.image : await getImage(host?.compressed_image)
-        try {
-          const image = await getImage(event.image);
-          const compressedImage = await getImage(event.compressed_image)
-          if (image) {
-            return {
-              ...rest,
-              image: image,
-              compressed_image: compressedImage,
-              host: {
-                ...host,
-                image: hostImage,
-                compressed_image: hostCompressedImage,
-              },
-              members: await getEventMembersCountById(event.event_id),
-              group: await getGroupNameAndLocationById(event.group_id),
-            };
-          }
-          return null;
-        } catch (error: any) {
-          return throwError(next, "Error fetching image: " + error.message);
-        }
+        return {
+          ...event,
+          image: await getImage(event.image || ""),
+          compressed_image: await getImage(event.compressed_image || ""),
+        };
       })
     );
+
     res.status(200).json({
       success: true,
       message: "Events fetched successfully",
@@ -400,5 +526,3 @@ export const getUserEvents = async (
     next(err);
   }
 };
-
-

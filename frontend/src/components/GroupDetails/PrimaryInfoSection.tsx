@@ -15,7 +15,8 @@ const PrimaryInfoSection: FC<PrimaryInfoSectionProps> = ({
   groupType,
   organizedBy,
 }) => {
-  const { userId } = useSelector((state: RootState) => state.user);
+  const { id:userId } = useSelector((state: RootState) => state.user);
+  
   return (
     <div className="w-full sm:w-[45%] flex flex-col xs:gap-2 xl:gap-4 mt-4">
       <h1 className="text-2xl lg:text-[2rem] font-bold py-2">{name}</h1>

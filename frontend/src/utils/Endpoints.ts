@@ -3,6 +3,7 @@ export const RouteEndpoints = {
   LOGIN: "/login",
   SIGNUP: "/signup",
   LOGOUT: "/logout",
+ 
   PROFILE: "/profile",
   EDIT_PROFILE: "/edit-profile",
   FORGOT_PASSWORD: "/forgot-password",
@@ -30,7 +31,8 @@ export const Endpoints = {
   SIGNUP: "/signup",
   LOGOUT: "/logout",
   PROFILE: "/profile",
-
+  REFRESH_TOKEN: "/refresh-token",
+  
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
   VERIFY_EMAIL: "/verify-email",
@@ -54,6 +56,7 @@ export const Endpoints = {
   GROUP_DETAILS_EVENTS:"/details/events",
 
   SEARCH: "/search",
+  GET_CITY: "/get-city",
 
   EDIT_PROFILE: "/edit-profile",
   UPDATE_PERSONAL_INFO: "/update-personal-info",

@@ -11,10 +11,12 @@ import { z } from "zod";
 import { useDispatch, useSelector } from "react-redux";
 import Toast from "@/utils/Toast";
 import { setUser } from "@/redux/slice/userSlice";
-import { putApi } from "@/utils/Api";
 import { RootState } from "@/redux/RootReducer";
+import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 
 export const usePersonalInfo = () => {
+
+  const {axiosPrivate} = useAxiosPrivate();
   const navigation = useNavigate();
   const dispatch = useDispatch();
   const { dob, sex, looking_for, life_state } = useSelector(
@@ -99,14 +101,14 @@ export const usePersonalInfo = () => {
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     try {
       dispatch(setLoading(true));
-      const res = await putApi(
+      const res = await axiosPrivate.put(
         `${API_ENDPOINTS.USER}${Endpoints.UPDATE_PERSONAL_INFO}`,
         data
       );
-      if (res.success) {
+      if (res.data.success) {
         dispatch(setLoading(false));
-        Toast(res.message, "success");
-        dispatch(setUser(res.data));
+        Toast(res.data.message, "success");
+        dispatch(setUser(res.data.data));
         navigation(RouteEndpoints.PROFILE);
       }
     } catch (e: any) {
