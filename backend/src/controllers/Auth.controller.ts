@@ -11,7 +11,6 @@ import { generateRefreshToken, generateToken } from "../utils/GenerateToken";
 import { throwError } from "../utils/Error";
 import {
   uploadToS3,
-  getImage,
   uploadCompressedImageToS3,
 } from "../utils/UploadToS3";
 import { sendToMail } from "../services/SendEmail";
@@ -170,11 +169,6 @@ export const HandleRefreshToken = async (
   const data = jwt.decode(refreshToken) as DecodedToken;
   console.log(data, "DATA");
   ClearCookie(response, "community-refresh-token");
-  const user = await db.user.findUnique({
-    where: {
-      id: data?.id,
-    },
-  });
 
   const existingUser = await db.user.findFirst({
     where: {
