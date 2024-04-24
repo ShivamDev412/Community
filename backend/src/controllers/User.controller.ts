@@ -159,10 +159,6 @@ export const updateUserPersonalInfo = async (
     if (parsedData.success) {
       const { birthday, gender, lookingFor, lifeStages } = parsedData.data;
 
-      let formattedBirthday = null;
-      if (birthday) {
-        formattedBirthday = moment(birthday, "YYYY-MM-DD").format("YYYY-MM-DD");
-      }
       const userId: string | undefined = req?.user?.id;
       if (userId) {
         await db.user.update({
@@ -170,7 +166,7 @@ export const updateUserPersonalInfo = async (
             id: userId,
           },
           data: {
-            dob: formattedBirthday,
+            dob: `${birthday}T00:00:00Z`,
             sex: gender,
             looking_for: lookingFor,
             life_state: lifeStages,

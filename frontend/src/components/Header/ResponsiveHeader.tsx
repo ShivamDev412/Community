@@ -8,7 +8,7 @@ import { ResponsiveMenu } from "@/utils/Constant";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/RootReducer";
 import { Link } from "react-router-dom";
-import SearchSection from "./SearchSection";
+import SearchSection from "../HeaderSearch";
 const ResponsiveHeader = () => {
   const [open, setOpen] = useState(false);
   const [openSearch, setOpenSearch] = useState(false);
