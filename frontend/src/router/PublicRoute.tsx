@@ -1,10 +1,12 @@
 import { RouteEndpoints } from "../utils/Endpoints";
 import { Outlet, Navigate } from "react-router-dom";
 import { Suspense } from "react";
-import useAuth from "../Hooks/useAuth";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/Store";
+
 function PublicRoute() {
-  const { isAuth } = useAuth();
-  return isAuth ? (
+  const { token } = useSelector((state: RootState) => state.auth);
+  return token ? (
     <Navigate to={RouteEndpoints.HOME} />
   ) : (
     <Suspense fallback={<h2>Loading...</h2>}>

@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://shiv41297:jxUa7EWYQm4y@ep-billowing-thunder-a5029b6q.us-east-2.aws.neon.tech/community?sslmode=require"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -29,6 +29,7 @@ model User {
   events                UserEvent?
   groups                UserGroup?
   interests             UserInterest?
+  refresh_token         String[]             @default([])
 }
 
 model PasswordResetToken {

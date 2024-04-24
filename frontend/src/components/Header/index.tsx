@@ -2,7 +2,7 @@ import LogoSection from "./LogoSection";
 import NotificationLogoSection from "./NotificationLogoSection";
 import ProfileSection from "./ProfileSection";
 import ResponsiveHeader from "./ResponsiveHeader";
-import SearchSection from "./SearchSection";
+import SearchSection from "../HeaderSearch";
 
 const Header = () => {
   return (
@@ -17,7 +17,9 @@ const Header = () => {
           <ProfileSection />
         </div>
       </div>
-      <ResponsiveHeader />
+      <div className="xs:block sm:hidden">
+        <ResponsiveHeader />
+      </div>
     </header>
   );
 };

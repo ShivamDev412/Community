@@ -21,7 +21,7 @@ const MenuData: FC<MenuDataProps> = ({ menu, link, setShowDropdown }) => {
 };
 const ProfileSection = () => {
   const { name, image } = useSelector((state: RootState) => state.user);
-  const { logout } = useHeader();
+  const { logoutHandler } = useHeader();
   const [showDropdown, setShowDropdown] = useState(false);
   return (
     <div>
@@ -67,7 +67,7 @@ const ProfileSection = () => {
           />
           <MenuItem
             className="px-6 hover:bg-white hover:text-primary text-gray-600"
-            onClick={logout}
+            onClick={logoutHandler}
           >
             <p>Logout</p>
           </MenuItem>

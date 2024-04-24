@@ -1,5 +1,4 @@
 import { setLoading } from "@/redux/slice/loadingSlice";
-import { postApi } from "@/utils/Api";
 import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
 import { ResetPasswordSchema } from "@/utils/Validations";
@@ -8,8 +7,10 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { z } from "zod";
 import { useLocation, useNavigate } from "react-router-dom";
+import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 
 export const useResetPassword = () => {
+  const {axiosPrivate} = useAxiosPrivate();
   const navigation = useNavigate();
   const location = useLocation();
   const token = location.search.split("=")[1];
@@ -33,12 +34,12 @@ export const useResetPassword = () => {
     const dataToSend = { ...data, token };
     try {
       dispatch(setLoading(true));
-      const res = await postApi(
+      const res = await axiosPrivate.post(
         `${API_ENDPOINTS.AUTH}${Endpoints.RESET_PASSWORD}`,
         dataToSend
       );
-      if (res.success) {
-        Toast(res.message, "success");
+      if (res.data.success) {
+        Toast(res.data.message, "success");
         navigation(RouteEndpoints.LOGIN);
         dispatch(setLoading(false));
         clearErrors();

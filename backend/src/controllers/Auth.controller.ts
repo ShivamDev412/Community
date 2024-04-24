@@ -7,8 +7,7 @@ import {
 } from "../utils/Validation";
 // @ts-ignore
 import passport from "passport";
-import { generateToken } from "../utils/GenerateToken";
-// import sql from "../database";
+import { generateRefreshToken, generateToken } from "../utils/GenerateToken";
 import { throwError } from "../utils/Error";
 import {
   uploadToS3,
@@ -21,12 +20,14 @@ import db from "../database/db.config";
 import dotenv from "dotenv";
 import ForgotPasswordTemplate from "../emailTemplates/ForgotPasswordTemplate";
 import { DecodedToken } from "../Types/Auth.type";
+import SetCookies, { ClearCookie } from "../utils/SetCookies";
 dotenv.config();
 export const Login = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
+  const cookies = req.cookies;
   try {
     const { email, password } = LoginSchema.parse(req.body);
 
@@ -52,40 +53,32 @@ export const Login = async (
         id: existingUser.id.toString(),
         email: existingUser.email,
       });
-      res.cookie("community-auth-token", token, {
-        httpOnly: false,
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7 * 30),
+      const newRefreshToken = generateRefreshToken({
+        id: existingUser.id.toString(),
       });
-      const imageUrl = await getImage(existingUser?.image || "");
-      const compressedImageUrl = await getImage(
-        existingUser.compressed_image || ""
-      );
-      if (imageUrl) {
-        res.status(200).json({
-          success: true,
-          message: "Login successful",
-          data: {
-            userId: existingUser.id,
-            email: existingUser.email,
-            name: existingUser.name,
-            image: imageUrl,
-            compressedImage: compressedImageUrl,
-            bio: existingUser.bio,
-            location: existingUser.location,
-            dob: existingUser.dob,
-            sex: existingUser.sex,
-            age: existingUser.dob
-              ? new Date().getFullYear() -
-                new Date(existingUser.dob).getFullYear()
-              : 0,
-            joined_on: existingUser.joined_on,
-            looking_for: existingUser.looking_for,
-            life_state: existingUser.life_state,
-          },
-        });
-      } else {
-        throwError(next, "Failed to login");
-      }
+      const newRefreshTokenArray = !cookies["community-refresh-token"]
+        ? existingUser.refresh_token
+        : existingUser.refresh_token.filter((token) => {
+            token !== cookies["community-refresh-token"];
+          });
+      if (cookies["community-refresh-token"])
+        ClearCookie(res, "community-refresh-token");
+      await db.user.update({
+        where: {
+          id: existingUser.id,
+        },
+        data: {
+          refresh_token: [...newRefreshTokenArray, newRefreshToken],
+        },
+      });
+      SetCookies(res, "community-refresh-token", newRefreshToken);
+      res.status(200).json({
+        success: true,
+        message: "Login successful",
+        data: {
+          "auth-token": token,
+        },
+      });
     }
   } catch (error) {
     next(error);
@@ -128,56 +121,158 @@ export const Signup = async (
         compressed_image: compressedImage,
       },
     });
-    const user = await db.user.findUnique({
-      where: {
-        id: newUser.id,
-      },
-    });
-    if (user?.id && user?.email) {
+    if (newUser) {
       const token = generateToken({
-        id: user.id,
-        email: user.email,
+        id: newUser.id,
+        email: newUser.email,
       });
-      res.cookie("community-auth-token", token, {
-        httpOnly: false,
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7 * 30),
+      const refreshToken = generateRefreshToken({
+        id: newUser.id.toString(),
       });
-      const imageUrl = await getImage(user?.image || "");
-      const compressedImageUrl = await getImage(user?.compressed_image || "");
-      if (imageUrl) {
-        res.status(200).json({
-          success: true,
-          message: "Signup successful",
-          data: {
-            ...user,
-            image: imageUrl,
-            compressedImage: compressedImageUrl,
-          },
-        });
-      } else {
-        throwError(next, "Failed to create user");
-      }
+      await db.user.update({
+        where: {
+          id: newUser.id,
+        },
+        data: {
+          refresh_token: [refreshToken],
+        },
+      });
+      SetCookies(res, "community-refresh-token", refreshToken);
+      res.status(200).json({
+        success: true,
+        message: "Signup successful",
+        data: {
+          "auth-token": token,
+        },
+      });
     } else {
-      throwError(next, "Failed to create user");
+      throwError(next, "Failed to signup");
     }
   } catch (error) {
     next(error);
   }
 };
-// export const deleteAllUsers = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     await sql`DELETE FROM users`;
-//     res
-//       .status(200)
-//       .json({ success: true, message: "All users deleted successfully" });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+export const HandleRefreshToken = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  const cookies = request.cookies;
+  const refreshToken = cookies["community-refresh-token"];
+  console.log(request.cookies, "REFRESH_COOKIES");
+  if (!refreshToken) {
+    response.status(401).json({
+      success: false,
+      message: "Refresh token not provided",
+    });
+    return;
+  }
+  const data = jwt.decode(refreshToken) as DecodedToken;
+  console.log(data, "DATA");
+  ClearCookie(response, "community-refresh-token");
+  const user = await db.user.findUnique({
+    where: {
+      id: data?.id,
+    },
+  });
+
+  const existingUser = await db.user.findFirst({
+    where: {
+      refresh_token: {
+        hasSome: [refreshToken],
+      },
+    },
+  });
+  console.log(existingUser, "EXISTING USER");
+  // Detected refresh token reuse
+  if (!existingUser) {
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET!,
+      async (err: any, decode: any) => {
+        if (err) {
+          response.status(403).json({
+            success: false,
+            message: "Invalid refresh token",
+          });
+          // Finding the user whose refresh token is reused
+          const hackedUser = await db.user.findUnique({
+            where: {
+              id: decode?.id,
+            },
+          });
+          // Deleting all the refresh token of the user
+          const result = await db.user?.update({
+            where: {
+              id: hackedUser?.id,
+            },
+            data: {
+              refresh_token: [],
+            },
+          });
+          console.log(result, "HACKED_USER");
+        }
+      }
+    );
+    return response.status(403).json({
+      success: false,
+      message: "Forbidden",
+    });
+  } else {
+    const newRefreshTokenArray = existingUser?.refresh_token.filter((token) => {
+      return token !== refreshToken;
+    });
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET!,
+      async (err: any, decode: any) => {
+        if (err) {
+          console.log("expired refresh token ");
+          const result = await db.user?.update({
+            where: {
+              id: existingUser.id,
+            },
+            data: {
+              refresh_token: [...newRefreshTokenArray],
+            },
+          });
+          console.log(result, "RESULT");
+        }
+        if (err || existingUser.id !== decode?.id) {
+          return response.status(403).json({
+            success: false,
+            message: "Invalid refresh token",
+          });
+        }
+        // Refresh token is valid
+        const accessToken = generateToken({
+          id: existingUser.id,
+          email: existingUser.email,
+        });
+        const newRefreshToken = generateRefreshToken({
+          id: existingUser.id,
+        });
+        const userWithUpdatedRefreshToken = await db.user?.update({
+          where: {
+            id: existingUser.id,
+          },
+          data: {
+            refresh_token: [...newRefreshTokenArray, newRefreshToken],
+          },
+        });
+        if (userWithUpdatedRefreshToken) {
+          SetCookies(response, "community-refresh-token", newRefreshToken);
+          response.status(200).json({
+            success: true,
+            message: "Access token generated successfully",
+            "auth-token": accessToken,
+          });
+        }
+      }
+    );
+  }
+};
+
 export const forgotPassword = async (
   req: Request,
   res: Response,

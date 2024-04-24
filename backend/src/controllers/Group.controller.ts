@@ -16,7 +16,7 @@ export const getUserGroups = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     if (!userId) {
       return throwError(next, "User not found");
     } else {
@@ -46,7 +46,7 @@ export const createUserGroup = async (
 ) => {
   try {
     const { about, name, group_type, location } = req.body;
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     const file = req?.file;
     const imageBuffer = file?.buffer;
     const groupExists = await db.group.findMany({
@@ -111,7 +111,7 @@ export const updateUserGroup = async (
     const { about, name, group_type, location, image } = req.body;
 
     const groupId = req?.params?.groupId;
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     const file = req?.file;
     const imageBuffer = file?.buffer;
     const groupData = await db.group.findFirst({
@@ -195,7 +195,7 @@ export const getGroupsByOrganizer = async (
   response: Response,
   next: NextFunction
 ) => {
-  const userId: string | undefined = request?.user?.userId;
+  const userId: string | undefined = request?.user?.id;
   if (!userId) {
     return throwError(next, "User not found");
   }
@@ -221,7 +221,7 @@ export const getGroupDetails = async (
 ) => {
   try {
     const name = request?.query?.name;
-    const userId: string | undefined = request?.user?.userId;
+    const userId: string | undefined = request?.user?.id;
 
     if (!userId) {
       return throwError(next, "User not found");
@@ -302,7 +302,7 @@ export const getAllEventsInGroup = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = request?.user?.userId;
+    const userId: string | undefined = request?.user?.id;
     const groupId: any = request?.query?.groupId;
     if (!userId) {
       return throwError(next, "User not found");

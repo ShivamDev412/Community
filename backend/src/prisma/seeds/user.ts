@@ -4,6 +4,9 @@ const getAdminUser = async () => {
     const users = await db.user.findMany();
     console.log(users);
 }
+const deleteAllUsers = async () => {
+    await db.user.deleteMany()
+}
 const deleteUser = async () => {
     await db.user.delete({
         where: {
@@ -25,7 +28,18 @@ const deleteAllGroups = async () => {
 
     
 }
-
+const removeAllRefreshToken = async () => {
+    await db.user.update({
+        where: {
+            id: "clvbb95jp0003mqj8f8pa9bho"
+        },
+        data: {
+            refresh_token:[]
+        }
+    })
+}
 // deleteAllGroups()
 // getGroups()
+// deleteAllUsers()
+// removeAllRefreshToken()
 getAdminUser()

@@ -5,12 +5,13 @@ import {
   setHostingEvents,
   setPastEvents,
 } from "@/redux/slice/eventSlice";
-import { getApi } from "@/utils/Api";
 import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 const useEventTab = () => {
+  const {axiosPrivate} = useAxiosPrivate()
   const dispatch = useDispatch();
   const {
     hostingEvents,
@@ -57,19 +58,19 @@ const useEventTab = () => {
   const getEvents = async () => {
     try {
       dispatch(setLoading(true));
-      const res = await getApi(
+      const res = await axiosPrivate.get(
         `${API_ENDPOINTS.USER}${Endpoints.USER_EVENTS}?tab=${tab}&page=${page}`
       );
-      if (res.success) {
+      if (res.data.success) {
         switch (tab) {
           case "attending":
-            dispatch(setAttendingEvents(res?.data));
+            dispatch(setAttendingEvents(res?.data.data));
             break;
           case "hosting":
-            dispatch(setHostingEvents(res?.data));
+            dispatch(setHostingEvents(res?.data.data));
             break;
           case "past":
-            dispatch(setPastEvents(res?.data));
+            dispatch(setPastEvents(res?.data.data));
             break;
         }
         dispatch(setLoading(false));

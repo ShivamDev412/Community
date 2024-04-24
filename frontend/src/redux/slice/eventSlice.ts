@@ -23,15 +23,15 @@ const initialState: EventsState = {
     host: {
       name: "",
       image: "",
-      user_id: ""
+      user_id: "",
     },
     group: {
-      group_id: "",
+      id: "",
       name: "",
       image: "",
       location: "",
-      group_type: ""
-    }
+      group_type: "",
+    },
   },
   hostingPageNumber: 1,
   attendingPageNumber: 1,
@@ -62,7 +62,12 @@ const userEventsSlice = createSlice({
     },
     setEventDetails: (state, action: PayloadAction<any>) => {
       state.eventDetails = action.payload;
-    }
+    },
+    clearAllEvents: (state) => {
+      state.hostingEvents = [];
+      state.attendingEvents = [];
+      state.pastEvents = [];
+    },
   },
 });
 
@@ -73,6 +78,7 @@ export const {
   setHostingPageNumber,
   setAttendingPageNumber,
   setPastPageNumber,
-  setEventDetails
+  setEventDetails,
+  clearAllEvents,
 } = userEventsSlice.actions;
 export default userEventsSlice.reducer;

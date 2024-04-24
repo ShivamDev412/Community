@@ -9,10 +9,11 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
-import { postApiFile } from "@/utils/Api";
 import { setUser } from "@/redux/slice/userSlice";
 import { useEffect } from "react";
+import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 const useEditProfile = () => {
+  const {axiosPrivateFile} = useAxiosPrivate();
   const dispatch = useDispatch();
   const navigation = useNavigate();
   const { name, image, location, bio } = useSelector(
@@ -52,14 +53,14 @@ const useEditProfile = () => {
     formData.append("bio", JSON.stringify(data?.bio));
     try {
       dispatch(setLoading(true));
-      const res = await postApiFile(
+      const res = await axiosPrivateFile.post(
         `${API_ENDPOINTS.USER}${Endpoints.EDIT_PROFILE}`,
         formData
       );
-      if (res.success) {
+      if (res.data.success) {
 
         dispatch(setLoading(false));
-        Toast(res.message, "success");
+        Toast(res.data.message, "success");
         dispatch(setUser(res.data));
         navigation(RouteEndpoints.PROFILE);
         reset();

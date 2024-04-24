@@ -1,5 +1,4 @@
 import { NewGroupType } from "@/Types";
-import { postApiFile, putApiFile } from "@/utils/Api";
 import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
 import { NewGroupSchema } from "@/utils/Validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,8 +11,9 @@ import { setLoading } from "@/redux/slice/loadingSlice";
 import { RootState } from "@/redux/RootReducer";
 import { useEffect } from "react";
 import { setGroupDetails } from "@/redux/slice/groupSlice";
-
+import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 export const useNewGroup = () => {
+  const {axiosPrivateFile} = useAxiosPrivate();
   const location = useLocation();
   const isEditGroup = location.pathname.includes("edit-group");
   const navigation = useNavigate();
@@ -73,12 +73,12 @@ export const useNewGroup = () => {
   const addAndUpdateApi = async (type: string, formData: FormData) => {
     switch (type) {
       case "add":
-        return await postApiFile(
+        return await axiosPrivateFile.post(
           `${API_ENDPOINTS.GROUP}${Endpoints.CREATE_GROUP}`,
           formData
         );
       case "update":
-        return await putApiFile(
+        return await axiosPrivateFile.put(
           `${API_ENDPOINTS.GROUP}${Endpoints.UPDATE_GROUP}/${groupDetails.id}`,
           formData
         );
@@ -103,13 +103,13 @@ export const useNewGroup = () => {
     formData.append("about", dataToSend.description);
     try {
       dispatch(setLoading(true));
-      const res = await addAndUpdateApi(
+      const res:any = await addAndUpdateApi(
         isEditGroup ? "update" : "add",
         formData
       );
-      if (res.success) {
+      if (res.data.success) {
         dispatch(setLoading(false));
-        Toast(res.message, "success");
+        Toast(res.data.message, "success");
         navigation(Endpoints.YOUR_GROUPS);
         reset();
         clearErrors();

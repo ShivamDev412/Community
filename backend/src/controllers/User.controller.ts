@@ -11,23 +11,70 @@ import { uploadToS3 } from "../utils/UploadToS3";
 import moment from "moment";
 import { QueryResultRow } from "pg";
 import db from "../database/db.config";
+import { ClearCookie } from "../utils/SetCookies";
 
+export const LogOut = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const userId = req.user?.id;
+  const cookies = req.cookies;
+  const refreshToken = cookies["community-refresh-token"];
+
+  if (!refreshToken) {
+    return throwError(next, "No refresh token found");
+  }
+
+  const existingUser = await db.user.findFirst({
+    where: {
+      id: userId,
+    },
+  });
+
+  const deleteRefreshTokenFromDb = await db.user.update({
+    where: {
+      id: existingUser?.id,
+    },
+    data: {
+      refresh_token: existingUser?.refresh_token.filter((token) => {
+        return token !== refreshToken;
+      }),
+    },
+  });
+  if (!deleteRefreshTokenFromDb) {
+    return throwError(next, "Something went wrong while logging out");
+  } else {
+    ClearCookie(res, "community-refresh-token");
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  }
+};
 export const GetUserData = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
+
     if (userId) {
       const user = await db.user.findUnique({
         where: {
           id: userId,
         },
       });
+      const imageData = await getImage(user?.image || "");
+      const compressedImageData = await getImage(user?.compressed_image || "");
       res.status(200).json({
         success: true,
-        data: user,
+        data: {
+          ...user,
+          image: imageData,
+          compressed_image: compressedImageData,
+        },
       });
     } else {
       return throwError(next, "User not found");
@@ -52,7 +99,7 @@ export const editUserProfile = async (
       file?.buffer,
       file?.mimetype
     );
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     if (userId) {
       const bioToSend = bio ? bio : "";
       if (imageToSend) {
@@ -116,24 +163,24 @@ export const updateUserPersonalInfo = async (
       if (birthday) {
         formattedBirthday = moment(birthday, "YYYY-MM-DD").format("YYYY-MM-DD");
       }
-      const userId: string | undefined = req?.user?.userId;
+      const userId: string | undefined = req?.user?.id;
       if (userId) {
         await db.user.update({
           where: {
             id: userId,
           },
           data: {
-            dob: formattedBirthday, 
+            dob: formattedBirthday,
             sex: gender,
-            looking_for: lookingFor, 
+            looking_for: lookingFor,
             life_state: lifeStages,
           },
         });
         const updatedUser = await db.user.findUnique({
           where: {
-            id:userId
-          }
-        })
+            id: userId,
+          },
+        });
         res.status(200).json({
           success: true,
           data: {
@@ -160,7 +207,7 @@ export const changePassword = async (
   try {
     const { currentPassword, newPassword, confirmPassword } =
       ChangePasswordSchema.parse(req.body);
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     if (userId) {
       const existingUser: QueryResultRow | null = await db.user.findUnique({
         where: {
@@ -205,7 +252,7 @@ export const getAllCategories = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     if (userId) {
       const categories = await db.category.findMany();
       res.status(200).json({
@@ -226,7 +273,7 @@ export const getInterestsByCategories = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     const { categoryId } = req.params;
     if (userId) {
       const interests = await db.interest.findMany({
@@ -253,7 +300,7 @@ export const addUserInterests = async (
 ) => {
   try {
     const { interestId } = req.body;
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     if (userId) {
       await db.userInterest.create({
         data: {
@@ -288,7 +335,7 @@ export const removeUserInterests = async (
 ) => {
   try {
     const { interestId } = req.params;
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     if (userId) {
       await db.userInterest.delete({
         where: {
@@ -322,7 +369,7 @@ export const getUserAllInterests = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req?.user?.userId;
+    const userId: string | undefined = req?.user?.id;
     if (userId) {
       const userInterests = await db.userInterest.findMany({
         where: {
@@ -350,7 +397,7 @@ export const getUserCreatedGroups = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req.user?.userId;
+    const userId: string | undefined = req.user?.id;
     if (!userId) {
       return throwError(next, "User not found");
     }
@@ -408,7 +455,7 @@ export const getUserEvents = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req.user?.userId;
+    const userId: string | undefined = req.user?.id;
     if (!userId) {
       return throwError(next, "User not found");
     }
@@ -448,7 +495,7 @@ export const getUserEvents = async (
         events = await db.event.findMany({
           where: {
             event_date: {
-              lt: moment().subtract(24, 'hours').toDate()
+              lt: moment().subtract(24, "hours").toDate(),
             },
           },
           skip: offset,

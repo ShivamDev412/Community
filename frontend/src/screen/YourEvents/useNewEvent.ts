@@ -1,5 +1,5 @@
+import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 import { NewEventType } from "@/Types";
-import { getApi, postApiFile, putApiFile } from "@/utils/Api";
 import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
 import { NewEventSchema } from "@/utils/Validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,7 @@ import { EventDetailsInitialState } from "@/utils/Constant";
 import dayjs from "dayjs";
 
 export const useNewEvent = () => {
+  const { axiosPrivate, axiosPrivateFile } = useAxiosPrivate();
   const navigation = useNavigate();
   const dispatch = useDispatch();
   const [tags, setTags] = useState<Array<{ value: string; label: string }>>([]);
@@ -52,10 +53,10 @@ export const useNewEvent = () => {
   const getAllTags = async () => {
     dispatch(setLoading(true));
     try {
-      const res = await getApi(`/api/event${Endpoints.TAGS}`);
-      if (res.success) {
+      const res = await axiosPrivate.get(`/api/event${Endpoints.TAGS}`);
+      if (res.data.success) {
         setTags(
-          res.data.map((value: { id: string; name: string }) => {
+          res.data.data.map((value: { id: string; name: string }) => {
             return {
               value: value.id,
               label: value.name,
@@ -98,19 +99,18 @@ export const useNewEvent = () => {
       tags: isEditableEvent ? eventDetails?.tags : [],
       link: isEditableEvent ? eventDetails?.link || undefined : "",
       address: isEditableEvent ? eventDetails?.address || undefined : "",
-  
     },
     resolver: zodResolver(NewEventSchema),
   });
   const addAndUpdateApi = async (type: string, formData: FormData) => {
     switch (type) {
       case "add":
-        return await postApiFile(
+        return await axiosPrivateFile.post(
           `${API_ENDPOINTS.EVENT}${Endpoints.CREATE_EVENT}`,
           formData
         );
       case "update":
-        return await putApiFile(
+        return await axiosPrivateFile.put(
           `${API_ENDPOINTS.EVENT}${Endpoints.UPDATE_EVENT}/${eventDetails.event_id}`,
           formData
         );
@@ -145,13 +145,13 @@ export const useNewEvent = () => {
 
     try {
       dispatch(setLoading(true));
-      const res = await addAndUpdateApi(
+      const res: any = await addAndUpdateApi(
         isEditableEvent ? "update" : "add",
         formData
       );
-      if (res.success) {
+      if (res.data.success) {
         dispatch(setLoading(false));
-        Toast(res.message, "success");
+        Toast(res.data.message, "success");
         navigation(RouteEndpoints.YOUR_EVENTS);
         reset();
         clearErrors();

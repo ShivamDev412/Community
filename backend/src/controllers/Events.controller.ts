@@ -14,7 +14,7 @@ export const getTags = async (
   response: Response,
   next: NextFunction
 ) => {
-  const userId: string | undefined = request?.user?.userId;
+  const userId: string | undefined = request?.user?.id;
   if (!userId) {
     return throwError(next, "User not found");
   }
@@ -50,7 +50,7 @@ export const createEvent = async (
       link,
     } = request.body;
     console.log(request.body);
-    const userId: string | undefined = request?.user?.userId;
+    const userId: string | undefined = request?.user?.id;
     const file = request?.file;
     const imageBuffer = file?.buffer;
     const eventExists = await db.event.findFirst({
@@ -140,7 +140,7 @@ export const getEventDetails = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = req.user?.userId;
+    const userId: string | undefined = req.user?.id;
     if (!userId) {
       return throwError(next, "User not found");
     }
@@ -275,7 +275,7 @@ export const updateEvent = async (
       link,
       image,
     } = request.body;
-    const userId: string | undefined = request?.user?.userId;
+    const userId: string | undefined = request?.user?.id;
     if (!userId) {
       return throwError(next, "User not found");
     }
