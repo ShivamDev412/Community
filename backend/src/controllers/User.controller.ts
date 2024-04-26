@@ -1,4 +1,4 @@
-import { getImage, uploadCompressedImageToS3 } from "./../utils/UploadToS3";
+import { getImage, uploadCompressedImageToS3 } from "../services/UploadToS3";
 import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
 import { throwError } from "../utils/Error";
@@ -7,11 +7,11 @@ import {
   PersonalInfoSchema,
   ChangePasswordSchema,
 } from "../utils/Validation";
-import { uploadToS3 } from "../utils/UploadToS3";
+import { uploadToS3 } from "../services/UploadToS3";
 import moment from "moment";
 import { QueryResultRow } from "pg";
 import db from "../database/db.config";
-import { ClearCookie } from "../utils/SetCookies";
+import { ClearCookie } from "../services/SetCookies";
 
 export const LogOut = async (
   req: Request,
@@ -65,6 +65,33 @@ export const GetUserData = async (
         where: {
           id: userId,
         },
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          compressed_image: true,
+          bio: true,
+          location: true,
+          dob: true,
+          sex: true,
+          email: true,
+          looking_for: true,
+          life_state: true,
+          joined_on: true,
+        },
+      });
+      const interests = await db.userInterest.findMany({
+        where: {
+          user_id: userId,
+        },
+        include: {
+          interest: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       });
       const imageData = await getImage(user?.image || "");
       const compressedImageData = await getImage(user?.compressed_image || "");
@@ -74,6 +101,7 @@ export const GetUserData = async (
           ...user,
           image: imageData,
           compressed_image: compressedImageData,
+          interests: interests,
         },
       });
     } else {
@@ -90,15 +118,19 @@ export const editUserProfile = async (
 ) => {
   const { name, address, bio, image } = EditProfileSchema.parse(req.body);
   const file = req.file;
+  const user = await db.user.findUnique({
+    where: {
+      id: req?.user?.id,
+    },
+  });
   try {
     const imageToSend = file
       ? await uploadToS3(name, file?.buffer, file.mimetype)
-      : image;
-    const compressedImageToSend = await uploadCompressedImageToS3(
-      name,
-      file?.buffer,
-      file?.mimetype
-    );
+      : user?.image;
+    const compressedImageToSend = file
+      ? await uploadCompressedImageToS3(name, file?.buffer, file?.mimetype)
+      : user?.compressed_image;
+
     const userId: string | undefined = req?.user?.id;
     if (userId) {
       const bioToSend = bio ? bio : "";
@@ -119,6 +151,20 @@ export const editUserProfile = async (
           where: {
             id: userId,
           },
+          select: {
+            id: true,
+            name: true,
+            image: true,
+            compressed_image: true,
+            bio: true,
+            location: true,
+            dob: true,
+            sex: true,
+            email: true,
+            looking_for: true,
+            life_state: true,
+            joined_on: true,
+          },
         });
         const imageData = file
           ? await getImage(updatedUser?.image || "")
@@ -132,7 +178,7 @@ export const editUserProfile = async (
             data: {
               ...updatedUser,
               image: imageData,
-              compressedImage: compressedImageData,
+              compressed_image: compressedImageData,
             },
             message: "Profiled updated successfully",
           });
@@ -250,7 +296,12 @@ export const getAllCategories = async (
   try {
     const userId: string | undefined = req?.user?.id;
     if (userId) {
-      const categories = await db.category.findMany();
+      const categories = await db.category.findMany({
+        select: {
+          id: true,
+          name: true,
+        },
+      });
       res.status(200).json({
         success: true,
         data: categories,
@@ -276,6 +327,10 @@ export const getInterestsByCategories = async (
         where: {
           category_id: categoryId,
         },
+        select: {
+          id: true,
+          name: true,
+        },
       });
       res.status(200).json({
         success: true,
@@ -297,33 +352,53 @@ export const addUserInterests = async (
   try {
     const { interestId } = req.body;
     const userId: string | undefined = req?.user?.id;
-    if (userId) {
-      await db.userInterest.create({
-        data: {
-          user_id: userId,
-          interest_id: interestId,
-        },
-      });
-      const userInterests = await db.userInterest.findMany({
-        where: {
-          user_id: userId,
-        },
-        include: {
-          interest: true,
-        },
-      });
-      res.status(200).json({
-        success: true,
-        message: "Interests updated successfully",
-        data: userInterests,
-      });
-    } else {
+
+    if (!userId) {
       return throwError(next, "User not found");
     }
+    const interest = await db.interest.findUnique({
+      where: {
+        id: interestId,
+      },
+    });
+
+    if (!interest) {
+      return throwError(next, "Interest not found");
+    }
+    await db.userInterest.create({
+      data: {
+        user: {
+          connect: { id: userId },
+        },
+        interest: {
+          connect: { id: interestId },
+        },
+      },
+    });
+    const userInterests = await db.userInterest.findMany({
+      where: {
+        user_id: userId,
+      },
+      include: {
+        interest: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Interest added to user successfully",
+      data: userInterests,
+    });
   } catch (err) {
     next(err);
   }
 };
+
 export const removeUserInterests = async (
   req: Request,
   res: Response,
@@ -333,10 +408,24 @@ export const removeUserInterests = async (
     const { interestId } = req.params;
     const userId: string | undefined = req?.user?.id;
     if (userId) {
+      const userInterest = await db.userInterest.findFirst({
+        where: {
+          user_id: userId,
+          interest_id: interestId,
+        },
+        include: {
+          interest: true,
+        },
+      });
+      if (!userInterest) {
+        return throwError(next, "User interest not found");
+      }
       await db.userInterest.delete({
         where: {
-          interest_id: interestId,
-          user_id: userId,
+          user_id_interest_id: {
+            user_id: userId,
+            interest_id: interestId,
+          },
         },
       });
       const userInterests = await db.userInterest.findMany({
@@ -344,7 +433,12 @@ export const removeUserInterests = async (
           user_id: userId,
         },
         include: {
-          interest: true,
+          interest: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       });
       res.status(200).json({
@@ -372,7 +466,12 @@ export const getUserAllInterests = async (
           user_id: userId,
         },
         include: {
-          interest: true,
+          interest: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       });
       res.status(200).json({

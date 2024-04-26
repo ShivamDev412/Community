@@ -157,10 +157,10 @@ export const NewEventSchema = z
 export const EditProfileSchema = z.object({
   image: z.any().refine(
     (value) => {
-      if (value instanceof FileList) {
-        return value.length > 0;
+      if (typeof value === "string" || value instanceof FileList) {
+        return true;
       }
-      value !== null && value !== undefined;
+      return false;
     },
     {
       message: "Profile Image is required",

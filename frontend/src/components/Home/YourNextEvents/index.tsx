@@ -7,11 +7,14 @@ function YourNextEvents() {
     <section>
       <SectionTitle
         title="Your Next Event"
-        url={RouteEndpoints.HOME}
+        url={RouteEndpoints.YOUR_EVENTS}
         more={"View All"}
       />
 
-      <NoNewEvents />
+      <NoNewEvents
+        title={"You have not registered for any events"}
+        subTitle={"Events you have registered for will appear here."}
+      />
     </section>
   );
 }

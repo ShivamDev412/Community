@@ -5,10 +5,10 @@ import {
   getImage,
   uploadCompressedImageToS3,
   uploadToS3,
-} from "../utils/UploadToS3";
-import getImageDimensions from "../utils/GetImageDimension";
+} from "../services/UploadToS3";
+import getImageDimensions from "../services/GetImageDimension";
 import { getAllImages } from "../Types/GetAllImages";
-import { getLatitudeAndLongitude } from "../utils/GetLatitudeAndLongitude";
+import { getLatitudeAndLongitude } from "../services/GetLatitudeAndLongitude";
 import db from "../database/db.config";
 export const getUserGroups = async (
   req: Request,

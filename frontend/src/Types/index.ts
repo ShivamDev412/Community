@@ -32,20 +32,24 @@ export interface WrapperProps {
 }
 
 export type UserType = {
-  user_id: string;
+  id: string;
   name: string;
   email: string;
-  location: {
-    city: string;
-    state: string;
-  };
-  age: number | null;
+  location: string;
   joined_on: string;
   image: string | null;
+  compressed_image: string | null;
   bio: string | null;
   dob: string | null;
   sex: string | null;
+  looking_for?: string[];
+  life_state?: string[];
+  interests:Interest[]
 };
+type Interest = {
+  id: string;
+  name: string;
+}
 export type SectionTitleProps = {
   title: string;
   url: string;

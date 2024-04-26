@@ -14,7 +14,7 @@ const YourGroups = () => {
     // pageNumberInMember,
   } = useYourGroup();
   return (
-    <section className="w-11/12 sm:w-8/12 mx-auto overflow-x-hidden h-full pb-10">
+    <section className="w-11/12 sm:w-10/12 mx-auto overflow-x-hidden h-full pb-10">
       <section className="flex items-center justify-between mt-10">
         <div className="flex items-center gap-4">
           <BackToHome />

@@ -13,7 +13,7 @@ import { setUser } from "@/redux/slice/userSlice";
 import { useEffect } from "react";
 import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 const useEditProfile = () => {
-  const {axiosPrivateFile} = useAxiosPrivate();
+  const { axiosPrivateFile } = useAxiosPrivate();
   const dispatch = useDispatch();
   const navigation = useNavigate();
   const { name, image, location, bio } = useSelector(
@@ -31,7 +31,7 @@ const useEditProfile = () => {
     setValue,
   } = useForm<EditProfileType>({
     defaultValues: {
-      image: image,
+      image: image ? image : "",
       firstName: name.split(" ")[0],
       lastName: name.split(" ")[1],
       address: location,
@@ -58,10 +58,9 @@ const useEditProfile = () => {
         formData
       );
       if (res.data.success) {
-
         dispatch(setLoading(false));
         Toast(res.data.message, "success");
-        dispatch(setUser(res.data));
+        dispatch(setUser(res.data.data));
         navigation(RouteEndpoints.PROFILE);
         reset();
         clearErrors();

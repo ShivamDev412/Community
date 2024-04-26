@@ -1,25 +1,34 @@
-
 import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
 import { useEffect, useState } from "react";
 import Toast from "@/utils/Toast";
 import { SelectChangeEvent } from "@mui/material";
 import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
-
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/RootReducer";
+import { setUserInterest } from "@/redux/slice/userSlice";
 export const useInterests = () => {
-  const {axiosPrivate} = useAxiosPrivate()
+  const dispatch = useDispatch();
+  const { axiosPrivate } = useAxiosPrivate();
   const [category, setCategory] = useState("");
-  const [categories, setCategories] = useState<
-    { name: string; category_id: string }[]
-  >([]);
-  const [interests, setInterests] = useState<
-    { name: string; interest_id: string }[]
-  >([]);
-  const [selectedInterests, setSelectedInterest] = useState<
-    { name: string; interest_id: string }[]
-  >([]);
+  const [categories, setCategories] = useState<{ name: string; id: string }[]>(
+    []
+  );
+  const [interests, setInterests] = useState<{ name: string; id: string }[]>(
+    []
+  );
+  const { interests: selectedInterests } = useSelector(
+    (state: RootState) => state.user
+  );
+
+  useEffect(() => {
+    getCategories();
+    getAllUserInterests();
+  }, []);
   const getCategories = async () => {
     try {
-      const res = await axiosPrivate.get(`${API_ENDPOINTS.USER}${Endpoints.CATEGORIES}`);
+      const res = await axiosPrivate.get(
+        `${API_ENDPOINTS.USER}${Endpoints.CATEGORIES}`
+      );
       if (res.data.success) {
         setCategories(res.data.data);
       }
@@ -33,28 +42,36 @@ export const useInterests = () => {
         `${API_ENDPOINTS.USER}${Endpoints.GET_USER_INTERESTS}`
       );
       if (res.data.success) {
-        setSelectedInterest(res.data.data);
+        dispatch(setUserInterest(
+          res.data.data.map((interest: any) => interest.interest)
+        ));
       }
     } catch (err: any) {
       Toast(err.message, "error");
     }
   };
-  useEffect(() => {
-    getCategories();
-    getAllUserInterests();
-  }, []);
   const handleCategory = async (e: SelectChangeEvent<string>) => {
-    const categoryId = categories.find(
-      (c) => c.name === e.target.value
-    )?.category_id;
+    const filteredCategories = categories.filter(
+      (category) => category.name === e.target.value
+    );
+    const categoryId =
+      filteredCategories.length > 0 ? filteredCategories[0].id : null;
     setCategory(e.target.value);
     if (categoryId) {
       try {
         const res = await axiosPrivate.get(
           `${API_ENDPOINTS.USER}${Endpoints.INTERESTS}/${categoryId}`
         );
+
         if (res.data.success) {
-          setInterests(res.data.data);
+          const filteredInterests = res.data.data.filter(
+            (interest: { id: string; name: string }) =>
+              !selectedInterests?.some(
+                (selectedInterest: { id: string }) =>
+                  selectedInterest.id === interest.id
+              )
+          );
+          setInterests(filteredInterests);
         }
       } catch (err: any) {
         Toast(err.message, "error");
@@ -63,15 +80,13 @@ export const useInterests = () => {
   };
   const handleSelectedInterests = async (interest: {
     name: string;
-    interest_id: string;
+    id: string;
   }) => {
-    const updatedInterest = interests.filter(
-      (i) => i.interest_id !== interest.interest_id
-    );
-    setSelectedInterest([...selectedInterests, interest]);
+    const updatedInterest = interests.filter((i) => i.id !== interest.id);
+    dispatch(setUserInterest([...selectedInterests, interest]));
     setInterests(updatedInterest);
     const dataToSend = {
-      interestId: interest.interest_id,
+      interestId: interest.id,
     };
     try {
       const res = await axiosPrivate.post(
@@ -86,25 +101,25 @@ export const useInterests = () => {
   };
   const handleRemoveInterest = async (interest: {
     name: string;
-    interest_id: string;
+    id: string;
   }) => {
     const updatedInterest = selectedInterests.filter(
-      (i) => i.interest_id !== interest.interest_id
+      (i:{id:string}) => i.id !== interest.id
     );
-    setSelectedInterest(updatedInterest);
+    dispatch(setUserInterest((updatedInterest)));
     if (category !== "") {
       setInterests([...interests, interest]);
     }
 
     try {
       const res = await axiosPrivate.delete(
-        `${API_ENDPOINTS.USER}${Endpoints.DELETE_INTERESTS}/${interest.interest_id}`
+        `${API_ENDPOINTS.USER}${Endpoints.DELETE_INTERESTS}/${interest.id}`
       );
       if (res.data.success) {
         console.log(res.data, "data");
       }
     } catch (err: any) {
-        Toast(err.message, "error");
+      Toast(err.message, "error");
     }
   };
   return {

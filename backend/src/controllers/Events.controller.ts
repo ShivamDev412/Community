@@ -4,9 +4,9 @@ import {
   getImage,
   uploadCompressedImageToS3,
   uploadToS3,
-} from "../utils/UploadToS3";
-import getImageDimensions from "../utils/GetImageDimension";
-import { getLatitudeAndLongitude } from "../utils/GetLatitudeAndLongitude";
+} from "../services/UploadToS3";
+import getImageDimensions from "../services/GetImageDimension";
+import { getLatitudeAndLongitude } from "../services/GetLatitudeAndLongitude";
 import db from "../database/db.config";
 
 export const getTags = async (

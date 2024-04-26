@@ -15,10 +15,17 @@ export const useHome = () => {
     try {
       dispatch(setLoading(true));
       const response = await axiosPrivate.get(`${API_ENDPOINTS.USER}/`);
-    
+
       if (response.data.success) {
         dispatch(setLoading(false));
-        dispatch(setUser(response.data.data));
+        dispatch(
+          setUser({
+            ...response.data.data,
+            interests: response.data.data.interests.map(
+              (interest: any) => interest.interest
+            ),
+          })
+        );
       }
     } catch (err: any) {
       dispatch(setLoading(false));

@@ -28,8 +28,8 @@ model User {
   password_reset_tokens PasswordResetToken?
   events                UserEvent?
   groups                UserGroup?
-  interests             UserInterest?
-  refresh_token         String[]             @default([])
+  interests             UserInterest[]
+  refresh_token         String[]            @default([])
 }
 
 model PasswordResetToken {
@@ -98,27 +98,18 @@ model Interest {
   updated_at       DateTime          @default(now())
   CategoryInterest CategoryInterest?
   category         Category          @relation(fields: [category_id], references: [id])
-  users            UserInterest?
+  users            UserInterest[]
   events           Event[]           @relation("EventInterests")
 }
 
-// model Tag {
-//   id         String    @id @default(cuid())
-//   name       String
-//   created_at DateTime  @default(now())
-//   updated_at DateTime  @default(now())
-//   eventId    String?
-//   events     EventTag?
-//   Event      Event?    @relation(fields: [eventId], references: [id])
-// }
-
 model UserInterest {
-  user_id     String   @unique
-  interest_id String   @unique
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now())
-  interest    Interest @relation(fields: [interest_id], references: [id])
-  user        User     @relation(fields: [user_id], references: [id])
+  user_id     String
+  interest_id String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now())
+  user        User      @relation(fields: [user_id], references: [id])
+  interest    Interest  @relation(fields: [interest_id], references: [id])
+  @@unique([user_id, interest_id]) 
 }
 
 model UserGroup {

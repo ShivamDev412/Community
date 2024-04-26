@@ -7,19 +7,19 @@ import {
 } from "../utils/Validation";
 // @ts-ignore
 import passport from "passport";
-import { generateRefreshToken, generateToken } from "../utils/GenerateToken";
+import { generateRefreshToken, generateToken } from "../services/GenerateToken";
 import { throwError } from "../utils/Error";
 import {
   uploadToS3,
   uploadCompressedImageToS3,
-} from "../utils/UploadToS3";
+} from "../services/UploadToS3";
 import { sendToMail } from "../services/SendEmail";
 import jwt from "jsonwebtoken";
 import db from "../database/db.config";
 import dotenv from "dotenv";
 import ForgotPasswordTemplate from "../emailTemplates/ForgotPasswordTemplate";
 import { DecodedToken } from "../Types/Auth.type";
-import SetCookies, { ClearCookie } from "../utils/SetCookies";
+import SetCookies, { ClearCookie } from "../services/SetCookies";
 dotenv.config();
 export const Login = async (
   req: Request,
@@ -168,7 +168,7 @@ export const HandleRefreshToken = async (
   }
   const data = jwt.decode(refreshToken) as DecodedToken;
   console.log(data, "DATA");
-  ClearCookie(response, "community-refresh-token");
+ 
 
   const existingUser = await db.user.findFirst({
     where: {
@@ -177,6 +177,7 @@ export const HandleRefreshToken = async (
       },
     },
   });
+  // ClearCookie(response, "community-refresh-token");
   console.log(existingUser, "EXISTING USER");
   // Detected refresh token reuse
   if (!existingUser) {
@@ -210,7 +211,7 @@ export const HandleRefreshToken = async (
     );
     return response.status(403).json({
       success: false,
-      message: "Forbidden",
+      message: "Forbidden. No user found with this refresh token",
     });
   } else {
     const newRefreshTokenArray = existingUser?.refresh_token.filter((token) => {
