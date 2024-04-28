@@ -105,29 +105,22 @@ export const NewEventSchema = z
     type: z.string().min(1, { message: "Event Type is required" }),
     details: z.string().min(1, { message: "Event Details are required" }),
     group: z.string().min(1, { message: "Group is required" }),
-    tags: z.array(z.string()).refine(
-      (value) => {
-        return value.length !== 0;
-      },
-      {
-        message: "At least one tag is required",
-      }
-    ),
+    tags: z.array(z.string()).min(1, { message: "Tags are required" }),
     date: z.string().min(1, { message: "Event Date is required" }),
     time: z.string().min(1, { message: "Event Time is required" }),
     event_end_time: z.string().min(1, { message: "Event End Time is required" }),
-    address: z.string().optional(),
+    location: z.string().optional(),
     link: z.string().optional(),
 
   })
   .superRefine(
-    ({ type, address, link, time, event_end_time }, refinementContext) => {
+    ({ type, location, link, time, event_end_time }, refinementContext) => {
       if (type === "in-person") {
-        if (!address || address.length < 1) {
+        if (!location || location.length < 1) {
           refinementContext.addIssue({
             code: ZodIssueCode.custom,
             message: "Address is required for in-person events",
-            path: ["address"],
+            path: ["location"],
           });
         }
       } 

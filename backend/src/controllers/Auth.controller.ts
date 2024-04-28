@@ -4,15 +4,13 @@ import {
   SignupSchema,
   LoginSchema,
   ResetPasswordSchema,
+  ForgotPasswordValidation,
 } from "../utils/Validation";
 // @ts-ignore
 import passport from "passport";
 import { generateRefreshToken, generateToken } from "../services/GenerateToken";
 import { throwError } from "../utils/Error";
-import {
-  uploadToS3,
-  uploadCompressedImageToS3,
-} from "../services/UploadToS3";
+import { uploadToS3, uploadCompressedImageToS3 } from "../services/UploadToS3";
 import { sendToMail } from "../services/SendEmail";
 import jwt from "jsonwebtoken";
 import db from "../database/db.config";
@@ -53,7 +51,7 @@ export const Login = async (
         email: existingUser.email,
       });
       const newRefreshToken = generateRefreshToken({
-        id: existingUser.id.toString(),
+        id: existingUser.id,
       });
       const newRefreshTokenArray = !cookies["community-refresh-token"]
         ? existingUser.refresh_token
@@ -158,7 +156,6 @@ export const HandleRefreshToken = async (
 ) => {
   const cookies = request.cookies;
   const refreshToken = cookies["community-refresh-token"];
-  console.log(request.cookies, "REFRESH_COOKIES");
   if (!refreshToken) {
     response.status(401).json({
       success: false,
@@ -166,10 +163,6 @@ export const HandleRefreshToken = async (
     });
     return;
   }
-  const data = jwt.decode(refreshToken) as DecodedToken;
-  console.log(data, "DATA");
- 
-
   const existingUser = await db.user.findFirst({
     where: {
       refresh_token: {
@@ -184,7 +177,7 @@ export const HandleRefreshToken = async (
     jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET!,
-      async (err: any, decode: any) => {
+      async (err: any, decode:any) => {
         if (err) {
           response.status(403).json({
             success: false,
@@ -274,7 +267,7 @@ export const forgotPassword = async (
   next: NextFunction
 ) => {
   try {
-    const { email } = req.body;
+    const { email } = ForgotPasswordValidation.parse(req.body);
     const user = await db.user.findUnique({
       where: {
         email,
@@ -362,38 +355,54 @@ export const verifyTokenAndSetPassword = async (
 export const googleLogin = async (req: Request, res: Response) => {
   passport.authenticate("google", { scope: ["profile", "email"] })(req, res);
 };
-export const googleCallback = (req: any, res: any) => {
+export const googleCallback = (req: Request, res: Response) => {
   passport.authenticate("google", {
     failureRedirect: process.env.SOCIAL_LOGIN_FAILURE_REDIRECT_URL!,
-  })(req, res, () => {
+  })(req, res, async () => {
     if (!req.user) {
       res.redirect(process.env.SOCIAL_LOGIN_FAILURE_REDIRECT_URL!);
       return;
     } else {
+      const existingUser = req.user;
+      const newRefreshToken = generateRefreshToken({
+        id: existingUser.id,
+      });
       const token = generateToken({
-        id: req.user.id,
-        email: req.user.email,
+        id: existingUser.id,
+        email: existingUser.email,
       });
-      res.cookie("community-auth-token", token, {
-        httpOnly: false,
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7 * 30),
+      const newRefreshTokenArray = !req.cookies["community-refresh-token"]
+        ? existingUser.refresh_token
+        : existingUser.refresh_token.filter((token: string) => {
+            token !== req.cookies["community-refresh-token"];
+          });
+      if (req.cookies["community-refresh-token"])
+        ClearCookie(res, "community-refresh-token");
+      await db.user.update({
+        where: {
+          id: existingUser.id,
+        },
+        data: {
+          refresh_token: [...newRefreshTokenArray, newRefreshToken],
+        },
       });
-      res.redirect(process.env.SOCIAL_LOGIN_SUCCESS_REDIRECT_URL!);
+      SetCookies(res, "community-refresh-token", newRefreshToken);
+      res.redirect(
+        `${process.env.SOCIAL_LOGIN_SUCCESS_REDIRECT_URL}?token=${token}`
+      );
     }
-
-    return;
   });
 };
 export const githubLogin = async (req: Request, res: Response) => {
   passport.authenticate("github", { scope: ["user:email"] })(req, res);
 };
-export const githubCallback = (req: any, res: any) => {
+export const githubCallback = (req: Request, res: Response) => {
   passport.authenticate("github", {
     failureRedirect: process.env.SOCIAL_LOGIN_FAILURE_REDIRECT_URL!,
   })(req, res, () => {
     const token = generateToken({
-      id: req.user.user_id,
-      email: req.user.email,
+      id: req?.user?.id as string,
+      email: req?.user?.email,
     });
     res.cookie("community-auth-token", token, {
       httpOnly: false,
@@ -406,13 +415,13 @@ export const githubCallback = (req: any, res: any) => {
 export const facebookLogin = async (req: Request, res: Response) => {
   passport.authenticate("facebook", { scope: ["email"] })(req, res);
 };
-export const facebookCallback = (req: any, res: any) => {
+export const facebookCallback = (req: Request, res: Response) => {
   passport.authenticate("facebook", {
     failureRedirect: process.env.SOCIAL_LOGIN_FAILURE_REDIRECT_URL!,
   })(req, res, () => {
     const token = generateToken({
-      id: req.user.user_id,
-      email: req.user.email,
+      id: req?.user?.id as string,
+      email: req?.user?.email,
     });
     res.cookie("community-auth-token", token, {
       httpOnly: false,

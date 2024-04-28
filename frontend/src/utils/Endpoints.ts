@@ -3,7 +3,8 @@ export const RouteEndpoints = {
   LOGIN: "/login",
   SIGNUP: "/signup",
   LOGOUT: "/logout",
- 
+  GOOGLE_SUCCESS_LOGIN: "/login/google/success",
+  GOOGLE_FAILURE_LOGIN: "/login/google/failure",
   PROFILE: "/profile",
   EDIT_PROFILE: "/edit-profile",
   FORGOT_PASSWORD: "/forgot-password",

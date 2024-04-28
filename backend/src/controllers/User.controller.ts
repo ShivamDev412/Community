@@ -78,6 +78,7 @@ export const GetUserData = async (
           looking_for: true,
           life_state: true,
           joined_on: true,
+          google_id: true,
         },
       });
       const interests = await db.userInterest.findMany({
@@ -93,8 +94,12 @@ export const GetUserData = async (
           },
         },
       });
-      const imageData = await getImage(user?.image || "");
-      const compressedImageData = await getImage(user?.compressed_image || "");
+      const imageData = user?.google_id
+        ? user?.image
+        : await getImage(user?.image || "");
+      const compressedImageData = user?.google_id
+        ? user?.image
+        : await getImage(user?.compressed_image || "");
       res.status(200).json({
         success: true,
         data: {

@@ -1,7 +1,7 @@
 export const ENDPOINTS = {
     HOME: "/home",
     LOGIN: "/login",
-    LOGOUT: "/logout",
+    LOGOUT:  "/logout/",
     REFRESH_TOKEN: "/refresh-token",
     SIGNUP: "/signup",
     FORGOT_PASSWORD: "/forgot-password",

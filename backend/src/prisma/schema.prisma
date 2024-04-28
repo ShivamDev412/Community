@@ -105,11 +105,12 @@ model Interest {
 model UserInterest {
   user_id     String
   interest_id String
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @default(now())
-  user        User      @relation(fields: [user_id], references: [id])
-  interest    Interest  @relation(fields: [interest_id], references: [id])
-  @@unique([user_id, interest_id]) 
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+  user        User     @relation(fields: [user_id], references: [id])
+  interest    Interest @relation(fields: [interest_id], references: [id])
+
+  @@unique([user_id, interest_id])
 }
 
 model UserGroup {

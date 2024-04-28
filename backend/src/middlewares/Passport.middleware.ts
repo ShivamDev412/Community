@@ -31,17 +31,17 @@ const GoogleMiddleware = () => {
           const existingUser = await db.user.findFirst({
             where: {
               google_id: profile.id,
-            }
-          })
+            },
+          });
           if (!existingUser) {
             const newUser = await db.user.create({
               data: {
                 name: defaultUser.name,
                 email: defaultUser.email,
                 image: defaultUser.image,
-                google_id: defaultUser.google_id
-              }
-            })
+                google_id: defaultUser.google_id,
+              },
+            });
             return cb(null, newUser);
           } else {
             return cb(null, existingUser);
@@ -74,24 +74,30 @@ const GithubMiddleware = () => {
         const defaultUser = {
           email: profile.email,
           name: `${profile.given_name} ${profile.family_name}`,
-          image: profile.photos[0].value,
+          image: profile.photos[0].value.replace("s96-c", "s400-c"),
           google_id: profile.id,
         };
         try {
-          // const existingUser = await getUserByGoogleId(profile.id);
-          // console.log("existingUser", existingUser);
-          // if (!existingUser) {
-          //   await addUserWithGoogleId(
-          //     defaultUser.name,
-          //     defaultUser.email,
-          //     defaultUser.image,
-          //     defaultUser.google_id
-          //   );
-          //   return cb(null, defaultUser);
-          // } else {
-          //   console.log("existingUser", existingUser);
-          //   return cb(null, existingUser);
-          // }
+          const existingUser = await db.user.findUnique({
+            where: {
+              google_id: profile.id,
+            },
+          });
+          console.log("existingUser", existingUser);
+          if (!existingUser) {
+            const newUser = await db.user.create({
+              data: {
+                name: defaultUser.name,
+                email: defaultUser.email,
+                image: defaultUser.image,
+                google_id: defaultUser.google_id,
+              },
+            });
+            return cb(null, newUser);
+          } else {
+            console.log("existingUser", existingUser);
+            return cb(null, existingUser);
+          }
         } catch (error) {
           return cb(error, null);
         }

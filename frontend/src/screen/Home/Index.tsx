@@ -6,7 +6,7 @@ import YourInterests from "@/components/Home/YourIntrests";
 function Home() {
   const { name } = useHome();
   return (
-    <section className="w-11/12 sm:w-10/12 mx-auto">
+    <section className="w-11/12 sm:w-10/12 2xl:w-7/12 mx-auto">
       <h1 className="my-5 text-2xl sm:text-[3rem] font-bold sm:my-[0.7in]">
         Welcome, {name?.split(" ")[0]} 👋
       </h1>

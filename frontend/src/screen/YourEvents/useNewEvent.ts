@@ -138,7 +138,7 @@ export const useNewEvent = () => {
     );
     formData.append("group", data.group);
     if (data.type === "in-person") {
-      data?.address && formData.append("location", data?.address);
+      data?.location && formData.append("address", data?.location);
     } else {
       data?.link && formData.append("link", data?.link);
     }

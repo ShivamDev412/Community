@@ -8,6 +8,7 @@ import {
 import getImageDimensions from "../services/GetImageDimension";
 import { getLatitudeAndLongitude } from "../services/GetLatitudeAndLongitude";
 import db from "../database/db.config";
+import { NewEventSchema } from "../utils/Validation";
 
 export const getTags = async (
   request: Request,
@@ -46,10 +47,9 @@ export const createEvent = async (
       type,
       tags,
       group,
-      location,
+      address,
       link,
-    } = request.body;
-    console.log(request.body);
+    } = NewEventSchema.parse(request.body);
     const userId: string | undefined = request?.user?.id;
     const file = request?.file;
     const imageBuffer = file?.buffer;
@@ -75,7 +75,7 @@ export const createEvent = async (
         return throwError(next, "Image not provided");
       }
       const linkToSend = type === "online" ? link : null;
-      const locationToSend = type === "in-person" ? location : null;
+      const locationToSend = type === "in-person" ? address : null;
       const tagsToSend = JSON.parse(tags);
       const imageUrl = await uploadToS3(name, file?.buffer, file.mimetype);
       const compressedImageUrl = await uploadCompressedImageToS3(
@@ -86,7 +86,7 @@ export const createEvent = async (
       let latitude = 0;
       let longitude = 0;
       if (type === "in-person") {
-        const locationCoord = await getLatitudeAndLongitude(location);
+        const locationCoord = await getLatitudeAndLongitude(address as string);
         if (locationCoord) {
           latitude = locationCoord.latitude;
           longitude = locationCoord.longitude;
@@ -101,14 +101,13 @@ export const createEvent = async (
           host_id: userId,
           group_id: group,
           event_date: `${date}T00:00:00Z`,
-          event_time: new Date(`${date}T${time}:00Z`).toISOString(), // Convert event time to ISO-8601 string
+          event_time: new Date(`${date}T${time}:00Z`).toISOString(), 
           event_end_time: new Date(
             `${date}T${event_end_time}:00Z`
           ).toISOString(),
           event_type: type,
           link: linkToSend,
           address: locationToSend,
-          // tags: tagsToSend,
           latitude,
           longitude,
         },
@@ -271,10 +270,10 @@ export const updateEvent = async (
       type,
       tags,
       group,
-      location,
+      address,
       link,
       image,
-    } = request.body;
+    } = NewEventSchema.parse(request.body);
     const userId: string | undefined = request?.user?.id;
     if (!userId) {
       return throwError(next, "User not found");
@@ -326,12 +325,12 @@ export const updateEvent = async (
       : event?.compressed_image || "";
 
     const linkToSend = type === "online" ? link : null;
-    const locationToSend = type === "in-person" ? location : null;
+    const locationToSend = type === "in-person" ? address : null;
     const tagsToSend = JSON.parse(tags);
     let latitude = 0;
     let longitude = 0;
     if (type === "in-person") {
-      const locationCoord = await getLatitudeAndLongitude(location);
+      const locationCoord = await getLatitudeAndLongitude(address as string);
 
       if (locationCoord) {
         latitude = locationCoord.latitude;

@@ -25,7 +25,8 @@ const {
   GROUP_DETAILS_EVENTS,
   EVENT_DETAILS,
   EDIT_EVENT,
-  RESET_PASSWORD
+  RESET_PASSWORD,
+  GOOGLE_SUCCESS_LOGIN
 } = RouteEndpoints;
 const LoginScreen = lazy(() => import("../screen/Login"));
 const SignupScreen = lazy(() => import("../screen/Signup"));
@@ -51,6 +52,7 @@ const GroupDetailsEventsScreen = lazy(() => import("../screen/GroupDetails/Group
 const EventDetailsScreen = lazy(() => import("../screen/EventDetails"))
 const ForgotPasswordScreen = lazy(() => import("../screen/ForgotPassword"))
 const ResetPasswordScreen = lazy(() => import("../screen/ResetPassword"))
+const GoogleSuccessLoginScreen = lazy(() => import("../screen/SocialLoginSuccess"))
 const Router = () => {
   return (
     <BrowserRouter>
@@ -59,6 +61,7 @@ const Router = () => {
         <Route element={<PublicRoute />}>
           <Route path={LOGIN} element={<LoginScreen />} />
           <Route path={SIGNUP} element={<SignupScreen />} />
+          <Route path={GOOGLE_SUCCESS_LOGIN} element={<GoogleSuccessLoginScreen />} />
           <Route path={FORGOT_PASSWORD} element={<ForgotPasswordScreen />} />
           <Route path={RESET_PASSWORD} element={<ResetPasswordScreen />} />
         </Route>
