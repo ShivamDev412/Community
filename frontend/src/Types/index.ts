@@ -312,3 +312,8 @@ export type LazyLoadedImageComponentProps = {
   compressedImage:string | undefined;
   alt:string
 }
+export type CustomHomeSelectType = {
+  value: string;
+  label: string;
+  active: boolean;
+}

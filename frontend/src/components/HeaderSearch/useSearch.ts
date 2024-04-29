@@ -1,4 +1,4 @@
-import { setLocation } from "@/redux/slice/homeSlice";
+import { setCoord, setLocation } from "@/redux/slice/homeSlice";
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/Store";
@@ -52,7 +52,6 @@ export const useSearch = () => {
 
   useEffect(() => {
     if (location?.city && location?.state) {
-      console.log(place);
       if (!place.includes(location.city) && !place.includes(location.state)) {
         handleSetPlace(location?.city, location?.state);
       }
@@ -102,6 +101,7 @@ export const useSearch = () => {
         (position) => {
           const latitude = position.coords.latitude;
           const longitude = position.coords.longitude;
+          dispatch(setCoord({ lat: latitude, lon: longitude }));
           fetchCity(latitude, longitude);
         },
         () => Toast("Unable to retrieve your location", "error")
@@ -116,10 +116,13 @@ export const useSearch = () => {
     placesService?.getDetails(
       {
         placeId: place,
-        fields: ["address_components"],
+        fields: ["address_components", "geometry"],
       },
       (placeDetails: any) => {
         const locationData = handleLocation(placeDetails.address_components);
+        const latitude = placeDetails.geometry.location.lat();
+        const longitude = placeDetails.geometry.location.lng();
+        dispatch(setCoord({ lat: latitude, lon: longitude }));
         if (locationData.location.city && locationData.location.state) {
           dispatch(setLocation(locationData));
           handleSetPlace(
@@ -161,7 +164,7 @@ export const useSearch = () => {
       const res = await axiosPrivate.get(
         `${API_ENDPOINTS.HOME}${Endpoints.SEARCH}?${query}`
       );
-      console.log(res);
+      console.log(res)
     } catch (error) {
       Toast("Something went wrong", "error");
     }

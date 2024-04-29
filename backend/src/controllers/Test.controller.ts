@@ -12,3 +12,7 @@ export const DeleteUser = async (req: Request, res: Response) => {
   });
   res.json(user);
 };
+export const GetEvents = async (req: Request, res: Response) => {
+    const events = await db.event.findMany();
+    res.json(events);
+}

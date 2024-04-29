@@ -109,14 +109,14 @@ export const NewEventSchema = z
     date: z.string().min(1, { message: "Event Date is required" }),
     time: z.string().min(1, { message: "Event Time is required" }),
     event_end_time: z.string().min(1, { message: "Event End Time is required" }),
-    location: z.string().optional(),
+    address: z.string().optional(),
     link: z.string().optional(),
 
   })
   .superRefine(
-    ({ type, location, link, time, event_end_time }, refinementContext) => {
+    ({ type, address, link, time, event_end_time }, refinementContext) => {
       if (type === "in-person") {
-        if (!location || location.length < 1) {
+        if (!address || address.length < 1) {
           refinementContext.addIssue({
             code: ZodIssueCode.custom,
             message: "Address is required for in-person events",

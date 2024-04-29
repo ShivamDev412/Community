@@ -23,7 +23,6 @@ const ProfileSection = () => {
   const { name, image } = useSelector((state: RootState) => state.user);
   const { logoutHandler } = useHeader();
   const [showDropdown, setShowDropdown] = useState(false);
-  console.log(image);
   return (
     <div>
       <Dropdown open={showDropdown}>

@@ -1,3 +1,4 @@
+import { Distances, HomeEvents } from "@/utils/Constant";
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -9,10 +10,13 @@ const initialState = {
     lat: 0,
     lon: 0,
   },
+  filters: {
+    distance: Distances[0],
+    type: HomeEvents[0],
+  },
   user: {},
   groups: {},
   events: {},
-  intrusts: {},
 };
 const homeSlice = createSlice({
   name: "home",
@@ -53,18 +57,40 @@ const homeSlice = createSlice({
     setEvents: (state, action) => {
       return {
         ...state,
-        events: action.payload.events,
+        events: action.payload,
       };
     },
-    setIntrusts: (state, action) => {
+    clearHomeState: (state) => {
+      return { ...state, ...initialState };
+    },
+    setFilters: (state, action) => {
       return {
         ...state,
-        intrusts: action.payload.intrusts,
+        filters: {
+          ...state.filters,
+          distance: action.payload.distance,
+          type: action.payload.type,
+        },
       };
     },
-    clearState: () => initialState, // Clear the state when the user logs out
-    clearUser: () => initialState, // Clear the user state when the user logs out
+    resetFilters: (state) => {
+      return {
+        ...state,
+        filters: {
+          ...state.filters,
+          distance: Distances[0],
+          type: HomeEvents[0],
+        },
+      };
+    },
   },
 });
-export const { setLocation, setCoord } = homeSlice.actions;
+export const {
+  setLocation,
+  setCoord,
+  clearHomeState,
+  setEvents,
+  setFilters,
+  resetFilters,
+} = homeSlice.actions;
 export default homeSlice.reducer;

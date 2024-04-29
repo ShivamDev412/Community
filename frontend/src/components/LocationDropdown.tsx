@@ -22,7 +22,6 @@ const LocationDropdown: FC<LocationDropdownProps> = ({
               key={prediction.place_id}
               className="text-black py-2 hover:cursor-pointer hover:bg-slate-100 transition-all p-2 rounded-md"
               onClick={(e) => {
-              
                 e.stopPropagation();
                 handleLocationSelect(
                   prediction.place_id,

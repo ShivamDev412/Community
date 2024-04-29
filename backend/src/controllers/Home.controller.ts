@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { throwError } from "../utils/Error";
 import getCity from "../services/GetCity";
 import db from "../database/db.config";
+import calculateDistance from "../services/CalculateDistance";
 export const searchByNameAndLocation = async (
   request: Request,
   response: Response,
@@ -23,7 +24,6 @@ export const getCityOfUser = async (
   next: NextFunction
 ) => {
   try {
-    const userId = request?.user?.id;
     const { lat, lon } = request.body;
     if (lat && lon) {
       const address = await getCity(lat, lon);
@@ -37,17 +37,49 @@ export const getCityOfUser = async (
         city,
         state,
       };
-      console.log(location);
       response.status(200).json(location);
-      // await db.user.update({
-      //   where: {
-      //     id: userId
-      //   },
-      //   data: {
-      //     location: coord
-      //   }
-      // })
     }
+  } catch (error) {
+    next(error);
+  }
+};
+export const getEvents = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  try {
+    const { query, latitude, longitude, radius } = request.query;
+    const radiusValue = radius || 30;
+    let events = await db.event.findMany();
+
+    if (typeof query === "string" && query.trim() !== "") {
+      const filteredEvents = events.filter((event) => {
+        const isQueryInName = event.name
+          .toLowerCase()
+          .includes(query.toLowerCase());
+        const isQueryInDescription = event.details
+          ?.toLowerCase()
+          .includes(query.toLowerCase());
+        return isQueryInName || isQueryInDescription;
+      });
+      events = filteredEvents;
+    }
+
+    events = events.filter((event) => {
+      const distance = calculateDistance(
+        latitude,
+        longitude,
+        event.latitude as number,
+        event.longitude as number
+      );
+      return distance <= +radiusValue;
+    });
+
+    response.status(200).json({
+      success: true,
+      data: events,
+    });
   } catch (error) {
     next(error);
   }

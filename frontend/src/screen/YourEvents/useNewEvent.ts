@@ -117,6 +117,7 @@ export const useNewEvent = () => {
     }
   };
   const onSubmit: SubmitHandler<FormField> = async (data) => {
+    debugger;
     const tagsToSend = tags
       .filter((value) => data.tags.includes(value.label))
       .map((value) => {
@@ -138,7 +139,7 @@ export const useNewEvent = () => {
     );
     formData.append("group", data.group);
     if (data.type === "in-person") {
-      data?.location && formData.append("address", data?.location);
+      data?.address && formData.append("address", data?.address);
     } else {
       data?.link && formData.append("link", data?.link);
     }

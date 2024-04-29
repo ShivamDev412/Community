@@ -8,6 +8,7 @@ import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 
 import { logOut } from "@/redux/slice/authSlice";
 import { clearAllEvents } from "@/redux/slice/eventSlice";
+import { clearHomeState } from "@/redux/slice/homeSlice";
 
 export const useHeader = () => {
   const { axiosPrivate } = useAxiosPrivate();
@@ -27,6 +28,7 @@ export const useHeader = () => {
         dispatch(clearAllEvents());
         dispatch(clearUser());
         dispatch(clearGroups());
+        dispatch(clearHomeState());
       }
     } catch (error) {
       Toast("Something went wrong", "error");
