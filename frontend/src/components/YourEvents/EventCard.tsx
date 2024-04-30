@@ -2,38 +2,66 @@ import { EventType } from "@/Types";
 import { FC } from "react";
 import moment from "moment";
 import { Link } from "react-router-dom";
+import { IoShareOutline } from "react-icons/io5";
+
 import LazyLoadedImageComponent from "../LazyLoadedImageComponent";
+import Toast from "@/utils/Toast";
 
 const EventCard: FC<{ data: EventType }> = ({ data }) => {
   const eventDate = moment(data?.event_date).utc().format("ddd, MMM D");
   const eventTime = moment(data?.event_time).utc().format("h:mm A");
+  const eventEndTime = moment(data?.event_end_time).utc().format("h:mm A");
+
+  const handleShareClick = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    id: string
+  ) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const eventUrl = `${window.location.origin}/event/${id}`;
+    navigator.clipboard
+      .writeText(eventUrl)
+      .then(() => Toast("Link copied to clipboard","success"))
+      .catch((error) => console.error("Failed to copy link: ", error));
+  };
+
   return (
-    <Link to={`/event/${data?.id}`}>
-      <div className="flex gap-4 mb-10">
-        <div className="w-[20%] h-[1in]">
-          <LazyLoadedImageComponent
-            image={data?.image}
-            compressedImage={data?.compressed_image}
-            alt={`${name}_image`}
-          />
+    <div className="event-card">
+      <Link to={`/event/${data?.id}`}>
+        <div className="flex gap-4 mb-10">
+          <div className="w-1/4 h-[1in]">
+            <LazyLoadedImageComponent
+              image={data?.image}
+              compressedImage={data?.compressed_image}
+              alt={`${data?.name}_cover_image`}
+            />
+          </div>
+          <div className="w-3/4">
+            <h3 className="uppercase font-semibold text-[rgba(124,111,80,1)] text-[0.95rem]">
+              {eventDate}
+              <span className="text-[rgba(124,111,80,1)]"> - </span>
+              {eventTime} - {eventEndTime}
+            </h3>
+            <h3 className="font-semibold text-lg">{data?.name}</h3>
+            <p className="text-gray-500 text-sm">{data?.group?.location}</p>
+            <div className="flex justify-between mt-5">
+              <p className="text-gray-500 text-sm">
+                {" "}
+                {data?.members
+                  ? `${data.members} ${
+                      data.members === 1 ? "attendee" : "attendees"
+                    }`
+                  : "No attendee"}
+              </p>
+              <button onClick={(e) => handleShareClick(e, data?.id)}>
+                {" "}
+                <IoShareOutline className="share-icon h-6 w-6 text-gray-600 hover:text-black transition-all" />
+              </button>
+            </div>
+          </div>
         </div>
-        <div>
-          <h3 className="uppercase font-semibold text-[rgba(124,111,80,1)]">
-            {eventDate}
-            <span className="text-[rgba(124,111,80,1)]"> - </span>
-            {eventTime}
-          </h3>
-          <h3 className="font-semibold text-lg">{data?.name}</h3>
-          <p className="text-gray-500 text-sm">{data?.group?.location}</p>
-          <p className="text-gray-500 text-sm mt-2">
-            {" "}
-            {data?.members
-              ? `${data.members} ${data.members === 1 ? "member" : "members"}`
-              : "No members"}
-          </p>
-        </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 };
 

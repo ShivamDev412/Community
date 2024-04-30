@@ -13,13 +13,13 @@ const YourInterests = () => {
         more={"See all your interests"}
       />
       <div className="flex flex-wrap gap-2 mt-2">
-        {interests.length > 0 ? (
-          interests.slice(0, 5).map((interest) => (
+        {interests?.length > 0 ? (
+          interests?.slice(0, 5).map((interest) => (
             <div
-              key={interest.id}
+              key={interest?.id}
               className="border border-cyan-700 px-2 py-1 rounded-lg text-white font-semibold bg-cyan-700"
             >
-              {interest.name}
+              {interest?.name}
             </div>
           ))
         ) : (

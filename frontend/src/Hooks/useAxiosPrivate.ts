@@ -38,10 +38,8 @@ const useAxiosPrivate = () => {
       async (error) => {
         const originalRequest = error.config;
         if (error.response?.status === 403 && !originalRequest?.sent) {
-          debugger;
           originalRequest.sent = true;
           const newAccessToken = await refreshToken();
-          debugger;
           if (!newAccessToken) return Promise.reject(error);
           else {
             dispatch(setCredentials(newAccessToken));

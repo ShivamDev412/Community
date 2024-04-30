@@ -1,7 +1,8 @@
+import { HomeDataType } from "@/Types";
 import { Distances, HomeEvents } from "@/utils/Constant";
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
+const initialState:HomeDataType = {
   location: {
     city: "",
     state: "",

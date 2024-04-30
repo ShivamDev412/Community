@@ -18,7 +18,11 @@ export interface LocationDropdownProps {
     description: string;
   }[];
   isPlacePredictionsLoading: boolean;
-  handleLocationSelect: (placeIdd:string,  placeId: string, addressType: string) => void;
+  handleLocationSelect: (
+    placeIdd: string,
+    placeId: string,
+    addressType: string
+  ) => void;
   className?: string;
   addressType?: string;
 }
@@ -44,12 +48,12 @@ export type UserType = {
   sex: string | null;
   looking_for?: string[];
   life_state?: string[];
-  interests:Interest[]
+  interests: Interest[];
 };
 type Interest = {
   id: string;
   name: string;
-}
+};
 export type SectionTitleProps = {
   title: string;
   url: string;
@@ -86,7 +90,7 @@ export type InputProps = {
   errors: any;
   id: string;
   disabled?: boolean;
-  getValues:Function
+  getValues: Function;
 };
 export interface SelectFieldProps extends InputProps {
   options: { value: string; label: string }[];
@@ -108,7 +112,7 @@ export type Group = {
   about?: string;
   image?: string;
 
-  compressed_image?:string
+  compressed_image?: string;
   created_at?: string;
   updated_at?: string;
 };
@@ -122,10 +126,10 @@ export type GroupsSliceType = {
   groupsCreated: Array<Group>;
   groupsInMember: Array<Group>;
   groupDetails: GroupDetails;
-  groupEvents:{
-    events:Array<EventDetailType & {members:number}>,
+  groupEvents: {
+    events: Array<EventDetailType & { members: number }>;
     pageNumber: number;
-  },
+  };
   pageNumberCreated: number;
   pageNumberInMember: number;
 };
@@ -140,7 +144,7 @@ export type EditProfileLinkProps = {
 export type ProfileImageProps = {
   location: string;
   image: string;
-  compressedImage:string;
+  compressedImage: string;
   name: string;
   email: string;
   joined_on_date: string;
@@ -191,7 +195,7 @@ export type GroupDetails = {
   id: string;
   group_type: string;
   image: string;
-  compressed_image:string,
+  compressed_image: string;
   location: string;
   latitude: number;
   longitude: number;
@@ -202,7 +206,7 @@ export type GroupDetails = {
     name: string;
     image: string;
     id: string;
-    compressed_image: string
+    compressed_image: string;
   };
   updated_at: string;
 };
@@ -218,10 +222,11 @@ export interface EventType {
   id: string;
   name: string;
   image: string;
-  compressed_image:string,
+  compressed_image: string;
   details: string;
   event_date: string;
   event_time: string;
+  event_end_time: string;
   event_type: "online" | "in-person";
   link: string;
   address: string | null;
@@ -263,7 +268,7 @@ type EventMembers = {
   type: string;
 };
 export type EventDetailType = {
-  event_id: string;
+  id: string;
   name: string;
   details: string;
   event_date: string;
@@ -275,10 +280,16 @@ export type EventDetailType = {
   tags: string[];
   created_at: string;
   image: string;
-  compressed_image:string,
+  compressed_image: string;
   members: EventMembers[];
-  host: { name: string; image: string; user_id: string };
-  group: { name: string; image: string; location: string; group_type: string, id: string };
+  host: { name: string; image: string; id: string };
+  group: {
+    name: string;
+    image: string;
+    location: string;
+    group_type: string;
+    id: string;
+  };
 };
 export type EventDetailsHeaderSectionProps = {
   eventName: string;
@@ -289,7 +300,7 @@ export type EventDetailsHeaderSectionProps = {
 };
 export type EventDetailBannerImageProps = {
   image: string;
-  compressedImage:string,
+  compressedImage: string;
   name: string;
 };
 export type EventGroupDetailsProp = {
@@ -308,12 +319,33 @@ export type EventAttendeesProps = {
   members: EventMembers[];
 };
 export type LazyLoadedImageComponentProps = {
-  image:string | undefined;
-  compressedImage:string | undefined;
-  alt:string
-}
+  image: string | undefined;
+  compressedImage: string | undefined;
+  alt: string;
+};
 export type CustomHomeSelectType = {
   value: string;
   label: string;
   active: boolean;
-}
+};
+
+type HomeEventType = {
+  [timestamp: number]: EventType[];
+};
+export type HomeDataType = {
+  location: {
+    city: string;
+    state: string;
+  };
+  coord: {
+    lat: number;
+    lon: number;
+  };
+  filters: {
+    distance: CustomHomeSelectType;
+    type: CustomHomeSelectType;
+  };
+  user: UserType | {};
+  groups: Group[] | {};
+  events: HomeEventType | {};
+};

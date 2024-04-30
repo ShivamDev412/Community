@@ -12,6 +12,7 @@ export const useEventDetails = () => {
   const dispatch = useDispatch();
   const { eventId } = useParams();
   const { eventDetails} = useSelector((state: RootState) => state.events);
+  const {id} = useSelector((state: RootState) => state.user);
   const getEventDetails = async () => {
     try {
       dispatch(setLoading(true));
@@ -26,10 +27,15 @@ export const useEventDetails = () => {
       Toast(err.message, "error");
     }
   };
+  const attendEvent = async (id:string) => {
+
+  }
   useEffect(() => {
     getEventDetails();
   }, [eventId]);
   return {
     eventDetails,
+    id,
+    attendEvent
   };
 };

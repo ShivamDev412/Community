@@ -2,18 +2,19 @@ import { RootState } from "@/redux/RootReducer";
 import { setLoading } from "@/redux/slice/loadingSlice";
 import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 import { setUser } from "@/redux/slice/userSlice";
-import { resetFilters, setEvents } from "@/redux/slice/homeSlice";
+import { setEvents } from "@/redux/slice/homeSlice";
+
 export const useHome = () => {
   const dispatch = useDispatch();
   const { axiosPrivate } = useAxiosPrivate();
   const { name } = useSelector((state: RootState) => state.user);
-  const { coord } = useSelector((state: RootState) => state.home);
-  const [radius, setRadius] = useState(30);
+  const { coord, filters } = useSelector((state: RootState) => state.home);
+
   const getUserDetails = async () => {
     try {
       dispatch(setLoading(true));
@@ -36,10 +37,22 @@ export const useHome = () => {
     }
   };
   const getQuery = (query: string) => {
-    const que = `?radius=${radius}&latitude=${coord.lat}&longitude=${coord.lon}`;
-    if (query) {
-      return `${que}&query=${query}`;
+    let que = `?`;
+    if (filters.type.value.trim() !== "") {
+      que += `type=${filters.type.value}&`;
     }
+    if (filters.distance.value.trim() !== "") {
+      que += `radius=${filters.distance.value}&`;
+    }
+    if (query.trim() !== "") {
+      que += `query=${query}&`;
+    }
+    que += `latitude=${coord.lat}&longitude=${coord.lon}`;
+
+    if (que.endsWith("&")) {
+      que = que.slice(0, -1);
+    }
+
     return que;
   };
   const getEvents = async () => {
@@ -62,9 +75,6 @@ export const useHome = () => {
   }, []);
   useEffect(() => {
     getEvents();
-  }, [coord]);
-  const handleResetFilter = () => {
-    dispatch(resetFilters())
-  }
-  return { name, radius, setRadius, handleResetFilter };
+  }, [coord, filters]);
+  return { name };
 };

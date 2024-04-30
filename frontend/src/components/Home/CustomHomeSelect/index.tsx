@@ -14,7 +14,7 @@ const CustomHomeSelect: FC<{
     showDropDown,
     setShowDropDown,
     isActive,
-  } = useCustomHomeSelect(selectOptions);
+  } = useCustomHomeSelect(selectOptions, selectType);
   return (
     <div className="relative w-[9rem]">
       <button
@@ -33,14 +33,14 @@ const CustomHomeSelect: FC<{
         />
       </button>
       {showDropDown && (
-        <div className="absolute top-10 left-0 flex flex-col border shadow-md items-start gap-2 z-[999] bg-white w-full">
-          {options.map((item) => (
+        <div className="absolute top-10 left-0 flex flex-col border shadow-md items-start gap-2  bg-white w-full">
+          {options?.map((item) => (
             <button
-              key={item.value}
-              onClick={() => handleSelect(item.value)}
+              key={item?.value}
+              onClick={() => handleSelect(item?.value)}
               className="text-gray-600 hover:bg-stone-100 hover:cursor-pointer w-full px-2 py-1.5 text-sm whitespace-nowrap"
             >
-              {item.label}
+              {item?.label}
             </button>
           ))}
         </div>
