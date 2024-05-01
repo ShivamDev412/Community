@@ -6,7 +6,7 @@ const initialState: EventsState = {
   attendingEvents: [],
   pastEvents: [],
   eventDetails: {
-    event_id: "",
+    id: "",
     name: "",
     details: "",
     event_date: "",
@@ -23,7 +23,7 @@ const initialState: EventsState = {
     host: {
       name: "",
       image: "",
-      user_id: "",
+      id: "",
     },
     group: {
       id: "",

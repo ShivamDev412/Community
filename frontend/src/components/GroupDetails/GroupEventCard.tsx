@@ -15,13 +15,13 @@ const GroupEventCard: FC<EventDetailType> = ({
   details,
   members,
   image,
-  event_id,
+  id,
 }) => {
   const eventDate = moment(event_date).format("ddd, MMM D YYYY");
   const eventTime = moment(event_time, "HH:mm:ss").format("h:mm a");
   const eventEndTime = moment(event_end_time, "HH:mm:ss").format("h:mm a");
   return (
-    <Link to={`/event/${event_id}`}>
+    <Link to={`/event/${id}`}>
       <div className="bg-white rounded-lg p-4 shadow flex gap-3">
         <div className="h-[1in] w-auto">
           <img

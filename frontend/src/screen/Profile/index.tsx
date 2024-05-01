@@ -9,7 +9,7 @@ import {
 } from "@/components/Profile";
 
 const Profile = () => {
-  const { image, compressedImage, name, location, email, joined_on_date } =
+  const { image, compressed_image, name, location, email, joined_on_date } =
     useProfile();
   return (
     <section className="overflow-x-hidden bg-[#f8f8f9] h-full pb-10 mt-5">
@@ -18,7 +18,7 @@ const Profile = () => {
           <section className="bg-white p-6 rounded-lg">
             <ProfileImage
               image={image ? image : ""}
-              compressedImage={compressedImage}
+              compressedImage={compressed_image ? compressed_image : ""}
               name={name}
               email={email}
               joined_on_date={joined_on_date}

@@ -111,13 +111,12 @@ export const useNewEvent = () => {
         );
       case "update":
         return await axiosPrivateFile.put(
-          `${API_ENDPOINTS.EVENT}${Endpoints.UPDATE_EVENT}/${eventDetails.event_id}`,
+          `${API_ENDPOINTS.EVENT}${Endpoints.UPDATE_EVENT}/${eventDetails.id}`,
           formData
         );
     }
   };
   const onSubmit: SubmitHandler<FormField> = async (data) => {
-    debugger;
     const tagsToSend = tags
       .filter((value) => data.tags.includes(value.label))
       .map((value) => {

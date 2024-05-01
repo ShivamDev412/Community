@@ -35,7 +35,7 @@ export const usePersonalInfo = () => {
   } = useForm<PersonalInfoType>({
     defaultValues: {
       birthday: dob,
-      gender: sex,
+      gender: sex as string,
       lookingFor: [],
       lifeStages: [],
     },
@@ -43,7 +43,7 @@ export const usePersonalInfo = () => {
   });
   console.log(life_state)
   useEffect(() => {
-    if (looking_for.length) {
+    if (looking_for?.length) {
       looking_for.forEach((item) => {
         setLookingFor((prev) => {
           return prev.map((prevItem) => {
@@ -57,7 +57,7 @@ export const usePersonalInfo = () => {
     }
   }, [looking_for]);
   useEffect(() => {
-    if (life_state.length) {
+    if (life_state?.length) {
       life_state.forEach((item) => {
         setLifeStages((prev) => {
           return prev.map((prevItem) => {
