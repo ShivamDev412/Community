@@ -13,7 +13,12 @@ import {
 import GroupAndEventEditAndDelete from "@/components/GroupAndEventEditAndDelete";
 
 const EventDetail = () => {
-  const { eventDetails: event, id: userId, attendEvent } = useEventDetails();
+  const {
+    eventDetails: event,
+    id: userId,
+    attendEvent,
+    isAttending,
+  } = useEventDetails();
   const eventDate = moment(event?.event_date).utc().format("ddd, MMM D YYYY");
   const eventTime = moment(event?.event_time, "HH:mm:ss")
     .utc()
@@ -45,10 +50,18 @@ const EventDetail = () => {
                 name={event?.name ? event?.name : ""}
                 url={`/edit-event/${event.id}`}
               />
+            ) : isAttending ? (
+              <Button
+                className="font-semibold text-lg bg-green-900
+              border-green-700 w-fit hover:cursor-default hover:opacity-100"
+              >
+                You're Going
+              </Button>
             ) : (
               <Button
-                className="bg-green-900 border-green-800 w-fit"
-                onClick={() => attendEvent(event?.id)}
+                className="bg-red-500
+                  border-red-500 w-fit"
+                onClick={attendEvent}
               >
                 {event?.link ? "Attend Online" : "Attend"}
               </Button>

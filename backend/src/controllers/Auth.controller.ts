@@ -371,11 +371,13 @@ export const googleCallback = (req: Request, res: Response) => {
         id: existingUser.id,
         email: existingUser.email,
       });
+      console.log(req.cookies, "REF")
       const newRefreshTokenArray = !req.cookies["community-refresh-token"]
         ? existingUser.refresh_token
         : existingUser.refresh_token.filter((token: string) => {
             token !== req.cookies["community-refresh-token"];
           });
+        console.log(newRefreshTokenArray, "REFRESH_TOKEN_ARRAY")
       if (req.cookies["community-refresh-token"])
         ClearCookie(res, "community-refresh-token");
       await db.user.update({

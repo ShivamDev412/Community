@@ -28,16 +28,16 @@ const EventCard: FC<{ data: EventType }> = ({ data }) => {
   return (
     <div className="event-card">
       <Link to={`/event/${data?.id}`}>
-        <div className="flex gap-4 mb-10">
-          <div className="w-1/4 h-[1in]">
+        <div className="flex xs:gap-2 sm:gap-4 mb-10 items-start">
+          <div className="xs:w-2/5 sm:w-1/4 ">
             <LazyLoadedImageComponent
               image={data?.image}
               compressedImage={data?.compressed_image}
               alt={`${data?.name}_cover_image`}
             />
           </div>
-          <div className="w-3/4">
-            <h3 className="uppercase font-semibold text-[rgba(124,111,80,1)] text-[0.95rem]">
+          <div className="w-3/5 sm:w-3/4 sm:mt-5">
+            <h3 className="uppercase font-semibold text-[rgba(124,111,80,1)] text-sm sm:text-[0.95rem]">
               {eventDate}
               <span className="text-[rgba(124,111,80,1)]"> - </span>
               {eventTime} - {eventEndTime}

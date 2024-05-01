@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { AuthPayload } from "../Types/Auth.type";
-import { User } from "../Types";
 declare global {
   namespace Express {
     interface Request {
@@ -20,16 +19,17 @@ export const AuthMiddleware = (
   const authHeader =
     request.headers.authorization || request.headers.Authorization;
   if (!authHeader?.includes("Bearer ")) {
-    response.status(401).json({ message: "Invalid authorization header" });
-    return;
+    return response
+      .status(401)
+      .json({ message: "Invalid authorization header" });
   }
   const token = authHeader?.toString().split(" ")[1];
   jwt.verify(token, process.env.JWT_SECRET_KEY!, (err, decode) => {
     if (err) {
-      response.status(403).json({ message: "Invalid token" });
+      return response.status(403).json({ message: "Invalid authorization token" });
     } else {
       request.user = decode as AuthPayload;
+      next();
     }
-    next();
   });
 };

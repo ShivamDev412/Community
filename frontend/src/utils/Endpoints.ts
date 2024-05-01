@@ -68,6 +68,7 @@ export const Endpoints = {
   ADD_INTERESTS:"/add-interests",
   DELETE_INTERESTS:"/delete-interests",
   GET_USER_INTERESTS:"/get-user-interests",
+  REGISTER_TO_EVENT:"/register-to-event",
 
 
   USER_EVENTS:"/user-events",

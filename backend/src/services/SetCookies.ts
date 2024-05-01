@@ -1,9 +1,9 @@
-import e, { Response } from "express";
-const cookieOptions = {
+import e, { Response, CookieOptions } from "express";
+const cookieOptions: CookieOptions = {
   httpOnly: true,
-  secure: true,
+  secure: true, 
   expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10),
-  sameSite: false,
+  sameSite: "none" as const,
 };
 const SetCookies = (response: Response, cookieName: string, cookie: string) => {
   response.cookie(cookieName, cookie, cookieOptions);

@@ -7,6 +7,7 @@ export const ENDPOINTS = {
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
     USER: "/",
+    REGISTER_TO_EVENT: "/register-to-event",
     
     GOOGLE_LOGIN: "/login/google",
     GOOGLE_CALLBACK: "/google/callback",

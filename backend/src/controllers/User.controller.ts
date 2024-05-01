@@ -25,13 +25,11 @@ export const LogOut = async (
   if (!refreshToken) {
     return throwError(next, "No refresh token found");
   }
-
   const existingUser = await db.user.findFirst({
     where: {
       id: userId,
     },
   });
-
   const deleteRefreshTokenFromDb = await db.user.update({
     where: {
       id: existingUser?.id,
@@ -569,15 +567,17 @@ export const getUserEvents = async (
     let events: any[] = [];
     switch (tab) {
       case "attending":
-        events = await db.event.findMany({
+        events = await db.userEvent.findMany({
           where: {
-            user_events: {
-              user_id: userId,
-            },
+            user_id: userId,
+          },
+          select: {
+            event: true,
           },
           skip: offset,
           take: pageSize,
         });
+        events = events.map((event) => event.event);
         break;
       case "hosting":
         events = await db.event.findMany({
@@ -595,7 +595,7 @@ export const getUserEvents = async (
         events = await db.event.findMany({
           where: {
             event_date: {
-              lt: moment().subtract(24, "hours").toDate(),
+              lt: moment().toDate(),
             },
           },
           skip: offset,
@@ -626,3 +626,53 @@ export const getUserEvents = async (
     next(err);
   }
 };
+
+export const registerToEvent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId: string | undefined = req.user?.id;
+    const { eventId } = req.body;
+    
+    if (!userId) {
+      return throwError(next, "User not found");
+    }
+
+    // Check if the event exists
+    const event = await db.event.findUnique({
+      where: {
+        id: eventId,
+      },
+    });
+
+    if (!event) {
+      return throwError(next, "Event not found");
+    }
+
+    // Create userEvent entry for the event
+    await db.userEvent.create({
+      data: {
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        event: {
+          connect: {
+            id: eventId,
+          },
+        },
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "User registered to event successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+

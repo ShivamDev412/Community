@@ -26,7 +26,7 @@ model User {
   google_id             String?             @unique
   Event                 Event[]
   password_reset_tokens PasswordResetToken?
-  events                UserEvent?
+  events                UserEvent[]
   groups                UserGroup?
   interests             UserInterest[]
   refresh_token         String[]            @default([])
@@ -78,7 +78,7 @@ model Event {
   group            Group      @relation(fields: [group_id], references: [id])
   host             User       @relation(fields: [host_id], references: [id])
   tags             Interest[] @relation("EventInterests")
-  user_events      UserEvent?
+  user_events      UserEvent[]
 }
 
 model Category {
@@ -123,12 +123,13 @@ model UserGroup {
 }
 
 model UserEvent {
-  user_id    String   @unique
-  event_id   String   @unique
+  user_id    String   
+  event_id   String   
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
   event      Event    @relation(fields: [event_id], references: [id])
   user       User     @relation(fields: [user_id], references: [id])
+  @@unique([user_id, event_id])
 }
 
 // model EventTag {
