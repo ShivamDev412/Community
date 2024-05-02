@@ -37,6 +37,8 @@ export const ENDPOINTS = {
     SEARCH:"/search",
     GET_CITY:"/get-city",
     GET_EVENTS:"/get-events",
+    RSVP_EVENTS:"/rspv-events",
+    CANCEL_RSVP:"/cancel-rsvp",
 
     EDIT_PROFILE:"/edit-profile",
     UPDATE_PERSONAL_INFO:"/update-personal-info",

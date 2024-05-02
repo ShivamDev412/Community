@@ -675,4 +675,40 @@ export const registerToEvent = async (
     next(err);
   }
 };
+export const cancelRSVP = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId: string | undefined = req.user?.id;
+    const { eventId } = req.body;
+
+    if (!userId) {
+      return throwError(next, "User not found");
+    }
+    const event = await db.event.findUnique({
+      where: {
+        id: eventId,
+      },
+    });
+    if (!event) {
+      return throwError(next, "Event not found");
+    }
+    await db.userEvent.delete({
+      where: {
+        user_id_event_id: {
+          user_id: userId,
+          event_id: eventId,
+        },
+      },
+    });
+    res.status(200).json({
+      success: true,
+      message: "RSVP canceled successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+}
 

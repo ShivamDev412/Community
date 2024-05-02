@@ -261,7 +261,7 @@ export type TabPanelComponentProps = {
   data: EventType[];
 };
 type EventMembers = {
-  user_id: string;
+  id: string;
   name: string;
   email: string;
   image: string;
@@ -348,4 +348,5 @@ export type HomeDataType = {
   user: UserType | {};
   groups: Group[] | {};
   events: HomeEventType | {};
+  rsvpEvents: EventType[];
 };

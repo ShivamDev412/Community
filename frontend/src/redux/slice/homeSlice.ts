@@ -18,6 +18,7 @@ const initialState:HomeDataType = {
   user: {},
   groups: {},
   events: {},
+  rsvpEvents: [],
 };
 const homeSlice = createSlice({
   name: "home",
@@ -61,6 +62,12 @@ const homeSlice = createSlice({
         events: action.payload,
       };
     },
+    setRsvpEvents: (state, action) => {
+      return {
+        ...state,
+        rsvpEvents: action.payload,
+      };
+    },
     clearHomeState: (state) => {
       return { ...state, ...initialState };
     },
@@ -93,5 +100,6 @@ export const {
   setEvents,
   setFilters,
   resetFilters,
+  setRsvpEvents,
 } = homeSlice.actions;
 export default homeSlice.reducer;

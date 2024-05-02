@@ -5,7 +5,7 @@ import getCity from "../services/GetCity";
 import db from "../database/db.config";
 import calculateDistance from "../services/CalculateDistance";
 import { getImage } from "../services/UploadToS3";
-export const searchByNameAndLocation = async (
+export const SearchByNameAndLocation = async (
   request: Request,
   response: Response,
   next: NextFunction
@@ -20,7 +20,7 @@ export const searchByNameAndLocation = async (
     next(error);
   }
 };
-export const getCityOfUser = async (
+export const GetCityOfUser = async (
   request: Request,
   response: Response,
   next: NextFunction
@@ -46,7 +46,7 @@ export const getCityOfUser = async (
   }
 };
 
-export const getEvents = async (
+export const GetEvents = async (
   request: Request,
   response: Response,
   next: NextFunction
@@ -65,6 +65,9 @@ export const getEvents = async (
         },
         event_date: {
           gte: today.toDate(),
+        },
+        event_end_time: {
+          gt: moment.utc().toDate(),
         },
       },
       orderBy: {
@@ -140,6 +143,72 @@ export const getEvents = async (
     response.status(200).json({
       success: true,
       data: groupedEvents,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const GetAttendingEvents = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  try {
+    const today = moment().utc().startOf("day");
+    const userId = request?.user?.id;
+
+    let events = await db.userEvent.findMany({
+      where: {
+        user_id: userId,
+        event: {
+          event_date: {
+            gte: today.toDate(),
+          },
+          event_end_time: {
+            gt: moment.utc().toDate(),
+          },
+        },
+      },
+      select: {
+        event: true,
+      },
+      orderBy: {
+        event: {
+          event_date: "asc",
+        },
+      },
+    });
+    events = await Promise.all(
+      events.map(async ({ event }) => {
+        return {
+          event: {
+            ...event,
+            image: (await getImage(event?.image || "")) as string,
+            compressed_image: (await getImage(
+              event?.compressed_image || ""
+            )) as string,
+            group: await db.group.findUnique({
+              where: {
+                id: event?.group_id,
+              },
+              select: {
+                name: true,
+                location: true,
+              },
+            }),
+            members: await db.userEvent.count({
+              where: {
+                event_id: event?.id,
+              },
+            }),
+          },
+        };
+      })
+    );
+    const eventsToSend = events.map(({ event }) => event);
+    response.status(200).json({
+      success: true,
+      data: eventsToSend,
     });
   } catch (error) {
     next(error);

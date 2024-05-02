@@ -47,8 +47,25 @@ export const useEventDetails = () => {
     }
   };
   const isUserAttending = () => {
-    return eventDetails.members.some((attendee) => attendee.user_id === id);
+    return eventDetails.members.some((attendee) => attendee.id === id);
   }
+  const cancelRSVP = async () => {
+    try {
+      const res = await axiosPrivate.post(
+        `${API_ENDPOINTS.USER}${Endpoints.CANCEL_RSVP}`,
+        {
+          eventId,
+        }
+      );
+      if (res.data.success) {
+        getEventDetails()
+        setIsAttending(false);
+        Toast(res.data.message, "success");
+      }
+    } catch (err: any) {
+      Toast(err.message, "error");
+    }
+  };
   useEffect(() => {
     getEventDetails();
   }, [eventId]);
@@ -61,5 +78,6 @@ export const useEventDetails = () => {
     attendEvent,
     isUserAttending,
     isAttending,
+    cancelRSVP,
   };
 };

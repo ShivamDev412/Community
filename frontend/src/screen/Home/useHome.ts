@@ -70,8 +70,10 @@ export const useHome = () => {
       Toast(err.message, "error");
     }
   };
+
   useEffect(() => {
     getUserDetails();
+    
   }, []);
   useEffect(() => {
     getEvents();

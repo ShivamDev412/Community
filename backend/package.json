@@ -24,6 +24,7 @@
     "@types/node-schedule": "^2.1.7",
     "@types/nodemailer": "^6.4.14",
     "@types/pg": "^8.11.0",
+    "@types/spdy": "^3.4.9",
     "dotenv": "^16.4.4",
     "nodemon": "^3.0.3",
     "prisma": "^5.12.1",
@@ -55,6 +56,7 @@
     "pg": "^8.11.5",
     "postgres": "^3.4.3",
     "sharp": "^0.33.2",
+    "spdy": "^4.0.2",
     "zod": "^3.22.4"
   }
 }

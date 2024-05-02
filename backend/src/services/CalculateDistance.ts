@@ -1,4 +1,4 @@
-function calculateDistance(
+function calculateDistanceInMiles(
   lat1: any,
   lon1: any,
   lat2: number,
@@ -14,7 +14,11 @@ function calculateDistance(
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distance = R * c;
-  return distance;
+  const distanceInKilometers = R * c;
+
+  const distanceInMiles = distanceInKilometers * 0.621371;
+  
+  return distanceInMiles;
 }
-export default calculateDistance;
+
+export default calculateDistanceInMiles;

@@ -18,6 +18,7 @@ const EventDetail = () => {
     id: userId,
     attendEvent,
     isAttending,
+    cancelRSVP,
   } = useEventDetails();
   const eventDate = moment(event?.event_date).utc().format("ddd, MMM D YYYY");
   const eventTime = moment(event?.event_time, "HH:mm:ss")
@@ -51,12 +52,20 @@ const EventDetail = () => {
                 url={`/edit-event/${event.id}`}
               />
             ) : isAttending ? (
-              <Button
-                className="font-semibold text-lg bg-green-900
-              border-green-700 w-fit hover:cursor-default hover:opacity-100"
-              >
-                You're Going
-              </Button>
+              <div className="my-5 flex gap-2 w-fit">
+                <Button
+                  className="font-semibold text-lg bg-green-900
+              border-green-700 hover:cursor-default hover:opacity-100"
+                >
+                  You're Going
+                </Button>
+                <Button
+                  className="bg-red-700 border-red-700"
+                  onClick={cancelRSVP}
+                >
+                  Cancel RSVP
+                </Button>
+              </div>
             ) : (
               <Button
                 className="bg-red-500

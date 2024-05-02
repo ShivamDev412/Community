@@ -101,7 +101,7 @@ export const createEvent = async (
           host_id: userId,
           group_id: group,
           event_date: `${date}T00:00:00Z`,
-          event_time: new Date(`${date}T${time}:00Z`).toISOString(), 
+          event_time: new Date(`${date}T${time}:00Z`).toISOString(),
           event_end_time: new Date(
             `${date}T${event_end_time}:00Z`
           ).toISOString(),
@@ -148,16 +148,23 @@ export const getEventDetails = async (
       db.event.findUnique({
         where: {
           id: eventId,
-        }
+        },
       }),
       db.userEvent.findMany({
         where: {
-          event_id: eventId
+          event_id: eventId,
         },
         include: {
-          user: true 
-        }
-      })
+          user: {
+            select: {
+              name: true,
+              image: true,
+              compressed_image: true,
+              id: true,
+            },
+          },
+        },
+      }),
     ]);
     const [eventImage, compressedEventImage, host, group, members] =
       await Promise.all([
@@ -187,18 +194,17 @@ export const getEventDetails = async (
           },
         }),
         Promise.all(
-          eventMembers.map(async (user) => {
-            try {
-              const image = user?.user?.image?.includes("https://")
-                ? user?.user.image
-                : await getImage(user.user?.image || "");
-              const compressedImage = user?.user?.image?.includes("https://")
-                ? user.user?.image
-                : await getImage(user.user?.compressed_image || "");
-              return image ? { ...user, image, compressedImage } : null;
-            } catch (error) {
-              throw new Error("Error fetching image");
-            }
+          eventMembers.map(async ({ user }) => {
+            return {
+              ...user,
+              image: user?.image?.includes("https://")
+                ? user.image
+                : await getImage(user?.image || ""),
+              compressed_image: user?.image?.includes("https://")
+                ? user.image
+                : await getImage(user?.compressed_image || ""),
+              id: user?.id,
+            };
           })
         ),
       ]);
@@ -216,20 +222,20 @@ export const getEventDetails = async (
     const groupCompressedImage = group
       ? await getImage(group?.compressed_image || "")
       : null;
+   
     const membersToSend = members.map((member) => ({
       ...member,
       image: member?.image || null,
-      compressed_image: member?.compressedImage || null,
+      compressed_image: member?.compressed_image || null,
       type: "member",
     }));
-
     membersToSend.unshift({
-      ...host,
+      id: host?.id ? host.id : "",
       image: hostImage || null,
       compressed_image: hostCompressedImage || null,
       type: "host",
+      name: host?.name || "",
     });
-
     res.status(200).json({
       success: true,
       message: "Event details fetched successfully",
@@ -284,14 +290,14 @@ export const updateEvent = async (
     const event = await db.event.findUnique({
       where: {
         id: eventId,
-      }
+      },
     });
     // Check if event name already exists and is not the same event
     if (event?.name !== name) {
       const eventExists = await db.event.findFirst({
         where: {
           id: eventId,
-        }
+        },
       });
       if (eventExists) {
         return throwError(next, { name: "Event name already exists" });

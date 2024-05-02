@@ -59,6 +59,7 @@ export const Endpoints = {
   SEARCH: "/search",
   GET_CITY: "/get-city",
   GET_EVENTS: "/get-events",
+  RSVP_EVENTS: "/rspv-events",
 
   EDIT_PROFILE: "/edit-profile",
   UPDATE_PERSONAL_INFO: "/update-personal-info",
@@ -69,6 +70,7 @@ export const Endpoints = {
   DELETE_INTERESTS:"/delete-interests",
   GET_USER_INTERESTS:"/get-user-interests",
   REGISTER_TO_EVENT:"/register-to-event",
+  CANCEL_RSVP:"/cancel-rsvp",
 
 
   USER_EVENTS:"/user-events",

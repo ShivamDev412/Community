@@ -12,7 +12,7 @@ function Home() {
         Welcome, {name?.split(" ")[0]} 👋
       </h1>
       <section className="xs:flex xs:flex-col sm:flex-row justify-between gap-[3rem] items-start">
-        <div className="w-full sm:w-4/12 bg-stone-100 p-6 rounded-lg gap-4 flex flex-col">
+        <div className="w-full sm:w-4/12 bg-stone-100 p-4 rounded-lg gap-4 flex flex-col">
           <YourNextEvents />
           <YourGroups />
           <YourInterests />
