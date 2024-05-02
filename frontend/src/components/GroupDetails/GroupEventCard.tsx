@@ -52,7 +52,7 @@ const GroupEventCard: FC<EventDetailType> = ({
           <div className="mt-5 flex relative items-center">
             {members?.slice(0, 5).map((member, index) => (
               <div
-                key={member.user_id}
+                key={member.id}
                 className={`h-[3rem] w-[3rem] ${index > 0 ? "-ml-5" : ""}`}
               >
                 <img
