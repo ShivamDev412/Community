@@ -3,13 +3,13 @@ import LazyLoadedImageComponent from "@/components/LazyLoadedImageComponent";
 import moment from "moment";
 import { Link } from "react-router-dom";
 
-const RsvpEventCard: React.FC<{ event: EventType }> = ({ event }) => {
+const RsvpEventCard: React.FC<{ event: EventType, isLast:boolean }> = ({ event, isLast }) => {
   const eventDate = moment(event?.event_date).utc().format("ddd, MMM D");
   const eventTime = moment(event?.event_time).utc().format("h:mm A");
   const eventEndTime = moment(event?.event_end_time).utc().format("h:mm A");
   return (
-    <Link to={`/event/${event?.id}`} className="border-b-2">
-      <div className="flex gap-2 items-start mb-5">
+    <Link to={`/event/${event?.id}`} className={!isLast ? "border-b-2": ""}>
+      <div className="flex gap-2 items-start py-5">
         <div className="xs:w-2/5 sm:w-[35%] ">
           <LazyLoadedImageComponent
             image={event?.image}

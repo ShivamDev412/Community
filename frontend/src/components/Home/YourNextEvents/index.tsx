@@ -13,10 +13,10 @@ function YourNextEvents() {
         url={RouteEndpoints.YOUR_EVENTS}
         more={"View All"}
       />
-      {rsvpEvents.length ? (
-        <div className="flex flex-col gap-4 p-4 mt-5 rounded-lg bg-white border border-gray-300 py-4 my-4 ">
-          {rsvpEvents.map((event: any) => (
-            <RsvpEventCard key={event.id} event={event} />
+      {rsvpEvents?.length ? (
+        <div className="flex flex-col p-4 mt-5 rounded-lg bg-white border border-gray-300 py-4 my-4 ">
+          {rsvpEvents.map((event: any,  index:number) => (
+            <RsvpEventCard key={event.id} event={event} isLast={index === rsvpEvents.length - 1}/>
           ))}
         </div>
       ) : (

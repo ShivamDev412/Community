@@ -565,14 +565,28 @@ export const getUserEvents = async (
     }
     const offset = (pageNum - 1) * pageSize;
     let events: any[] = [];
+    const today = moment().utc().startOf("day");
     switch (tab) {
       case "attending":
         events = await db.userEvent.findMany({
           where: {
             user_id: userId,
+            event: {
+              event_date: {
+                gte: today.toDate(),
+              },
+              event_end_time: {
+                gt: moment.utc().toDate(),
+              },
+            },
           },
           select: {
             event: true,
+          },
+          orderBy: {
+            event: {
+              event_date: "asc",
+            },
           },
           skip: offset,
           take: pageSize,
@@ -595,8 +609,14 @@ export const getUserEvents = async (
         events = await db.event.findMany({
           where: {
             event_date: {
-              lt: moment().toDate(),
+              lt: today.toDate(),
             },
+            event_end_time:{
+              lt: moment.utc().toDate(),
+            }
+          },
+          orderBy: {
+            event_date: "desc",
           },
           skip: offset,
           take: pageSize,
@@ -635,7 +655,7 @@ export const registerToEvent = async (
   try {
     const userId: string | undefined = req.user?.id;
     const { eventId } = req.body;
-    
+
     if (!userId) {
       return throwError(next, "User not found");
     }
@@ -710,5 +730,4 @@ export const cancelRSVP = async (
   } catch (err) {
     next(err);
   }
-}
-
+};
