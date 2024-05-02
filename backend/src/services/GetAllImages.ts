@@ -1,6 +1,6 @@
 import { NextFunction } from "express";
 import { throwError } from "../utils/Error";
-import { getImage } from "../services/UploadToS3";
+import { getImage } from "./UploadToS3";
 
 export const getAllImages = async (data: any, next: NextFunction) => {
   return await Promise.all(

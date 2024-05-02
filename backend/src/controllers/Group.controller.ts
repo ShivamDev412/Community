@@ -7,7 +7,7 @@ import {
   uploadToS3,
 } from "../services/UploadToS3";
 import getImageDimensions from "../services/GetImageDimension";
-import { getAllImages } from "../Types/GetAllImages";
+import { getAllImages } from "../services/GetAllImages";
 import { getLatitudeAndLongitude } from "../services/GetLatitudeAndLongitude";
 import db from "../database/db.config";
 import { NewGroupSchema } from "../utils/Validation";
@@ -306,8 +306,8 @@ export const getAllEventsInGroup = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = request?.user?.id;
-    const groupId:unknown = request?.query?.groupId;
+    const userId = request?.user?.id;
+    const groupId: unknown = request?.query?.groupId;
     if (!userId) {
       return throwError(next, "User not found");
     }
@@ -323,8 +323,7 @@ export const getAllEventsInGroup = async (
       }),
       next
     );
-
-    const eventIds = eventsWithImages.map((event) => event.event_id);
+    const eventIds = eventsWithImages.map((event) => event.id);
     const members = await Promise.all(
       eventIds.map(async (eventId) => {
         const eventMembers = await db.userEvent.findMany({
@@ -338,10 +337,12 @@ export const getAllEventsInGroup = async (
         const membersWithImages = await Promise.all(
           eventMembers.map(async (member) => ({
             ...member,
-            image: await getImage(member?.user?.image || ""),
-            compressed_image: await getImage(
-              member.user.compressed_image || ""
-            ),
+            image: member?.user?.image?.includes("https://")
+              ? member?.user?.image
+              : await getImage(member?.user?.image || ""),
+            compressed_image: member?.user?.image?.includes("https://")
+              ? member?.user?.image
+              : await getImage(member.user.compressed_image || ""),
           }))
         );
         return membersWithImages;
