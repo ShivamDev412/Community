@@ -18,6 +18,12 @@ import dotenv from "dotenv";
 import ForgotPasswordTemplate from "../emailTemplates/ForgotPasswordTemplate";
 import { DecodedToken } from "../Types/Auth.type";
 import SetCookies, { ClearCookie } from "../services/SetCookies";
+import {
+  createUser,
+  finUserByEmail,
+  findUser,
+  updateUser,
+} from "../prisma/schema/User.schema";
 dotenv.config();
 export const Login = async (
   req: Request,
@@ -28,11 +34,7 @@ export const Login = async (
   try {
     const { email, password } = LoginSchema.parse(req.body);
 
-    const existingUser = await db.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const existingUser = await finUserByEmail(email);
 
     if (!existingUser) {
       throwError(next, "No user with that email exists");
@@ -60,14 +62,10 @@ export const Login = async (
           });
       if (cookies["community-refresh-token"])
         ClearCookie(res, "community-refresh-token");
-      await db.user.update({
-        where: {
-          id: existingUser.id,
-        },
-        data: {
-          refresh_token: [...newRefreshTokenArray, newRefreshToken],
-        },
+      await updateUser(existingUser.id, {
+        refresh_token: [...newRefreshTokenArray, newRefreshToken],
       });
+
       SetCookies(res, "community-refresh-token", newRefreshToken);
       res.status(200).json({
         success: true,
@@ -93,11 +91,7 @@ export const Signup = async (
     if (!file) {
       return throwError(next, "Profile Image not provided");
     }
-    const isUserExists = await db.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const isUserExists = await finUserByEmail(email);
     if (isUserExists) {
       throwError(next, "User with this email already exists");
       return;
@@ -109,14 +103,12 @@ export const Signup = async (
       file?.buffer,
       file.mimetype
     );
-    const newUser = await db.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        image,
-        compressed_image: compressedImage,
-      },
+    const newUser = await createUser({
+      name,
+      email,
+      password: hashedPassword,
+      image,
+      compressed_image: compressedImage,
     });
     if (newUser) {
       const token = generateToken({
@@ -126,13 +118,8 @@ export const Signup = async (
       const refreshToken = generateRefreshToken({
         id: newUser.id.toString(),
       });
-      await db.user.update({
-        where: {
-          id: newUser.id,
-        },
-        data: {
-          refresh_token: [refreshToken],
-        },
+      await updateUser(newUser.id, {
+        refresh_token: [refreshToken],
       });
       SetCookies(res, "community-refresh-token", refreshToken);
       res.status(200).json({
@@ -177,28 +164,18 @@ export const HandleRefreshToken = async (
     jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET!,
-      async (err: any, decode:any) => {
+      async (err: any, decode: any) => {
         if (err) {
           response.status(403).json({
             success: false,
             message: "Invalid refresh token",
           });
           // Finding the user whose refresh token is reused
-          const hackedUser = await db.user.findUnique({
-            where: {
-              id: decode?.id,
-            },
-          });
+          const hackedUser = await findUser(decode?.id);
           // Deleting all the refresh token of the user
-          const result = await db.user?.update({
-            where: {
-              id: hackedUser?.id,
-            },
-            data: {
-              refresh_token: [],
-            },
+          await updateUser(hackedUser?.id as string, {
+            refresh_token: [],
           });
-          console.log(result, "HACKED_USER");
         }
       }
     );
@@ -216,13 +193,8 @@ export const HandleRefreshToken = async (
       async (err: any, decode: any) => {
         if (err) {
           console.log("expired refresh token ");
-          const result = await db.user?.update({
-            where: {
-              id: existingUser.id,
-            },
-            data: {
-              refresh_token: [...newRefreshTokenArray],
-            },
+          const result = await updateUser(existingUser.id, {
+            refresh_token: [...newRefreshTokenArray],
           });
           console.log(result, "RESULT");
         }
@@ -240,13 +212,8 @@ export const HandleRefreshToken = async (
         const newRefreshToken = generateRefreshToken({
           id: existingUser.id,
         });
-        const userWithUpdatedRefreshToken = await db.user?.update({
-          where: {
-            id: existingUser.id,
-          },
-          data: {
-            refresh_token: [...newRefreshTokenArray, newRefreshToken],
-          },
+        const userWithUpdatedRefreshToken = await updateUser(existingUser.id, {
+          refresh_token: [...newRefreshTokenArray, newRefreshToken],
         });
         if (userWithUpdatedRefreshToken) {
           SetCookies(response, "community-refresh-token", newRefreshToken);
@@ -268,11 +235,7 @@ export const forgotPassword = async (
 ) => {
   try {
     const { email } = ForgotPasswordValidation.parse(req.body);
-    const user = await db.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const user = await finUserByEmail(email);
     if (!user) {
       throwError(next, "No user with that email exists");
       return;
@@ -305,17 +268,11 @@ export const verifyTokenAndSetPassword = async (
   try {
     const { email, newPassword, confirmPassword, token } =
       ResetPasswordSchema.parse(req.body);
-    const user = await db.user.findUnique({
-      where: {
-        email,
-      },
-    });
-
+    const user = await finUserByEmail(email);
     if (!user) {
       throwError(next, "No user with that email exists");
       return;
     }
-
     try {
       const decoded: DecodedToken = jwt.verify(
         token,
@@ -337,13 +294,8 @@ export const verifyTokenAndSetPassword = async (
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await db.user.update({
-      where: {
-        email,
-      },
-      data: {
-        password: hashedPassword,
-      },
+    await updateUser(user.id, {
+      password: hashedPassword,
     });
     res
       .status(200)
@@ -371,22 +323,17 @@ export const googleCallback = (req: Request, res: Response) => {
         id: existingUser.id,
         email: existingUser.email,
       });
-      console.log(req.cookies, "REF")
+      console.log(req.cookies, "REF");
       const newRefreshTokenArray = !req.cookies["community-refresh-token"]
         ? existingUser.refresh_token
         : existingUser.refresh_token.filter((token: string) => {
             token !== req.cookies["community-refresh-token"];
           });
-        console.log(newRefreshTokenArray, "REFRESH_TOKEN_ARRAY")
+      console.log(newRefreshTokenArray, "REFRESH_TOKEN_ARRAY");
       if (req.cookies["community-refresh-token"])
         ClearCookie(res, "community-refresh-token");
-      await db.user.update({
-        where: {
-          id: existingUser.id,
-        },
-        data: {
-          refresh_token: [...newRefreshTokenArray, newRefreshToken],
-        },
+      await updateUser(existingUser.id, {
+        refresh_token: [...newRefreshTokenArray, newRefreshToken],
       });
       SetCookies(res, "community-refresh-token", newRefreshToken);
       res.redirect(

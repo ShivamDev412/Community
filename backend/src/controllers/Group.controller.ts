@@ -123,7 +123,6 @@ export const updateUserGroup = async (
         id: groupId,
       },
     });
-    console.log(groupData, name);
     if (groupData?.name !== name) {
       const groupExists = await db.group.findUnique({
         where: {

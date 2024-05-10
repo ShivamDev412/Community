@@ -35,6 +35,7 @@ export const ENDPOINTS = {
     EVENTS_DETAILS:"/event-details/:eventId",
 
     SEARCH:"/search",
+    SEARCH_EVENTS:"/search-events",
     GET_CITY:"/get-city",
     GET_EVENTS:"/get-events",
     RSVP_EVENTS:"/rspv-events",

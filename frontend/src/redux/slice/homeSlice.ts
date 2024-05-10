@@ -2,14 +2,10 @@ import { HomeDataType } from "@/Types";
 import { Distances, HomeEvents } from "@/utils/Constant";
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState:HomeDataType = {
+const initialState: HomeDataType = {
   location: {
     city: "",
     state: "",
-  },
-  coord: {
-    lat: 0,
-    lon: 0,
   },
   filters: {
     distance: Distances[0],
@@ -31,16 +27,6 @@ const homeSlice = createSlice({
           ...state.location,
           city: action.payload.location.city,
           state: action.payload.location.state,
-        },
-      };
-    },
-    setCoord: (state, action) => {
-      return {
-        ...state,
-        coord: {
-          ...state.coord,
-          lat: action.payload.lat,
-          lon: action.payload.lon,
         },
       };
     },
@@ -95,7 +81,6 @@ const homeSlice = createSlice({
 });
 export const {
   setLocation,
-  setCoord,
   clearHomeState,
   setEvents,
   setFilters,

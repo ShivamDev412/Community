@@ -78,6 +78,7 @@ export type NewEventType = {
   group: string;
   date: any;
   time: any;
+  category: string;
   event_end_time: any;
   type: string;
   tags: string[];
@@ -222,6 +223,7 @@ export interface EventType {
   id: string;
   name: string;
   image: string;
+  category_id: string;
   compressed_image: string;
   details: string;
   event_date: string;
@@ -274,10 +276,11 @@ export type EventDetailType = {
   event_date: string;
   event_time: string;
   event_end_time: string;
+  category_id: string;
   event_type: "online" | "in-person" | "";
   link: string | null;
   address: string | null;
-  tags: string[];
+  tags: {id:string, name:string}[];
   created_at: string;
   image: string;
   compressed_image: string;
@@ -288,7 +291,7 @@ export type EventDetailType = {
     image: string;
     location: string;
     group_type: string;
-    id: string;
+    group_id: string;
   };
 };
 export type EventDetailsHeaderSectionProps = {
@@ -332,21 +335,34 @@ export type CustomHomeSelectType = {
 type HomeEventType = {
   [timestamp: number]: EventType[];
 };
+export type SearchType = {
+  keyword: string;
+  day: CustomHomeSelectType;
+  type: CustomHomeSelectType;
+  distance: CustomHomeSelectType;
+  category: CustomHomeSelectType;
+  sortBy: string;
+  lat: number;
+  lon: number;
+  tab: "events" | "groups";
+};
 export type HomeDataType = {
   location: {
     city: string;
     state: string;
-  };
-  coord: {
-    lat: number;
-    lon: number;
   };
   filters: {
     distance: CustomHomeSelectType;
     type: CustomHomeSelectType;
   };
   user: UserType | {};
+  
   groups: Group[] | {};
   events: HomeEventType | {};
   rsvpEvents: EventType[];
 };
+export type SearchPageType = {
+  search:SearchType;
+  events:Array<EventType>;
+  groups: Group[];
+}

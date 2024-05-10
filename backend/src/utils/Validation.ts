@@ -135,6 +135,7 @@ export const NewEventSchema = z
     type: z.string().min(1, { message: "Event Type is required" }),
     details: z.string().min(1, { message: "Event Details are required" }),
     group: z.string().min(1, { message: "Group is required" }),
+    category: z.string().min(1, { message: "Category is required" }),
     tags: z.string().min(1, { message: "Tags are required" }),
     date: z.string().min(1, { message: "Event Date is required" }),
     time: z.string().min(1, { message: "Event Time is required" }),

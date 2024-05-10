@@ -7,6 +7,7 @@ import useEventTab from "./useEventTab";
 import { FC } from "react";
 import { TabPanelComponentProps } from "@/Types";
 import EventCard from "./EventCard";
+import NoDataFound from "../NoDataFound";
 const TabPanelComponent: FC<TabPanelComponentProps> = ({ value, data }) => {
   const noEvents = !data || data.length === 0;
   const showNoEvents = () => {
@@ -17,14 +18,14 @@ const TabPanelComponent: FC<TabPanelComponentProps> = ({ value, data }) => {
         return "You haven't hosted any events yet";
       case "3":
         return "No past events";
+      default:
+        return "No events found";
     }
   };
   return (
     <TabPanel value={value}>
       {noEvents ? (
-        <div className="w-full flex justify-center h-[2in] items-center">
-          <p className="font-[500] text-lg">{showNoEvents()}</p>
-        </div>
+        <NoDataFound text={showNoEvents()} />
       ) : (
         data.map((event) => <EventCard data={event} key={event?.id} />)
       )}

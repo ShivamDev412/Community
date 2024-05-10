@@ -14,11 +14,15 @@ import { RootState } from "@/redux/RootReducer";
 import { setEventDetails } from "@/redux/slice/eventSlice";
 import { EventDetailsInitialState } from "@/utils/Constant";
 import dayjs from "dayjs";
+import moment from "moment";
 
 export const useNewEvent = () => {
   const { axiosPrivate, axiosPrivateFile } = useAxiosPrivate();
   const navigation = useNavigate();
   const dispatch = useDispatch();
+  const [categories, setCategories] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
   const [tags, setTags] = useState<Array<{ value: string; label: string }>>([]);
   const isEditableEvent = location.pathname.includes("edit-event");
   const { eventDetails } = useSelector((state: RootState) => state.events);
@@ -47,13 +51,37 @@ export const useNewEvent = () => {
         }))
       );
     }
-    getAllTags();
+    // getAllTags();
+    getAllCategories();
   }, [groupsCreated]);
-
-  const getAllTags = async () => {
+  const getAllCategories = async () => {
     dispatch(setLoading(true));
     try {
-      const res = await axiosPrivate.get(`/api/event${Endpoints.TAGS}`);
+      const res = await axiosPrivate.get(
+        `${API_ENDPOINTS.USER}${Endpoints.CATEGORIES}`
+      );
+      if (res.data.success) {
+        setCategories(
+          res.data.data.map((value: { id: string; name: string }) => {
+            return {
+              value: value.id,
+              label: value.name,
+            };
+          })
+        );
+      }
+      dispatch(setLoading(false));
+    } catch (e) {
+      dispatch(setLoading(false));
+    }
+  };
+  const getTags = async (categoryId: string) => {
+    setValue("tags", []);
+    dispatch(setLoading(true));
+    try {
+      const res = await axiosPrivate.get(
+        `${API_ENDPOINTS.USER}${Endpoints.INTERESTS}/${categoryId}`
+      );
       if (res.data.success) {
         setTags(
           res.data.data.map((value: { id: string; name: string }) => {
@@ -69,6 +97,7 @@ export const useNewEvent = () => {
       dispatch(setLoading(false));
     }
   };
+
   type FormField = z.infer<typeof NewEventSchema>;
   const {
     register,
@@ -85,18 +114,19 @@ export const useNewEvent = () => {
       name: isEditableEvent ? eventDetails?.name : "",
       image: isEditableEvent ? eventDetails?.image : null,
       details: isEditableEvent ? eventDetails?.details : "",
-      group: isEditableEvent ? eventDetails?.group.id : "",
+      group: isEditableEvent ? eventDetails?.group.group_id : "",
+      category: isEditableEvent ? eventDetails?.category_id : "",
       date: isEditableEvent
         ? eventDetails?.event_date
         : dayjs().format("YYYY-MM-DD"),
       time: isEditableEvent
-        ? eventDetails?.event_time
+        ? moment(eventDetails?.event_time).utc().format("HH:mm")
         : dayjs().format("HH:mm"),
       event_end_time: isEditableEvent
-        ? eventDetails?.event_end_time
+        ? moment(eventDetails?.event_end_time).utc().format("HH:mm")
         : dayjs().format("HH:mm"),
       type: isEditableEvent ? eventDetails?.event_type : "",
-      tags: isEditableEvent ? eventDetails?.tags : [],
+      tags: isEditableEvent ? eventDetails?.tags.map((tag) => tag.name) : [],
       link: isEditableEvent ? eventDetails?.link || undefined : "",
       address: isEditableEvent ? eventDetails?.address || undefined : "",
     },
@@ -131,7 +161,9 @@ export const useNewEvent = () => {
     formData.append("time", data.time);
     formData.append("event_end_time", data.event_end_time);
     formData.append("type", data.type);
+    formData.append("category", data.category);
     formData.append("tags", JSON.stringify(tagsToSend));
+
     formData.append(
       "image",
       typeof data?.image[0] === "object" ? data?.image[0] : data.image
@@ -192,5 +224,7 @@ export const useNewEvent = () => {
     setError,
     getValues,
     isEditableEvent,
+    categories,
+    getTags,
   };
 };

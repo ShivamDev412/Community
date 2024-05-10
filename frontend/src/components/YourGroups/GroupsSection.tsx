@@ -1,6 +1,7 @@
 import { GroupsProps } from "@/Types";
 import { FC } from "react";
 import GroupCard from "./GroupCard";
+import NoDataFound from "../NoDataFound";
 
 const GroupsSection: FC<GroupsProps> = ({ title, data, noDataText }) => {
   return (
@@ -14,9 +15,7 @@ const GroupsSection: FC<GroupsProps> = ({ title, data, noDataText }) => {
             ))}
           </>
         ) : (
-          <div className="flex justify-center w-full">
-            <p>{noDataText}</p>
-          </div>
+          <NoDataFound text={noDataText} />
         )}
       </div>
     </section>

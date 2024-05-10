@@ -317,8 +317,10 @@ export const MultiSelectField: FC<
     const val = getValues(id);
     if (val) {
       setSelectedData(val);
+    } else if(val.length === 0) {
+      setSelectedData([])
     }
-  }, [getValues, id]);
+  }, [getValues(id), id]);
   return (
     <FormControl className="w-full">
       <InputLabel id={id}>{label}</InputLabel>

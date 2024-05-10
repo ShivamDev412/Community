@@ -5,6 +5,7 @@ import loadingSlice from "./slice/loadingSlice";
 import groupsSlice from "./slice/groupSlice";
 import eventsSlice from "./slice/eventSlice";
 import authSlice from "./slice/authSlice";
+import searchSlice from "./slice/searchSlice";
 const rootReducer = combineReducers({
   auth: authSlice,
   home: homeSlice,
@@ -12,6 +13,7 @@ const rootReducer = combineReducers({
   loading: loadingSlice,
   groups: groupsSlice,
   events: eventsSlice,
+  search: searchSlice,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

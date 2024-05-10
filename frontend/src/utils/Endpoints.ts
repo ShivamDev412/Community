@@ -25,7 +25,8 @@ export const RouteEndpoints = {
   GROUP_DETAILS: "/group/:name/",
   GROUP_DETAILS_MEMBERS:"/group/:name/members",
   GROUP_DETAILS_EVENTS:"/group/:name/events",
-  EVENT_DETAILS:"/event/:eventId"
+  EVENT_DETAILS:"/event/:eventId",
+  SEARCH:"/search",
 };
 export const Endpoints = {
   LOGIN: "/login",
@@ -42,7 +43,6 @@ export const Endpoints = {
 
   SETTINGS: "/settings",
   
- 
   TAGS: "/tags",
 
   GROUPS_ORGANIZED_BY_USER: "/groups-organized-by-user",
@@ -71,6 +71,7 @@ export const Endpoints = {
   GET_USER_INTERESTS:"/get-user-interests",
   REGISTER_TO_EVENT:"/register-to-event",
   CANCEL_RSVP:"/cancel-rsvp",
+  SEARCH_EVENTS:"/search-events",
 
 
   USER_EVENTS:"/user-events",

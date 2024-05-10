@@ -21,12 +21,8 @@ const EventDetail = () => {
     cancelRSVP,
   } = useEventDetails();
   const eventDate = moment(event?.event_date).utc().format("ddd, MMM D YYYY");
-  const eventTime = moment(event?.event_time, "HH:mm:ss")
-    .utc()
-    .format("h:mm a");
-  const eventEndTime = moment(event?.event_end_time, "HH:mm:ss")
-    .utc()
-    .format("h:mm a");
+  const eventTime = moment(event?.event_time).utc().format("h:mm a");
+  const eventEndTime = moment(event?.event_end_time).utc().format("h:mm a");
   return (
     <section className="mb-10">
       <section className="bg-white w-screen shadow">

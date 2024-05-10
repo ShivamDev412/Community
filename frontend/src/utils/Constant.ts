@@ -141,3 +141,27 @@ export const Distances = [
   { value: "50", label: "50 miles", active: false },
   { value: "100", label: "100 miles", active: false },
 ];
+export const SearchDay = [
+  { value: "", label: "Any Day", active: true },
+  { value: "today", label: "Today", active: false },
+  { value: "tomorrow", label: "Tomorrow", active: false },
+  { value: "this-week", label: "This Week", active: false },
+  { value: "this-weekend", label: "This Weekend", active: false },
+  { value: "next-week", label: "Next Week", active: false },
+];
+export const SearchCategory = [
+  { value: "", label: "Any Category", active: true },
+  { value: "art-and-culture", label: "Art & Culture", active: false },
+  { value: "career-and-business", label: "Career & Business", active: false },
+  {
+    value: "community-and-environment",
+    label: "Community & Environment",
+    active: false,
+  },
+  {
+    value: "dancing",
+    label: "Dancing",
+    active: false,
+  },
+  { value: "games", label: "Games", active: false },
+];

@@ -13,7 +13,8 @@ export const useHome = () => {
   const dispatch = useDispatch();
   const { axiosPrivate } = useAxiosPrivate();
   const { name } = useSelector((state: RootState) => state.user);
-  const { coord, filters } = useSelector((state: RootState) => state.home);
+  const { filters } = useSelector((state: RootState) => state.home);
+  const { search } = useSelector((state: RootState) => state.search);
 
   const getUserDetails = async () => {
     try {
@@ -47,7 +48,7 @@ export const useHome = () => {
     if (query.trim() !== "") {
       que += `query=${query}&`;
     }
-    que += `latitude=${coord.lat}&longitude=${coord.lon}`;
+    que += `latitude=${search.lat}&longitude=${search.lon}`;
 
     if (que.endsWith("&")) {
       que = que.slice(0, -1);
@@ -73,10 +74,9 @@ export const useHome = () => {
 
   useEffect(() => {
     getUserDetails();
-    
   }, []);
   useEffect(() => {
     getEvents();
-  }, [coord, filters]);
+  }, [search.lat, search.lon, filters]);
   return { name };
 };

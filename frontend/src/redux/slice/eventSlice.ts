@@ -13,6 +13,7 @@ const initialState: EventsState = {
     event_time: "",
     event_end_time: "",
     event_type: "",
+    category_id: "",
     link: null,
     address: null,
     tags: [],
@@ -26,7 +27,7 @@ const initialState: EventsState = {
       id: "",
     },
     group: {
-      id: "",
+      group_id: "",
       name: "",
       image: "",
       location: "",

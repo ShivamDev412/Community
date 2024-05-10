@@ -7,8 +7,20 @@ import {
 } from "../services/UploadToS3";
 import getImageDimensions from "../services/GetImageDimension";
 import { getLatitudeAndLongitude } from "../services/GetLatitudeAndLongitude";
-import db from "../database/db.config";
 import { NewEventSchema } from "../utils/Validation";
+import {
+  findInterests,
+  findInterestsByIds,
+} from "../prisma/schema/Interest.schema";
+import {
+  addEvent,
+  existingEvent,
+  findEvent,
+  findEventMembers,
+  updateEventById,
+} from "../prisma/schema/Event.schema";
+import { findUser } from "../prisma/schema/User.schema";
+import { findGroup } from "../prisma/schema/Group.schema";
 
 export const getTags = async (
   request: Request,
@@ -21,7 +33,7 @@ export const getTags = async (
   }
 
   try {
-    const interests = await db.interest.findMany();
+    const interests = await findInterests();
 
     response.status(200).json({
       success: true,
@@ -49,14 +61,13 @@ export const createEvent = async (
       group,
       address,
       link,
+      category,
     } = NewEventSchema.parse(request.body);
     const userId: string | undefined = request?.user?.id;
     const file = request?.file;
     const imageBuffer = file?.buffer;
-    const eventExists = await db.event.findFirst({
-      where: {
-        name,
-      },
+    const eventExists = await existingEvent({
+      name,
     });
     if (eventExists) {
       return throwError(next, { name: "Event name already exists" });
@@ -92,32 +103,29 @@ export const createEvent = async (
           longitude = locationCoord.longitude;
         }
       }
-      const newEvent = await db.event.create({
-        data: {
-          name,
-          image: imageUrl,
-          compressed_image: compressedImageUrl,
-          details,
-          host_id: userId,
-          group_id: group,
-          event_date: `${date}T00:00:00Z`,
-          event_time: new Date(`${date}T${time}:00Z`).toISOString(),
-          event_end_time: new Date(
-            `${date}T${event_end_time}:00Z`
-          ).toISOString(),
-          event_type: type,
-          link: linkToSend,
-          address: locationToSend,
-          latitude,
-          longitude,
-        },
+
+      const newEvent = await addEvent({
+        name,
+        image: imageUrl,
+        compressed_image: compressedImageUrl,
+        details,
+        host_id: userId,
+        group_id: group,
+        event_date: `${date}T00:00:00Z`,
+        event_time: new Date(`${date}T${time}:00Z`).toISOString(),
+        event_end_time: new Date(`${date}T${event_end_time}:00Z`).toISOString(),
+        event_type: type,
+        link: linkToSend,
+        address: locationToSend,
+        latitude,
+        longitude,
+        category_id: category,
       });
-      await db.event.update({
-        where: { id: newEvent.id },
-        data: {
-          tags: {
-            connect: tagsToSend,
-          },
+      const tagIds = tagsToSend.map((tag: { id: string }) => tag.id);
+      const interests = await findInterestsByIds(tagIds);
+      await updateEventById(newEvent.id, {
+        tags: {
+          connect: interests.map((interest) => ({ id: interest.id })),
         },
       });
       if (!newEvent) {
@@ -145,53 +153,25 @@ export const getEventDetails = async (
     }
     const eventId = req.params.eventId;
     const [event, eventMembers] = await Promise.all([
-      db.event.findUnique({
-        where: {
-          id: eventId,
-        },
-      }),
-      db.userEvent.findMany({
-        where: {
-          event_id: eventId,
-        },
-        include: {
-          user: {
-            select: {
-              name: true,
-              image: true,
-              compressed_image: true,
-              id: true,
-            },
-          },
-        },
-      }),
+      findEvent(eventId),
+      findEventMembers(eventId),
     ]);
     const [eventImage, compressedEventImage, host, group, members] =
       await Promise.all([
         getImage(event?.image || ""),
         getImage(event?.compressed_image || ""),
-        db.user.findUnique({
-          where: {
-            id: event?.host_id,
-          },
-          select: {
-            name: true,
-            image: true,
-            compressed_image: true,
-            id: true,
-          },
+        findUser(userId, {
+          id: true,
+          name: true,
+          image: true,
+          compressed_image: true,
         }),
-        db.group.findUnique({
-          where: {
-            id: event?.group_id,
-          },
-          select: {
-            name: true,
-            image: true,
-            compressed_image: true,
-            location: true,
-            group_type: true,
-          },
+        findGroup(event?.group_id as string, {
+          name: true,
+          image: true,
+          compressed_image: true,
+          location: true,
+          group_type: true,
         }),
         Promise.all(
           eventMembers.map(async ({ user }) => {
@@ -222,7 +202,7 @@ export const getEventDetails = async (
     const groupCompressedImage = group
       ? await getImage(group?.compressed_image || "")
       : null;
-   
+
     const membersToSend = members.map((member) => ({
       ...member,
       image: member?.image || null,
@@ -236,6 +216,7 @@ export const getEventDetails = async (
       type: "host",
       name: host?.name || "",
     });
+
     res.status(200).json({
       success: true,
       message: "Event details fetched successfully",
@@ -287,17 +268,11 @@ export const updateEvent = async (
     const eventId = request.params.eventId;
     const file = request?.file;
     const imageBuffer = file?.buffer;
-    const event = await db.event.findUnique({
-      where: {
-        id: eventId,
-      },
-    });
+    const event = await findEvent(eventId);
     // Check if event name already exists and is not the same event
     if (event?.name !== name) {
-      const eventExists = await db.event.findFirst({
-        where: {
-          id: eventId,
-        },
+      const eventExists = await existingEvent({
+        eventId,
       });
       if (eventExists) {
         return throwError(next, { name: "Event name already exists" });
@@ -343,40 +318,36 @@ export const updateEvent = async (
         longitude = locationCoord.longitude;
       }
     }
-    const newEvent = await db.event.update({
-      where: { id: eventId },
-      data: {
-        name,
-        image: imageUrl,
-        compressed_image: compressedImageUrl,
-        details,
-        host_id: userId,
-        group_id: group,
-        event_date: `${date}T00:00:00Z`,
-        event_time: new Date(`${date}T${time}:00Z`).toISOString(),
-        event_end_time: new Date(`${date}T${event_end_time}:00Z`).toISOString(),
-        event_type: type,
-        link: linkToSend,
-        address: locationToSend,
-        latitude,
-        longitude,
+    const tagIds = tagsToSend.map((tag: { id: string }) => tag.id);
+    const interests = await findInterestsByIds(tagIds);
+    const updateEvent = await updateEventById(eventId, {
+      name,
+      image: imageUrl,
+      compressed_image: compressedImageUrl,
+      details,
+      host_id: userId,
+      group_id: group,
+      event_date: `${date}T00:00:00Z`,
+      event_time: new Date(`${date}T${time}:00Z`).toISOString(),
+      event_end_time: new Date(`${date}T${event_end_time}:00Z`).toISOString(),
+      event_type: type,
+      link: linkToSend,
+      address: locationToSend,
+      latitude,
+      longitude,
+    });
+    const updateEventWithTag = await updateEventById(updateEvent.id, {
+      tags: {
+        set: interests.map((interest) => ({ id: interest.id })),
       },
     });
-    await db.event.update({
-      where: { id: newEvent.id },
-      data: {
-        tags: {
-          connect: tagsToSend,
-        },
-      },
-    });
-    if (!newEvent) {
+    if (!updateEventWithTag) {
       return throwError(next, "Event not created");
     }
     response.status(200).json({
       success: true,
       message: "Event updated successfully",
-      data: newEvent,
+      data: updateEventWithTag,
     });
   } catch (error) {
     next(error);

@@ -10,10 +10,10 @@ const CustomHomeSelect: FC<{
   const {
     options,
     handleSelect,
-    filters,
     showDropDown,
     setShowDropDown,
     isActive,
+    displayValue,
   } = useCustomHomeSelect(selectOptions, selectType);
   return (
     <div className="relative w-[9rem]">
@@ -23,9 +23,7 @@ const CustomHomeSelect: FC<{
           isActive ? "bg-cyan-700 text-white" : "bg-stone-100 text-black"
         } whitespace-nowrap px-4 py-2 rounded-[25px] font-[550] z-1 flex items-center gap-2 hover:cursor-pointer shadow-sm text-sm w-full justify-between`}
       >
-        {selectType === "type"
-          ? filters?.type?.label
-          : filters?.distance?.label}
+        {displayValue()}
         <IoIosArrowUp
           className={`${
             showDropDown ? "rotate-180" : "rotate-0"

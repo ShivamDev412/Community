@@ -3,7 +3,7 @@ import passport from "passport";
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const GitHubStrategy = require("passport-github2").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
-import db from "../database/db.config";
+import { createUser, findUser, findUserByGoogleId } from "../prisma/schema/User.schema";
 
 const GoogleMiddleware = () => {
   passport.use(
@@ -28,19 +28,13 @@ const GoogleMiddleware = () => {
           google_id: profile.id,
         };
         try {
-          const existingUser = await db.user.findFirst({
-            where: {
-              google_id: profile.id,
-            },
-          });
+          const existingUser = await findUserByGoogleId(profile.id);
           if (!existingUser) {
-            const newUser = await db.user.create({
-              data: {
-                name: defaultUser.name,
-                email: defaultUser.email,
-                image: defaultUser.image,
-                google_id: defaultUser.google_id,
-              },
+            const newUser = await createUser({
+              name: defaultUser.name,
+              email: defaultUser.email,
+              image: defaultUser.image,
+              google_id: defaultUser.google_id,
             });
             return cb(null, newUser);
           } else {
@@ -78,24 +72,16 @@ const GithubMiddleware = () => {
           google_id: profile.id,
         };
         try {
-          const existingUser = await db.user.findUnique({
-            where: {
-              google_id: profile.id,
-            },
-          });
-          console.log("existingUser", existingUser);
+          const existingUser = await findUser(profile.id);
           if (!existingUser) {
-            const newUser = await db.user.create({
-              data: {
-                name: defaultUser.name,
-                email: defaultUser.email,
-                image: defaultUser.image,
-                google_id: defaultUser.google_id,
-              },
+            const newUser = await createUser({
+              name: defaultUser.name,
+              email: defaultUser.email,
+              image: defaultUser.image,
+              google_id: defaultUser.google_id,
             });
             return cb(null, newUser);
           } else {
-            console.log("existingUser", existingUser);
             return cb(null, existingUser);
           }
         } catch (error) {
