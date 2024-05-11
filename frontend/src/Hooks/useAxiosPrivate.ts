@@ -5,6 +5,7 @@ import { RootState } from "@/redux/Store";
 import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
 import { setCredentials } from "@/redux/slice/authSlice";
 import Toast from "@/utils/Toast";
+
 const refreshToken = async () => {
   try {
     const response = await axios.get(
@@ -12,16 +13,18 @@ const refreshToken = async () => {
     );
     const token = response.data["auth-token"];
     return token;
-  } catch (err: any) {
+  } catch (err:any) {
     console.log(err);
     Toast(err.message, "error");
+    throw err;
   }
 };
+
 const useAxiosPrivate = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state: RootState) => state.auth);
 
-  useEffect(() => {
+  const handleInterceptors = async () => {
     const requestInterceptor = axiosPrivate.interceptors.request.use(
       (config) => {
         if (!config.headers["Authorization"]) {
@@ -31,6 +34,7 @@ const useAxiosPrivate = () => {
       },
       (error) => Promise.reject(error)
     );
+
     const responseInterceptor = axiosPrivate.interceptors.response.use(
       (response) => {
         return response;
@@ -52,6 +56,7 @@ const useAxiosPrivate = () => {
         return Promise.reject(error);
       }
     );
+
     const requestInterceptorFile = axiosPrivateFile.interceptors.request.use(
       (config) => {
         if (!config.headers["Authorization"]) {
@@ -61,6 +66,7 @@ const useAxiosPrivate = () => {
       },
       (error) => Promise.reject(error)
     );
+
     const responseInterceptorFile = axiosPrivateFile.interceptors.response.use(
       (response) => {
         return response;
@@ -76,17 +82,23 @@ const useAxiosPrivate = () => {
         return Promise.reject(error);
       }
     );
+
     return () => {
       axiosPrivate.interceptors.response.eject(responseInterceptor);
       axiosPrivateFile.interceptors.response.eject(responseInterceptorFile);
       axiosPrivate.interceptors.request.eject(requestInterceptor);
       axiosPrivateFile.interceptors.request.eject(requestInterceptorFile);
     };
-  }, [token, refreshToken]);
+  };
+
+  useEffect(() => {
+    handleInterceptors(); 
+  }, [token]);
 
   return {
     axiosPrivate,
     axiosPrivateFile,
   };
 };
+
 export default useAxiosPrivate;

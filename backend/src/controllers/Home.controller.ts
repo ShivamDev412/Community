@@ -219,7 +219,6 @@ export const HandleSearch = async (
   response: Response,
   next: NextFunction
 ) => {
-  console.log("HandleSearch");
   try {
     const searchParams = {
       keyword: (request.query.keyword as string) || "",
@@ -236,102 +235,158 @@ export const HandleSearch = async (
     if (!userId) {
       return throwError(next, "User not found");
     }
-    const today = moment().utc().startOf("day");
-    let eventDate: Date | string = today.toDate();
-    // * Handle for event date
-    switch (searchParams.day) {
-      case "today":
-        eventDate = today.toDate();
-        break;
-      case "tomorrow":
-        eventDate = today.clone().add(1, "day").format("YYYY-MM-DD");
-        break;
-      case "this-week":
-        eventDate = today.clone().add(7, "day").format("YYYY-MM-DD");
-        break;
-      case "this-weekend":
-        const endOfWeekend = today.clone().endOf("week");
-        eventDate = today.clone().add(1, "day").isAfter(endOfWeekend)
-          ? endOfWeekend.format("YYYY-MM-DD")
-          : today.clone().add(30, "day").format("YYYY-MM-DD");
-        break;
-      case "next-week":
-        eventDate = today.clone().add(7, "day").format("YYYY-MM-DD");
-        break;
-      default:
-        eventDate = today.toDate();
-    }
-    let events = await db.event.findMany({
-      where: {
-        host_id: {
-          not: {
-            equals: userId,
+    let events;
+    let groups;
+    if (searchParams.tab === "groups") {
+      groups = await db.group.findMany({
+        select: {
+          id: true,
+          name: true,
+          location: true,
+          image: true,
+          compressed_image: true,
+          about: true,
+          latitude: true,
+          longitude: true,
+          users: {
+            select: {
+              user_id: true,
+              group_id: true,
+            },
           },
         },
-        event_date: {
-          gte: eventDate,
+      });
+      if (searchParams.keyword.trim() !== "") {
+        groups = groups.filter((group) => {
+          const isQueryInName = group.name
+            .toLowerCase()
+            .includes(searchParams.keyword.toLowerCase());
+          const isGroupInDescription = group.about?.includes(
+            searchParams.keyword.toLowerCase()
+          );
+          return isQueryInName || isGroupInDescription;
+        });
+      }
+      if (searchParams.distance) {
+        groups = groups.filter((group) => {
+          const distance = calculateDistance(
+            searchParams.lat,
+            searchParams.lon,
+            group.latitude as number,
+            group.longitude as number
+          );
+          return distance <= +searchParams.distance;
+        });
+      }
+      groups = await Promise.all(
+        groups.map(async (group) => {
+          return {
+            ...group,
+            image: (await getImage(group?.image || "")) as string,
+            compressed_image: (await getImage(
+              group?.compressed_image || ""
+            )) as string,
+          };
+        })
+      );
+    } else {
+      const today = moment().utc().startOf("day");
+      let eventDate: Date | string = today.toDate();
+      // * Handle for event date
+      switch (searchParams.day) {
+        case "today":
+          eventDate = today.toDate();
+          break;
+        case "tomorrow":
+          eventDate = today.clone().add(1, "day").format("YYYY-MM-DD");
+          break;
+        case "this-week":
+          eventDate = today.clone().add(7, "day").format("YYYY-MM-DD");
+          break;
+        case "this-weekend":
+          const endOfWeekend = today.clone().endOf("week");
+          eventDate = today.clone().add(1, "day").isAfter(endOfWeekend)
+            ? endOfWeekend.format("YYYY-MM-DD")
+            : today.clone().add(30, "day").format("YYYY-MM-DD");
+          break;
+        case "next-week":
+          eventDate = today.clone().add(7, "day").format("YYYY-MM-DD");
+          break;
+        default:
+          eventDate = today.toDate();
+      }
+      events = await db.event.findMany({
+        where: {
+          host_id: {
+            not: {
+              equals: userId,
+            },
+          },
+          event_date: {
+            gte: eventDate,
+          },
         },
-      },
-    });
-    // * Handle for event by distance
-    if (searchParams.distance) {
-      events = events.filter((event) => {
-        const distance = calculateDistance(
-          searchParams.lat,
-          searchParams.lon,
-          event.latitude as number,
-          event.longitude as number
-        );
-        return distance <= +searchParams.distance;
       });
+      // * Handle for event by distance
+      if (searchParams.distance) {
+        events = events.filter((event) => {
+          const distance = calculateDistance(
+            searchParams.lat,
+            searchParams.lon,
+            event.latitude as number,
+            event.longitude as number
+          );
+          return distance <= +searchParams.distance;
+        });
+      }
+      // * Handle for event by type
+      if (searchParams.type) {
+        events = events.filter((event) => {
+          return event.event_type === searchParams.type;
+        });
+      }
+      // * Handle for event by keyword
+      if (searchParams.keyword.trim() !== "") {
+        const filteredEvents = events.filter((event) => {
+          const isQueryInName = event.name
+            .toLowerCase()
+            .includes(searchParams.keyword.toLowerCase());
+          const isQueryInDescription = event.details
+            ?.toLowerCase()
+            .includes(searchParams.keyword.toLowerCase());
+          return isQueryInName || isQueryInDescription;
+        });
+        events = filteredEvents;
+      }
+      events = await Promise.all(
+        events.map(async (event) => {
+          return {
+            ...event,
+            image: (await getImage(event?.image || "")) as string,
+            compressed_image: (await getImage(
+              event?.compressed_image || ""
+            )) as string,
+            group: await db.group.findUnique({
+              where: {
+                id: event?.group_id,
+              },
+              select: {
+                name: true,
+                location: true,
+              },
+            }),
+            members: await db.userEvent.count({
+              where: {
+                event_id: event?.id,
+              },
+            }),
+          };
+        })
+      );
     }
-    // * Handle for event by type
-    if (searchParams.type) {
-      events = events.filter((event) => {
-        return event.event_type === searchParams.type;
-      });
-    }
-    // * Handle for event by keyword
-    if (searchParams.keyword.trim() !== "") {
-      const filteredEvents = events.filter((event) => {
-        const isQueryInName = event.name
-          .toLowerCase()
-          .includes(searchParams.keyword.toLowerCase());
-        const isQueryInDescription = event.details
-          ?.toLowerCase()
-          .includes(searchParams.keyword.toLowerCase());
-        return isQueryInName || isQueryInDescription;
-      });
-      events = filteredEvents;
-    }
-    events = await Promise.all(
-      events.map(async (event) => {
-        return {
-          ...event,
-          image: (await getImage(event?.image || "")) as string,
-          compressed_image: (await getImage(
-            event?.compressed_image || ""
-          )) as string,
-          group: await db.group.findUnique({
-            where: {
-              id: event?.group_id,
-            },
-            select: {
-              name: true,
-              location: true,
-            },
-          }),
-          members: await db.userEvent.count({
-            where: {
-              event_id: event?.id,
-            },
-          }),
-        };
-      })
-    );
     response.status(200).json({
       success: true,
-      data: events,
+      data: searchParams.tab === "events" ? events : groups,
     });
   } catch (error) {
     next(error);

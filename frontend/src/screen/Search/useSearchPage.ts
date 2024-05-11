@@ -43,7 +43,8 @@ export const useSearchPage = () => {
         }${generateSearchQuery()}`
       );
       if (response.data.success) {
-        dispatch(setEvents(response.data.data));
+        debugger;
+        // dispatch(setEvents(response.data.data));
       }
     } catch (error) {
       Toast("Something went wrong", "error");

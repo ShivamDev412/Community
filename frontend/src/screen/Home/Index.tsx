@@ -4,6 +4,7 @@ import YourGroups from "@/components/Home/YourGroups";
 import YourInterests from "@/components/Home/YourIntrests";
 import HomeFilter from "@/components/Home/HomeFilter";
 import HomeEvents from "@/components/Home/HomeEvents";
+import EventCalender from "@/components/Home/EventCalender";
 function Home() {
   const { name } = useHome();
   return (
@@ -12,11 +13,15 @@ function Home() {
         Welcome, {name?.split(" ")[0]} 👋
       </h1>
       <section className="xs:flex xs:flex-col sm:flex-row justify-between gap-[3rem] items-start">
-        <div className="w-full sm:w-4/12 bg-stone-100 p-4 rounded-lg gap-4 flex flex-col">
-          <YourNextEvents />
-          <YourGroups />
-          <YourInterests />
+        <div className="sm:w-4/12">
+          <EventCalender />
+          <div className="w-full bg-stone-100 p-4 rounded-lg gap-4 flex flex-col mt-5">
+            <YourNextEvents />
+            <YourGroups />
+            <YourInterests />
+          </div>
         </div>
+
         <div className="w-full sm:w-8/12 flex-1">
           <HomeFilter />
           <HomeEvents />
