@@ -1,4 +1,3 @@
-import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
 import { ForgotPassword } from "@/utils/Validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,10 +5,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useDispatch } from "react-redux";
 import { setLoading } from "@/redux/slice/loadingSlice";
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
+import { useForgotPasswordMutation } from "@/redux/slice/api/userSlice";
 export const useForgotPassword = () => {
   const dispatch = useDispatch();
-  const {axiosPrivate} = useAxiosPrivate()
+  const [forgotPassword] = useForgotPasswordMutation()
   type FormField = z.infer<typeof ForgotPassword>;
   const {
     register,
@@ -26,12 +25,9 @@ export const useForgotPassword = () => {
   const onSubmit = async (data: FormField) => {
     try {
       dispatch(setLoading(true));
-      const res = await axiosPrivate.post(
-        `${API_ENDPOINTS.AUTH}${Endpoints.FORGOT_PASSWORD}`,
-        data
-      );
-      if (res.data.success) {
-        Toast(res.data.message, "success");
+      const res = await forgotPassword(data).unwrap();
+      if (res.success) {
+        Toast(res.message, "success");
         dispatch(setLoading(false));
         clearErrors();
       }

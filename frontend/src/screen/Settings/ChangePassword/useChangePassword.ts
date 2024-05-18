@@ -5,14 +5,14 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useDispatch } from "react-redux";
 import { setLoading } from "@/redux/slice/loadingSlice";
-import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
 import { useNavigate } from "react-router-dom";
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
+import { useChangePasswordMutation } from "@/redux/slice/api/userSlice";
 export const useChangePassword = () => {
-  const {axiosPrivate} = useAxiosPrivate()
   const dispatch = useDispatch();
   const navigation = useNavigate();
+  const [changePassword] = useChangePasswordMutation();
   type FormField = z.infer<typeof ChangePasswordSchema>;
   const {
     register,
@@ -35,13 +35,10 @@ export const useChangePassword = () => {
     console.log(data);
     try {
       dispatch(setLoading(true));
-      const res = await axiosPrivate.put(
-        `${API_ENDPOINTS.USER}${Endpoints.CHANGE_PASSWORD}`,
-        data
-      );
-      if (res.data.success) {
+      const res = await changePassword(data).unwrap();
+      if (res.success) {
         dispatch(setLoading(false));
-        Toast(res.data.message, "success");
+        Toast(res.message, "success");
         navigation(RouteEndpoints.ACCOUNT_MANAGEMENT);
         reset();
         clearErrors();

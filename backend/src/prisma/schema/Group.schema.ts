@@ -6,6 +6,7 @@ const findGroupsByOrganizer = async (organizerId: string, offset: number) => {
       organized_by: organizerId,
     },
     select: {
+      id:true,
       name: true,
       image: true,
       compressed_image: true,

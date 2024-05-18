@@ -316,6 +316,7 @@ export const MultiSelectField: FC<
   useEffect(() => {
     const val = getValues(id);
     if (val) {
+      
       setSelectedData(val);
     } else if(val.length === 0) {
       setSelectedData([])

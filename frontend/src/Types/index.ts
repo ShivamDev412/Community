@@ -1,6 +1,8 @@
 import { ButtonProps } from "@mui/base";
 import { ButtonHTMLAttributes } from "react";
 import { UseFormRegister } from "react-hook-form";
+
+// Auth //
 export type LoginType = {
   email: string;
   password: string;
@@ -12,6 +14,86 @@ export type SignupType = {
   firstName: string;
   lastName: string;
 };
+export type AuthResponse = {
+  data: {
+    "auth-token"?: string;
+  };
+  success: boolean;
+  message: string;
+};
+export type CategoriesType = {
+  id: string;
+  name: string;
+}
+export type CategoriesResponse = {
+  data: CategoriesType[];
+  success: boolean;
+};
+export type TagsResponse = {
+  data: Interest[];
+  success: boolean;
+  message: string;
+}
+// Home //
+export type HomeEventsResponse = {
+  data: {
+    data: EventType[];
+  };
+  success: boolean;
+};
+export type RSVPEventsResponse = {
+  data: EventType[];
+  success: boolean;
+};
+
+// User //
+export type UserResponse = {
+  data: UserType;
+  success: boolean;
+};
+export type UserType = {
+  id: string;
+  name: string;
+  email: string;
+  location: string;
+  joined_on: string;
+  image: string | null;
+  compressed_image: string | null;
+  bio: string | null;
+  dob: string | null;
+  sex: string | null;
+  looking_for?: string[];
+  life_state?: string[];
+  interests: Interest[];
+};
+export type PersonalInfoResponse = {
+  data: UserType;
+  success: boolean;
+  message: string;
+}
+// Groups //
+export type GroupResponse = {
+  data: Group[];
+  success: boolean;
+};
+export type NewGroupResponse = {
+  data: Group;
+  success: boolean;
+  message: string;
+};
+export type UpdateGroupBody = {
+  groupId:string;
+  body: FormData;
+}
+export type GroupDetailsResponse = {
+  data: GroupDetails;
+  success: boolean;
+}
+export type UpdateEventBody = {
+  eventId: string;
+  body: FormData;
+}
+// Common //
 export interface LocationDropdownProps {
   placePredictions: {
     place_id: string;
@@ -35,25 +117,21 @@ export interface WrapperProps {
   children: React.ReactNode;
 }
 
-export type UserType = {
+
+export type Interest = {
   id: string;
   name: string;
+};
+export type DefaultResponseType = {
+  success: boolean;
+  message: string;
+}
+export type ResetPasswordType  = {
+  token: string;
   email: string;
-  location: string;
-  joined_on: string;
-  image: string | null;
-  compressed_image: string | null;
-  bio: string | null;
-  dob: string | null;
-  sex: string | null;
-  looking_for?: string[];
-  life_state?: string[];
-  interests: Interest[];
-};
-type Interest = {
-  id: string;
-  name: string;
-};
+  newPassword: string;
+  confirmPassword: string;
+}
 export type SectionTitleProps = {
   title: string;
   url: string;
@@ -107,12 +185,11 @@ export interface MultiSelectFieldProps extends InputProps {
 export type Group = {
   id: string;
   name: string;
-  group_type?: "public" | "private"; // optional field with enum for group_type
+  group_type?: "public" | "private";
   location?: string;
   organized_by: string;
   about?: string;
   image?: string;
-
   compressed_image?: string;
   created_at?: string;
   updated_at?: string;
@@ -219,6 +296,11 @@ export type PrimaryInfoSectionProps = {
   groupType: string | undefined;
   organizedBy: string | undefined;
 };
+export type NewEventResponse = {
+  data: EventType;
+  success: boolean;
+  message: string;
+}
 export interface EventType {
   id: string;
   name: string;
@@ -280,7 +362,7 @@ export type EventDetailType = {
   event_type: "online" | "in-person" | "";
   link: string | null;
   address: string | null;
-  tags: {id:string, name:string}[];
+  tags: { id: string; name: string }[];
   created_at: string;
   image: string;
   compressed_image: string;
@@ -356,13 +438,13 @@ export type HomeDataType = {
     type: CustomHomeSelectType;
   };
   user: UserType | {};
-  
+
   groups: Group[] | {};
   events: HomeEventType | {};
   rsvpEvents: EventType[];
 };
 export type SearchPageType = {
-  search:SearchType;
-  events:Array<EventType>;
+  search: SearchType;
+  events: Array<EventType>;
   groups: Group[];
-}
+};

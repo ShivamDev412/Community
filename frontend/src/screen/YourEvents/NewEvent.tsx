@@ -32,6 +32,7 @@ const NewEvent = () => {
     getTags,
     control,
   } = useNewEvent();
+  console.log(getValues("type"))
   return (
     <>
       <h1 className="mt-10 text-[2rem] text-center font-semibold">

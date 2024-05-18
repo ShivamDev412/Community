@@ -4,8 +4,7 @@ import { HiUsers } from "react-icons/hi";
 import { FaUser } from "react-icons/fa";
 import { PrimaryInfoSectionProps } from "@/Types";
 import GroupAndEventEditAndDelete from "../GroupAndEventEditAndDelete";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/Store";
+import { useUserQuery } from "@/redux/slice/api/userSlice";
 
 const PrimaryInfoSection: FC<PrimaryInfoSectionProps> = ({
   host,
@@ -15,8 +14,7 @@ const PrimaryInfoSection: FC<PrimaryInfoSectionProps> = ({
   groupType,
   organizedBy,
 }) => {
-  const { id:userId } = useSelector((state: RootState) => state.user);
-  
+  const { data: user } = useUserQuery("");
   return (
     <div className="w-full sm:w-[45%] flex flex-col xs:gap-2 xl:gap-4 mt-4">
       <h1 className="text-2xl lg:text-[2rem] font-bold py-2">{name}</h1>
@@ -43,8 +41,11 @@ const PrimaryInfoSection: FC<PrimaryInfoSectionProps> = ({
         <FaUser className="h-4 w-4" /> Organized by:{" "}
         <span className="font-semibold">{organizedBy}</span>
       </p>
-      {userId === host && (
-        <GroupAndEventEditAndDelete name={name ? name : ""} url={`/edit-group/${name}`}/>
+      {user?.data.id === host && (
+        <GroupAndEventEditAndDelete
+          name={name ? name : ""}
+          url={`/edit-group/${name}`}
+        />
       )}
     </div>
   );

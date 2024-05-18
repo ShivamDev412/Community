@@ -8,10 +8,11 @@ import GroupsSection from "@/components/YourGroups/GroupsSection";
 const YourGroups = () => {
   const navigation = useNavigate();
   const {
-    groupsCreated,
-    groupsInMember,
+    // groupsCreated,
+    // groupsInMember,
     // pageNumberCreated,
     // pageNumberInMember,
+    groupsCreated,
   } = useYourGroup();
   return (
     <section className="w-11/12 sm:w-10/12 mx-auto overflow-x-hidden h-full pb-10">
@@ -26,16 +27,16 @@ const YourGroups = () => {
           </Button>
         </div>
       </section>
-      <GroupsSection
+       {/* <GroupsSection
         title="Members"
         data={groupsInMember}
         noDataText="You are not in any groups"
-      />
+      /> */}
       <GroupsSection
         title="Organizer"
-        data={groupsCreated}
+        data={groupsCreated?.data || []}
         noDataText="You haven't created any groups"
-      />
+      /> 
     </section>
   );
 };

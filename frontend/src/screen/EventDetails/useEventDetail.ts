@@ -1,80 +1,64 @@
-import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setLoading } from "@/redux/slice/loadingSlice";
 import Toast from "@/utils/Toast";
 import { setEventDetails } from "@/redux/slice/eventSlice";
 import { RootState } from "@/redux/RootReducer";
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
+import { useEventDetailsQuery } from "@/redux/slice/api/eventsSlice";
+import {
+  useCancelEventRSVPMutation,
+  useRegisterToEventMutation,
+  useUserQuery,
+} from "@/redux/slice/api/userSlice";
 export const useEventDetails = () => {
   const [isAttending, setIsAttending] = useState(false);
-  const { axiosPrivate } = useAxiosPrivate();
   const dispatch = useDispatch();
   const { eventId } = useParams();
   const { eventDetails } = useSelector((state: RootState) => state.events);
-  const { id } = useSelector((state: RootState) => state.user);
-
-  const getEventDetails = async () => {
-    try {
-      dispatch(setLoading(true));
-      const res = await axiosPrivate.get(
-        `${API_ENDPOINTS.EVENT}${Endpoints.EVENTS_DETAILS}/${eventId}`
-      );
-      if (res.data.success) {
-        dispatch(setEventDetails(res.data.data));
-        dispatch(setLoading(false));
-      }
-    } catch (err: any) {
-      Toast(err.message, "error");
-    }
-  };
+  const { data: user } = useUserQuery("");
+  const { data: eventData } = useEventDetailsQuery(eventId as string);
+  const [cancelEvent] = useCancelEventRSVPMutation();
+  const [registerToEvent] = useRegisterToEventMutation();
   const attendEvent = async () => {
     try {
-      const res = await axiosPrivate.post(
-        `${API_ENDPOINTS.USER}${Endpoints.REGISTER_TO_EVENT}`,
-        {
-          eventId,
-        }
-      );
-      if (res.data.success) {
-        getEventDetails()
+      const res = await registerToEvent(eventId as string).unwrap();
+      if (res.success) {
+        // getEventDetails()
         setIsAttending(true);
-        Toast(res.data.message, "success");
+        Toast(res.message, "success");
       }
     } catch (err: any) {
       Toast(err.message, "error");
     }
   };
   const isUserAttending = () => {
-    return eventDetails.members.some((attendee) => attendee.id === id);
-  }
+    return eventDetails.members.some(
+      (attendee) => attendee.id === user?.data?.id
+    );
+  };
   const cancelRSVP = async () => {
     try {
-      const res = await axiosPrivate.post(
-        `${API_ENDPOINTS.USER}${Endpoints.CANCEL_RSVP}`,
-        {
-          eventId,
-        }
-      );
-      if (res.data.success) {
-        getEventDetails()
+      const res = await cancelEvent(eventId as string).unwrap();
+      if (res.success) {
+        // getEventDetails()
         setIsAttending(false);
-        Toast(res.data.message, "success");
+        Toast(res.message, "success");
       }
     } catch (err: any) {
       Toast(err.message, "error");
     }
   };
   useEffect(() => {
-    getEventDetails();
-  }, [eventId]);
+    if (eventData) {
+      dispatch(setEventDetails(eventData.data));
+    }
+  }, [eventId, eventData]);
   useEffect(() => {
     setIsAttending(isUserAttending());
   }, [eventDetails]);
   return {
     eventDetails,
-    id,
+    id: user?.data?.id,
     attendEvent,
     isUserAttending,
     isAttending,

@@ -6,7 +6,9 @@ import groupsSlice from "./slice/groupSlice";
 import eventsSlice from "./slice/eventSlice";
 import authSlice from "./slice/authSlice";
 import searchSlice from "./slice/searchSlice";
+import { apiSlice } from "./slice/api/apiSlice";
 const rootReducer = combineReducers({
+  [apiSlice.reducerPath]: apiSlice.reducer,
   auth: authSlice,
   home: homeSlice,
   user: userSlice,

@@ -6,7 +6,7 @@ import LazyLoadedImageComponent from "../LazyLoadedImageComponent";
 
 const GroupCard: FC<GroupCardProps> = ({ data }) => {
   return (
-    <Link to={`/group/${data.name}/`} className="w-full sm:w-3/12">
+    <Link to={`/group/${data.name}/`} className="w-full sm:w-[22.5%]">
       <div className="flex flex-col gap-2 items-center rounded-lg">
         <div className="w-full h-full">
           <LazyLoadedImageComponent

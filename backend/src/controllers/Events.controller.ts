@@ -203,20 +203,30 @@ export const getEventDetails = async (
       ? await getImage(group?.compressed_image || "")
       : null;
 
-    const membersToSend = members.map((member) => ({
-      ...member,
-      image: member?.image || null,
-      compressed_image: member?.compressed_image || null,
-      type: "member",
-    }));
-    membersToSend.unshift({
-      id: host?.id ? host.id : "",
-      image: hostImage || null,
-      compressed_image: hostCompressedImage || null,
-      type: "host",
-      name: host?.name || "",
-    });
+    const membersToSend = members.reduce(
+      (accumulator, member) => {
+        if (member.id !== userId) {
+          accumulator.push({
+            ...member,
+            image: member?.image || null,
+            compressed_image: member?.compressed_image || null,
+            type: "member",
+          });
+        }
+        return accumulator;
+      },
+      [
+        {
+          id: host?.id || "",
+          image: hostImage || null,
+          compressed_image: hostCompressedImage || null,
+          type: "host",
+          name: host?.name || "",
+        },
+      ]
+    );
 
+    console.log(membersToSend);
     res.status(200).json({
       success: true,
       message: "Event details fetched successfully",
@@ -269,13 +279,12 @@ export const updateEvent = async (
     const file = request?.file;
     const imageBuffer = file?.buffer;
     const event = await findEvent(eventId);
-    // Check if event name already exists and is not the same event
     if (event?.name !== name) {
       const eventExists = await existingEvent({
-        eventId,
+        name,
       });
       if (eventExists) {
-        return throwError(next, { name: "Event name already exists" });
+        return throwError(next, { name: "Event with that name already exists" });
       }
     }
     let imageUrl = "";

@@ -1,78 +1,48 @@
-import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
 import { useEffect, useState } from "react";
 import Toast from "@/utils/Toast";
 import { SelectChangeEvent } from "@mui/material";
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/RootReducer";
-import { setUserInterest } from "@/redux/slice/userSlice";
+import { useCategoriesQuery } from "@/redux/slice/api/categoriesSlice";
+import {
+  useAddTagMutation,
+  useDeleteTagMutation,
+  useLazyTagsQuery,
+  useUserTagsQuery,
+} from "@/redux/slice/api/tagsSlice";
+import { Interest } from "@/Types";
 export const useInterests = () => {
-  const dispatch = useDispatch();
-  const { axiosPrivate } = useAxiosPrivate();
   const [category, setCategory] = useState("");
-  const [categories, setCategories] = useState<{ name: string; id: string }[]>(
-    []
-  );
   const [interests, setInterests] = useState<{ name: string; id: string }[]>(
     []
   );
-  const { interests: selectedInterests } = useSelector(
-    (state: RootState) => state.user
-  );
-
+  const { data: categories } = useCategoriesQuery("");
+  const { data: selectedInterests } = useUserTagsQuery("");
+  const [addTag] = useAddTagMutation();
+  const [deleteTag] = useDeleteTagMutation();
+  const [trigger, { data: tagsData }] = useLazyTagsQuery();
   useEffect(() => {
-    getCategories();
-    getAllUserInterests();
-  }, []);
-  const getCategories = async () => {
-    try {
-      const res = await axiosPrivate.get(
-        `${API_ENDPOINTS.USER}${Endpoints.CATEGORIES}`
+    if (tagsData) {
+      setInterests(
+        tagsData?.data.length
+          ? tagsData?.data?.map((value) => ({
+              name: value.name,
+              id: value.id,
+            }))
+          : []
       );
-      if (res.data.success) {
-        setCategories(res.data.data);
-      }
-    } catch (err: any) {
-      Toast(err.message, "error");
     }
-  };
-  const getAllUserInterests = async () => {
-    try {
-      const res = await axiosPrivate.get(
-        `${API_ENDPOINTS.USER}${Endpoints.GET_USER_INTERESTS}`
-      );
-      if (res.data.success) {
-        dispatch(setUserInterest(
-          res.data.data.map((interest: any) => interest.interest)
-        ));
-      }
-    } catch (err: any) {
-      Toast(err.message, "error");
-    }
-  };
+  }, [tagsData]);
   const handleCategory = async (e: SelectChangeEvent<string>) => {
-    const filteredCategories = categories.filter(
+    const filteredCategories = categories?.data.filter(
       (category) => category.name === e.target.value
     );
     const categoryId =
-      filteredCategories.length > 0 ? filteredCategories[0].id : null;
+      filteredCategories && filteredCategories.length > 0
+        ? filteredCategories[0].id
+        : null;
     setCategory(e.target.value);
     if (categoryId) {
       try {
-        const res = await axiosPrivate.get(
-          `${API_ENDPOINTS.USER}${Endpoints.INTERESTS}/${categoryId}`
-        );
-
-        if (res.data.success) {
-          const filteredInterests = res.data.data.filter(
-            (interest: { id: string; name: string }) =>
-              !selectedInterests?.some(
-                (selectedInterest: { id: string }) =>
-                  selectedInterest.id === interest.id
-              )
-          );
-          setInterests(filteredInterests);
-        }
+        trigger(categoryId);
       } catch (err: any) {
         Toast(err.message, "error");
       }
@@ -82,41 +52,23 @@ export const useInterests = () => {
     name: string;
     id: string;
   }) => {
-    const updatedInterest = interests.filter((i) => i.id !== interest.id);
-    dispatch(setUserInterest([...selectedInterests, interest]));
-    setInterests(updatedInterest);
-    const dataToSend = {
-      interestId: interest.id,
-    };
     try {
-      const res = await axiosPrivate.post(
-        `${API_ENDPOINTS.USER}${Endpoints.ADD_INTERESTS}`,
-        dataToSend
-      );
-      if (res.data.success) {
+      const response = await addTag({
+        interestId: interest.id,
+      }).unwrap();
+      if (response.success) {
+        const updatedInterest = interests.filter((i) => i.id !== interest.id);
+        setInterests(updatedInterest);
       }
     } catch (err: any) {
       Toast(err.message, "error");
     }
   };
-  const handleRemoveInterest = async (interest: {
-    name: string;
-    id: string;
-  }) => {
-    const updatedInterest = selectedInterests.filter(
-      (i:{id:string}) => i.id !== interest.id
-    );
-    dispatch(setUserInterest((updatedInterest)));
-    if (category !== "") {
-      setInterests([...interests, interest]);
-    }
-
+  const handleRemoveInterest = async (interest: Interest) => {
     try {
-      const res = await axiosPrivate.delete(
-        `${API_ENDPOINTS.USER}${Endpoints.DELETE_INTERESTS}/${interest.id}`
-      );
-      if (res.data.success) {
-        console.log(res.data, "data");
+      const res = await deleteTag(interest.id).unwrap();
+      if (res.success) {
+        setInterests((prevInterest) => [...prevInterest, interest]);
       }
     } catch (err: any) {
       Toast(err.message, "error");

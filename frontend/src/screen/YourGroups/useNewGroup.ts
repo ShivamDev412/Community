@@ -1,5 +1,5 @@
 import { NewGroupType } from "@/Types";
-import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
+import { Endpoints } from "@/utils/Endpoints";
 import { NewGroupSchema } from "@/utils/Validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -8,45 +8,18 @@ import { z } from "zod";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "@/redux/slice/loadingSlice";
+import {
+  useCreateGroupMutation,
+  useEditGroupMutation,
+} from "@/redux/slice/api/groupsSlice";
 import { RootState } from "@/redux/RootReducer";
-import { useEffect } from "react";
-import { setGroupDetails } from "@/redux/slice/groupSlice";
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 export const useNewGroup = () => {
-  const {axiosPrivateFile} = useAxiosPrivate();
   const location = useLocation();
   const isEditGroup = location.pathname.includes("edit-group");
   const navigation = useNavigate();
   const dispatch = useDispatch();
   const { groupDetails } = useSelector((state: RootState) => state.groups);
-  useEffect(() => {
-    if (!isEditGroup) {
-      reset();
-      dispatch(
-        setGroupDetails({
-          about: "",
-          created_at: "",
-          group_id: "",
-          group_type: "",
-          image: "",
-          compressed_image: "",
-          location: "",
-          latitude: 0,
-          longitude: 0,
-          membersCount: 0,
-          members: [],
-          name: "",
-          organized_by: {
-            name: "",
-            image: "",
-            compressed_image: "",
-            id: "",
-          },
-          updated_at: "",
-        })
-      );
-    }
-  }, [isEditGroup]);
+
   type FormField = z.infer<typeof NewGroupSchema>;
   const {
     register,
@@ -64,32 +37,17 @@ export const useNewGroup = () => {
       location: isEditGroup ? groupDetails?.location : "",
       groupType: isEditGroup ? groupDetails?.group_type : "",
       image: isEditGroup ? groupDetails?.image : "",
-  
     },
     resolver: zodResolver(NewGroupSchema),
   });
-  //
-
-  const addAndUpdateApi = async (type: string, formData: FormData) => {
-    switch (type) {
-      case "add":
-        return await axiosPrivateFile.post(
-          `${API_ENDPOINTS.GROUP}${Endpoints.CREATE_GROUP}`,
-          formData
-        );
-      case "update":
-        return await axiosPrivateFile.put(
-          `${API_ENDPOINTS.GROUP}${Endpoints.UPDATE_GROUP}/${groupDetails.id}`,
-          formData
-        );
-    }
-  };
+  const [createGroup] = useCreateGroupMutation();
+  const [editGroup] = useEditGroupMutation();
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     const dataToSend = {
       ...data,
       about: data.description,
       group_type: data.groupType,
-      image: data.image[0]
+      image: data.image[0],
     };
 
     const formData = new FormData();
@@ -101,33 +59,37 @@ export const useNewGroup = () => {
     formData.append("group_type", dataToSend.groupType);
     formData.append("location", dataToSend.location);
     formData.append("about", dataToSend.description);
+    console.log(formData, "dataToSend");
     try {
       dispatch(setLoading(true));
-      const res:any = await addAndUpdateApi(
-        isEditGroup ? "update" : "add",
-        formData
-      );
-      if (res.data.success) {
+      const response = isEditGroup
+        ? await editGroup({
+            body: formData,
+            groupId: groupDetails?.id as string,
+          }).unwrap()
+        : await createGroup(formData).unwrap();
+      const { message, success } = response;
+      if (success) {
         dispatch(setLoading(false));
-        Toast(res.data.message, "success");
+        Toast(message, "success");
         navigation(Endpoints.YOUR_GROUPS);
         reset();
         clearErrors();
       }
     } catch (e: any) {
       dispatch(setLoading(false));
-      if (e.response.data.message.hasOwnProperty("name")) {
+      if (e.data.message.hasOwnProperty("name")) {
         setError("name", {
           type: "manual",
-          message: e.response.data.message.name,
+          message: e.data.message.name,
         });
-      } else if (e.response.data.message.hasOwnProperty("image")) {
+      } else if (e.data.message.hasOwnProperty("image")) {
         setError("image", {
           type: "manual",
-          message: e.response.data.message.image,
+          message: e.data.message.image,
         });
       } else {
-        Toast(e.response.data.message, "error");
+        Toast(e.data.message, "error");
       }
     }
   };

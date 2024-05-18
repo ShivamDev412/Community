@@ -128,7 +128,6 @@ export const GetEvents = async (
         return event.event_type === type;
       });
     }
-
     const groupedEvents = events.reduce((acc: any, event) => {
       const eventDate = moment(event.event_date).utc().startOf("day");
       const formattedDate = eventDate.isSame(today, "day")

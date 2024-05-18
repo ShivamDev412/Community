@@ -29,11 +29,13 @@ export const getUserGroups = async (
           group: true,
         },
       });
+      console.log(userGroups, "userGroups")
       res.status(200).json({
         success: true,
         message: "User groups fetched successfully",
         data: userGroups,
       });
+
     }
   } catch (error) {
     next(error);
@@ -49,6 +51,7 @@ export const createUserGroup = async (
     const { about, name, group_type, location } = NewGroupSchema.parse(
       req.body
     );
+
     const userId: string | undefined = req?.user?.id;
     const file = req?.file;
     const imageBuffer = file?.buffer;

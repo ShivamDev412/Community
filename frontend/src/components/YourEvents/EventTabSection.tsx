@@ -33,8 +33,7 @@ const TabPanelComponent: FC<TabPanelComponentProps> = ({ value, data }) => {
   );
 };
 export default function EventTabs() {
-  const { value, handleChange, hostingEvents, attendingEvents, pastEvents } =
-    useEventTab();
+  const { userEvents, value, handleChange } = useEventTab();
   return (
     <section className="w-full mt-5">
       <TabContext value={value}>
@@ -45,9 +44,9 @@ export default function EventTabs() {
             <Tab label="Past" value="3" className="capitalize text-lg" />
           </TabList>
         </Box>
-        <TabPanelComponent value="1" data={attendingEvents} />
-        <TabPanelComponent value="2" data={hostingEvents} />
-        <TabPanelComponent value="3" data={pastEvents} />
+        <TabPanelComponent value="1" data={userEvents?.data || []} />
+        <TabPanelComponent value="2" data={userEvents?.data || []} />
+        <TabPanelComponent value="3" data={userEvents?.data || []} />
       </TabContext>
     </section>
   );

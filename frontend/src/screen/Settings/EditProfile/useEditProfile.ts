@@ -1,25 +1,22 @@
-import { EditProfileType } from "@/Types";
-import { RootState } from "@/redux/RootReducer";
+import { EditProfileType, UserType } from "@/Types";
 import { setLoading } from "@/redux/slice/loadingSlice";
-import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
 import { EditProfileSchema } from "@/utils/Validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
-import { setUser } from "@/redux/slice/userSlice";
 import { useEffect } from "react";
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
+import { useEditProfileMutation, useUserQuery } from "@/redux/slice/api/userSlice";
 const useEditProfile = () => {
-  const { axiosPrivateFile } = useAxiosPrivate();
   const dispatch = useDispatch();
   const navigation = useNavigate();
-  const { name, image, location, bio } = useSelector(
-    (state: RootState) => state.user
-  );
 
+  const { data: user } = useUserQuery("");
+  const { image, name, location, bio } = user?.data as UserType;
+  const [editProfile] = useEditProfileMutation();
   type FormField = z.infer<typeof EditProfileSchema>;
   const {
     register,
@@ -53,14 +50,10 @@ const useEditProfile = () => {
     formData.append("bio", JSON.stringify(data?.bio));
     try {
       dispatch(setLoading(true));
-      const res = await axiosPrivateFile.post(
-        `${API_ENDPOINTS.USER}${Endpoints.EDIT_PROFILE}`,
-        formData
-      );
-      if (res.data.success) {
+      const res = await editProfile(formData).unwrap();
+      if (res.success) {
         dispatch(setLoading(false));
-        Toast(res.data.message, "success");
-        dispatch(setUser(res.data.data));
+        Toast(res.message, "success");
         navigation(RouteEndpoints.PROFILE);
         reset();
         clearErrors();

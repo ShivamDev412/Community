@@ -87,6 +87,7 @@ export const GetUserData = async (
       });
 
       const interests = await findUserInterests(userId);
+      const interestsToSend = interests.map((interest) => interest.interest);
       const imageData = user?.google_id
         ? user?.image
         : await getImage(user?.image || "");
@@ -99,7 +100,7 @@ export const GetUserData = async (
           ...user,
           image: imageData,
           compressed_image: compressedImageData,
-          interests: interests,
+          interests: interestsToSend,
         },
       });
     } else {
@@ -348,10 +349,11 @@ export const removeUserInterests = async (
       }
       await removeUserInterest(userId, interestId);
       const userInterests = await findUserInterests(userId);
+      const interestToSend = userInterests.map((interest) => interest.interest);
       res.status(200).json({
         success: true,
         message: "Interest removed successfully",
-        data: userInterests,
+        data: interestToSend,
       });
     } else {
       return throwError(next, "User not found");
@@ -369,10 +371,11 @@ export const getUserAllInterests = async (
     const userId: string | undefined = req?.user?.id;
     if (userId) {
       const userInterests = await findUserInterests(userId);
+      const interestToSend = userInterests.map((interest) => interest.interest);
       res.status(200).json({
         success: true,
         message: "Interests fetched successfully",
-        data: userInterests,
+        data: interestToSend,
       });
     } else {
       return throwError(next, "User not found");

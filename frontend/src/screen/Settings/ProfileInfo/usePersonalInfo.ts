@@ -1,27 +1,23 @@
-import { PersonalInfoType } from "@/Types";
+import { PersonalInfoType, UserType } from "@/Types";
 import { setLoading } from "@/redux/slice/loadingSlice";
 import { LifeStages, LookingFor } from "@/utils/Constant";
-import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import { PersonalInfoSchema } from "@/utils/Validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import Toast from "@/utils/Toast";
-import { setUser } from "@/redux/slice/userSlice";
-import { RootState } from "@/redux/RootReducer";
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
+import { useUpdateUserPersonalInfoMutation, useUserQuery } from "@/redux/slice/api/userSlice";
 
 export const usePersonalInfo = () => {
 
-  const {axiosPrivate} = useAxiosPrivate();
   const navigation = useNavigate();
   const dispatch = useDispatch();
-  const { dob, sex, looking_for, life_state } = useSelector(
-    (state: RootState) => state.user
-  );
+  const {data:user} = useUserQuery("");
+  const {dob, sex, life_state, looking_for} = user?.data as UserType;
   const [lookingFor, setLookingFor] = useState(LookingFor);
   const [lifeStages, setLifeStages] = useState(LifeStages);
   type FormField = z.infer<typeof PersonalInfoSchema>;
@@ -98,17 +94,14 @@ export const usePersonalInfo = () => {
     if (cb === "setLookingFor") setLookingFor(dataToUpdated);
     if (cb === "setLifeStages") setLifeStages(dataToUpdated);
   };
+  const [updatePersonalInfo] = useUpdateUserPersonalInfoMutation();
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     try {
       dispatch(setLoading(true));
-      const res = await axiosPrivate.put(
-        `${API_ENDPOINTS.USER}${Endpoints.UPDATE_PERSONAL_INFO}`,
-        data
-      );
-      if (res.data.success) {
+      const res = await updatePersonalInfo(data as PersonalInfoType).unwrap();
+      if (res.success) {
         dispatch(setLoading(false));
-        Toast(res.data.message, "success");
-        dispatch(setUser(res.data.data));
+        Toast(res.message, "success");
         navigation(RouteEndpoints.PROFILE);
       }
     } catch (e: any) {

@@ -1,3 +1,4 @@
+import { UserType } from "@/Types";
 import { useProfile } from "./useProfile";
 import {
   EditProfileLink,
@@ -9,8 +10,9 @@ import {
 } from "@/components/Profile";
 
 const Profile = () => {
-  const { image, compressed_image, name, location, email, joined_on_date } =
+  const { user, joined_on_date } =
     useProfile();
+    const {image, name, email, location, compressed_image} = user?.data as UserType;
   return (
     <section className="overflow-x-hidden bg-[#f8f8f9] h-full pb-10 mt-5">
       <section className="flex justify-between flex-wrap xs:w-11/12 w-11/12 sm:w-10/12 lg:w-9/12 2xl:w-6/12 mx-auto overflow-x-hidden h-full mt-5 pb-10">

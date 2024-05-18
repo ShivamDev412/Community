@@ -1,18 +1,15 @@
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 import { SearchType } from "@/Types";
 import { RootState } from "@/redux/Store";
-import { setEvents } from "@/redux/slice/searchSlice";
-import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
+import { useLazySearchQuery } from "@/redux/slice/api/homeSlice";
 import Toast from "@/utils/Toast";
 import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 export const useSearchPage = () => {
-  const dispatch = useDispatch();
-  const { axiosPrivate } = useAxiosPrivate();
   const { search, events, groups } = useSelector(
     (state: RootState) => state.search
   );
+  const [trigger, { data }] = useLazySearchQuery();
   const generateSearchQuery = () => {
     const queryParams: string[] = [];
 
@@ -33,19 +30,20 @@ export const useSearchPage = () => {
     return queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
   };
   useEffect(() => {
+   if(search.tab === "events"){
+    // !Have to be handled
+  } else {
+
+  }
+  }, [data]);
+  useEffect(() => {
     handleSearch();
   }, [search]);
+
+  console.log(data);
   const handleSearch = async () => {
     try {
-      const response = await axiosPrivate.get(
-        `${API_ENDPOINTS.HOME}${
-          Endpoints.SEARCH_EVENTS
-        }${generateSearchQuery()}`
-      );
-      if (response.data.success) {
-        debugger;
-        // dispatch(setEvents(response.data.data));
-      }
+      trigger(generateSearchQuery());
     } catch (error) {
       Toast("Something went wrong", "error");
     }

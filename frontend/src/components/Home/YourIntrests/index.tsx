@@ -1,10 +1,10 @@
 import { RouteEndpoints } from "@/utils/Endpoints";
 import SectionTitle from "../SectionEventTitle";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/Store";
+import { useUserQuery } from "@/redux/slice/api/userSlice";
 
 const YourInterests = () => {
-  const { interests } = useSelector((state: RootState) => state.user);
+  const { data: user } = useUserQuery("");
+  console.log(user?.data?.interests);
   return (
     <section>
       <SectionTitle
@@ -13,8 +13,8 @@ const YourInterests = () => {
         more={"See all your interests"}
       />
       <div className="flex flex-wrap gap-2 mt-2">
-        {interests?.length > 0 ? (
-          interests?.slice(0, 5).map((interest) => (
+        {user?.data?.interests && user?.data?.interests?.length > 0 ? (
+          user?.data?.interests?.slice(0, 5).map((interest) => (
             <div
               key={interest?.id}
               className="border border-cyan-700 px-2 py-1 rounded-lg text-white font-semibold bg-cyan-700"

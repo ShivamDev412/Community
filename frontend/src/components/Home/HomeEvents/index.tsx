@@ -7,7 +7,7 @@ import { RouteEndpoints } from "@/utils/Endpoints";
 const HomeEvents = () => {
   const { events } = useHomeEvents();
   const todayTimestamp = moment().utc().startOf("day").unix();
-  const isEventsEmpty = Object.keys(events).length === 0;
+  const isEventsEmpty = events && Object.keys(events).length === 0;
   return (
     <section className="mt-5">
       {isEventsEmpty ? (
@@ -21,7 +21,7 @@ const HomeEvents = () => {
           </Link>
         </div>
       ) : (
-        Object.entries(events).map(([timestamp, eventArray]) => (
+        events && Object.entries(events?.data).map(([timestamp, eventArray]) => (
           <div key={timestamp && timestamp} className="mb-10">
             <h3 className="font-semibold text-xl pb-2 border-b-2 border-gray-400 mb-4">
               {parseInt(timestamp) === todayTimestamp

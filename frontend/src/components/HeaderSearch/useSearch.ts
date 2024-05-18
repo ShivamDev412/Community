@@ -6,16 +6,15 @@ import { useNavigate } from "react-router-dom";
 import { RootState } from "@/redux/Store";
 import { useGooglePlaces } from "@/Hooks/useGooglePlaces";
 import Toast from "@/utils/Toast";
-import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import { handleLocation } from "@/utils/CommonFunctions/handleLocation";
 import { setLoading } from "@/redux/slice/loadingSlice";
+import { useGetCityMutation } from "@/redux/slice/api/homeSlice";
 
 export const useSearch = () => {
   const navigate = useNavigate();
   const [event, setEvent] = useState("");
   const [place, setPlace] = useState("");
-  const { axiosPrivate } = useAxiosPrivate();
   const dispatch = useDispatch();
   const ref1 = useRef<HTMLInputElement>(null);
   const ref2 = useRef<HTMLInputElement>(null);
@@ -24,7 +23,7 @@ export const useSearch = () => {
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const { location } = useSelector((state: RootState) => state.home);
   const { search } = useSelector((state: RootState) => state.search);
-
+  const [getCity] = useGetCityMutation();
   const {
     placesService,
     placePredictions,
@@ -74,21 +73,16 @@ export const useSearch = () => {
   const fetchCity = async (lat: number, lon: number) => {
     dispatch(setLoading(true));
     try {
-      const response = await axiosPrivate.post(
-        `${API_ENDPOINTS.HOME}${Endpoints.GET_CITY}`,
-        {
-          lat,
-          lon,
-        }
-      );
-
-      if (response.statusText === "OK") {
-        const data = response.data;
+      const response = await getCity({
+        lat,
+        lon,
+      }).unwrap();
+      if (response) {
         dispatch(
           setLocation({
             location: {
-              city: data.city,
-              state: data.state,
+              city: response.city,
+              state: response.state,
             },
           })
         );
