@@ -17,6 +17,7 @@ export const homeApiSlice = apiSlice.injectEndpoints({
         method: "GET",
         keepUnusedDataFor: 5,
       }),
+      providesTags: ["RSVP_EVENTS"]
     }),
     getCity: builder.mutation<{city: number, state: number}, { lat: number; lon: number }>({
       query: (params) => ({
@@ -34,4 +35,4 @@ export const homeApiSlice = apiSlice.injectEndpoints({
     }),
   }),
 });
-export const { useEventsQuery, useRsvpEventsQuery, useGetCityMutation, useLazySearchQuery } = homeApiSlice;
+export const { useEventsQuery, useRsvpEventsQuery, useGetCityMutation, useSearchQuery } = homeApiSlice;

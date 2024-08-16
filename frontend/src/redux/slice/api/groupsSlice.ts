@@ -49,7 +49,7 @@ export const groupsApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Groups"],
     }),
-    eventsInGroup: builder.query<GroupDetailsResponse, string>({
+    eventsInGroup: builder.query<GroupResponse, string>({
       query: (groupId: string) => ({
         url: `${API_ENDPOINTS.GROUP}${Endpoints.GET_EVENTS_IN_GROUP}?groupId=${groupId}`,
         method: "GET",

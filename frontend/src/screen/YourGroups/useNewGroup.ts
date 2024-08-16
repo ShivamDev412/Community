@@ -59,7 +59,6 @@ export const useNewGroup = () => {
     formData.append("group_type", dataToSend.groupType);
     formData.append("location", dataToSend.location);
     formData.append("about", dataToSend.description);
-    console.log(formData, "dataToSend");
     try {
       dispatch(setLoading(true));
       const response = isEditGroup

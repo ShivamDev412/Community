@@ -8,13 +8,13 @@ import { Link } from "react-router-dom";
 const AccountManagement = () => {
   const {
     register,
-    handleSubmit,
+    // handleSubmit,
     // reset,
     // clearErrors,
     getValues,
     errors,
     // setValue,
-    onSubmit,
+    // onSubmit,
   } = useAccountManagement();
   return (
     <EditProfileWrapper>
@@ -27,7 +27,7 @@ const AccountManagement = () => {
           component="form"
           encType="multipart/form-data"
           className="flex flex-col gap-4 mt-10 xs:w-[85%] sm:w-9/12 lg:w-6/12 xl:w-4/12"
-          onSubmit={handleSubmit(onSubmit)}
+          // onSubmit={handleSubmit(onSubmit)}
         >
           <InputField
             id={"email"}

@@ -64,7 +64,6 @@ const GithubMiddleware = () => {
         profile: any,
         cb: any
       ) => {
-        console.log(profile);
         const defaultUser = {
           email: profile.email,
           name: `${profile.given_name} ${profile.family_name}`,
@@ -106,7 +105,6 @@ const FacebookMiddleware = () => {
         profile: any,
         cb: any
       ) => {
-        console.log(profile);
         const defaultUser = {
           email: profile.email,
           name: `${profile.given_name} ${profile.family_name}`,

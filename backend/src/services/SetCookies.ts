@@ -1,4 +1,4 @@
-import e, { Response, CookieOptions } from "express";
+import { Response, CookieOptions } from "express";
 const cookieOptions: CookieOptions = {
   httpOnly: true,
   secure: true, 

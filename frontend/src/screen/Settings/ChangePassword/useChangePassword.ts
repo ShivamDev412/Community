@@ -32,7 +32,6 @@ export const useChangePassword = () => {
     resolver: zodResolver(ChangePasswordSchema),
   });
   const onSubmit: SubmitHandler<FormField> = async (data) => {
-    console.log(data);
     try {
       dispatch(setLoading(true));
       const res = await changePassword(data).unwrap();

@@ -11,10 +11,6 @@ const initialState: HomeDataType = {
     distance: Distances[0],
     type: HomeEvents[0],
   },
-  user: {},
-  groups: {},
-  events: {},
-  rsvpEvents: [],
 };
 const homeSlice = createSlice({
   name: "home",
@@ -29,33 +25,6 @@ const homeSlice = createSlice({
           state: action.payload.location.state,
         },
       };
-    },
-    setUser: (state, action) => {
-      return {
-        ...state,
-        user: action.payload.user,
-      };
-    },
-    setGroups: (state, action) => {
-      return {
-        ...state,
-        groups: action.payload.groups,
-      };
-    },
-    setEvents: (state, action) => {
-      return {
-        ...state,
-        events: action.payload,
-      };
-    },
-    setRsvpEvents: (state, action) => {
-      return {
-        ...state,
-        rsvpEvents: action.payload,
-      };
-    },
-    clearHomeState: (state) => {
-      return { ...state, ...initialState };
     },
     setFilters: (state, action) => {
       return {
@@ -81,10 +50,8 @@ const homeSlice = createSlice({
 });
 export const {
   setLocation,
-  clearHomeState,
-  setEvents,
   setFilters,
   resetFilters,
-  setRsvpEvents,
+  
 } = homeSlice.actions;
 export default homeSlice.reducer;

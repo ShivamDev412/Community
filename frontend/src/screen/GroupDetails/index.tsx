@@ -7,7 +7,6 @@ import {
 import { useGroupDetails } from "./useGroupDetails";
 const GroupDetail = () => {
   const { groupDetails } = useGroupDetails();
-  console.log(groupDetails);
   return (
     <GroupDetailWrapper>
       {groupDetails?.data && (

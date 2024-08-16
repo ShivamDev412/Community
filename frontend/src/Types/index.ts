@@ -201,11 +201,8 @@ export interface DateAndTimePickerProps extends InputProps {
   getValues: any;
 }
 export type GroupsSliceType = {
-  groupsCreated: Array<Group>;
-  groupsInMember: Array<Group>;
   groupDetails: GroupDetails;
   groupEvents: {
-    events: Array<EventDetailType & { members: number }>;
     pageNumber: number;
   };
   pageNumberCreated: number;
@@ -328,9 +325,6 @@ export interface EventType {
   updated_at: string;
 }
 export type EventsState = {
-  hostingEvents: EventType[];
-  attendingEvents: EventType[];
-  pastEvents: EventType[];
   eventDetails: EventDetailType;
   hostingPageNumber: number;
   attendingPageNumber: number;
@@ -413,10 +407,6 @@ export type CustomHomeSelectType = {
   label: string;
   active: boolean;
 };
-
-type HomeEventType = {
-  [timestamp: number]: EventType[];
-};
 export type SearchType = {
   keyword: string;
   day: CustomHomeSelectType;
@@ -437,14 +427,5 @@ export type HomeDataType = {
     distance: CustomHomeSelectType;
     type: CustomHomeSelectType;
   };
-  user: UserType | {};
+};
 
-  groups: Group[] | {};
-  events: HomeEventType | {};
-  rsvpEvents: EventType[];
-};
-export type SearchPageType = {
-  search: SearchType;
-  events: Array<EventType>;
-  groups: Group[];
-};

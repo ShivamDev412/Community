@@ -9,10 +9,10 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/RootReducer";
 
 const SearchFilter = () => {
-  const { search } = useSelector((state: RootState) => state.search);
+  const { tab } = useSelector((state: RootState) => state.search);
   return (
     <section className="flex gap-4 my-10">
-      {search.tab === "events" ? (
+      {tab === "events" ? (
         <>
           <CustomHomeSelect selectOptions={HomeEvents} selectType={"type"} />
           <CustomHomeSelect selectOptions={Distances} selectType={"distance"} />

@@ -119,21 +119,38 @@ const cancelEvent = async (userId: string, eventId: string) => {
   });
 };
 const registerEvent = async (userId: string, eventId: string) => {
-  return await db.userEvent.create({
-    data: {
-      user: {
-        connect: {
-          id: userId,
+  try {
+    const existingRegistration = await db.userEvent.findUnique({
+      where: {
+        user_id_event_id: {
+          user_id: userId,
+          event_id: eventId,
         },
       },
-      event: {
-        connect: {
-          id: eventId,
+    });
+
+    if (existingRegistration) {
+      throw new Error('User is already registered for this event.');
+    }
+    return await db.userEvent.create({
+      data: {
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+        event: {
+          connect: {
+            id: eventId,
+          },
         },
       },
-    },
-  });
+    });
+  } catch (error) {
+    throw error;
+  }
 };
+
 export {
   findUser,
   updateUser,

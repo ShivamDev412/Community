@@ -3,7 +3,7 @@ import { changeTab } from "@/redux/slice/searchSlice";
 import { useSelector, useDispatch } from "react-redux";
 
 const SelectionTab = () => {
-  const { tab } = useSelector((state: RootState) => state.search.search);
+  const { tab } = useSelector((state: RootState) => state.search);
   return (
     <section className="flex gap-5 items-center">
       <Tab tabName="Events" isActive={tab === "events"} />

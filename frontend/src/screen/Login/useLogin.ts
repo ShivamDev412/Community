@@ -30,24 +30,18 @@ export const useLogin = () => {
     },
     resolver: zodResolver(LoginSchema),
   });
-  const [login] = useLoginMutation();
+  const [login, {isLoading}] = useLoginMutation();
   const onSubmit: SubmitHandler<FormField> = async (credentials) => {
     try {
-      dispatch(setLoading(true));
-      // const response:any = await axios.post(
-      //   `${API_ENDPOINTS.AUTH}${RouteEndpoints.LOGIN}`,
-      //   data
-      // );
+     
       const response = await login(credentials).unwrap();
       const { success, message, data } = response;
       if (success) {
         Toast(message, "success");
         dispatch(setCredentials(data["auth-token"]));
-
         navigate(RouteEndpoints.HOME);
         reset();
         clearErrors();
-        dispatch(setLoading(false));
       }
     } catch (error: any) {
       const message = error.response.data.message;
@@ -60,5 +54,5 @@ export const useLogin = () => {
     }
   };
 
-  return { register, handleSubmit, onSubmit, errors, getValues };
+  return { register, handleSubmit, onSubmit, errors, getValues, isLoading };
 };

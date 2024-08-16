@@ -21,8 +21,7 @@ const EventCard: FC<{ data: EventType }> = ({ data }) => {
     const eventUrl = `${window.location.origin}/event/${id}`;
     navigator.clipboard
       .writeText(eventUrl)
-      .then(() => Toast("Link copied to clipboard","success"))
-      .catch((error) => console.error("Failed to copy link: ", error));
+      .then(() => Toast("Link copied to clipboard", "success"));
   };
 
   return (

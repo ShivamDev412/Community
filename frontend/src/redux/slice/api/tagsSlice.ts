@@ -25,14 +25,14 @@ export const categoriesApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Tags"],
+      invalidatesTags: ["Tags", "User"],
     }),
     deleteTag: builder.mutation<TagsResponse, string>({
       query: (tagId: string) => ({
         url: `${API_ENDPOINTS.USER}${Endpoints.DELETE_INTERESTS}/${tagId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Tags"],
+      invalidatesTags: ["Tags", "User"],
     }),
   }),
 });

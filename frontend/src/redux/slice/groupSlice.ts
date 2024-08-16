@@ -2,8 +2,6 @@ import { GroupsSliceType } from "@/Types";
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState: GroupsSliceType = {
-  groupsCreated: [],
-  groupsInMember: [],
   groupDetails: {
     about: "",
     created_at: "",
@@ -26,7 +24,6 @@ const initialState: GroupsSliceType = {
     updated_at: "",
   },
   groupEvents: {
-    events: [],
     pageNumber: 1,
   },
   pageNumberCreated: 1,
@@ -37,12 +34,6 @@ const groupsSlice = createSlice({
   name: "groups",
   initialState,
   reducers: {
-    setGroupsCreated: (state, action) => {
-      state.groupsCreated = action.payload;
-    },
-    setGroupsInMember: (state, action) => {
-      state.groupsInMember = action.payload;
-    },
     setPageNumberCreated: (state, action) => {
       state.pageNumberCreated = action.payload;
     },
@@ -53,9 +44,6 @@ const groupsSlice = createSlice({
       state.groupDetails = action.payload;
     },
     clearGroups: (state) => {
-      state.groupsCreated = initialState.groupsCreated;
-      state.groupsInMember = initialState.groupsInMember;
-      state.pageNumberCreated = initialState.pageNumberCreated;
       state.pageNumberInMember = initialState.pageNumberInMember;
     },
     setGroupEvents: (state, action) => {
@@ -65,8 +53,6 @@ const groupsSlice = createSlice({
 });
 
 export const {
-  setGroupsCreated,
-  setGroupsInMember,
   setPageNumberCreated,
   setPageNumberInMember,
   clearGroups,

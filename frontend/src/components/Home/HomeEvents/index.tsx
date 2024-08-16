@@ -7,7 +7,7 @@ import { RouteEndpoints } from "@/utils/Endpoints";
 const HomeEvents = () => {
   const { events } = useHomeEvents();
   const todayTimestamp = moment().utc().startOf("day").unix();
-  const isEventsEmpty = events && Object.keys(events).length === 0;
+  const isEventsEmpty = events && Object.keys(events.data).length === 0;
   return (
     <section className="mt-5">
       {isEventsEmpty ? (

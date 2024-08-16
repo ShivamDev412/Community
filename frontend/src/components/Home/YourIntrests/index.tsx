@@ -4,7 +4,6 @@ import { useUserQuery } from "@/redux/slice/api/userSlice";
 
 const YourInterests = () => {
   const { data: user } = useUserQuery("");
-  console.log(user?.data?.interests);
   return (
     <section>
       <SectionTitle

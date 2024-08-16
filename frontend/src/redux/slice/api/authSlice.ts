@@ -11,11 +11,12 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-    signup: builder.mutation({
+    signup: builder.mutation<AuthResponse, FormData>({
       query: (data) => ({
         url: `${API_ENDPOINTS.AUTH}${Endpoints.SIGNUP}`,
         method: "POST",
         body: data,
+        formData: true,
       }),
     }),
     resetPassword: builder.mutation<AuthResponse, ResetPasswordType>({
@@ -27,4 +28,5 @@ export const authApiSlice = apiSlice.injectEndpoints({
     }),
   }),
 });
-export const { useLoginMutation, useSignupMutation, useResetPasswordMutation } = authApiSlice;
+export const { useLoginMutation, useSignupMutation, useResetPasswordMutation } =
+  authApiSlice;

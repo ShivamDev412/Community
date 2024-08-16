@@ -1,4 +1,4 @@
-import { CustomHomeSelectType } from "@/Types";
+import { CustomHomeSelectType, SearchType } from "@/Types";
 import { RootState } from "@/redux/Store";
 import { setFilters } from "@/redux/slice/homeSlice";
 import { setSearch } from "@/redux/slice/searchSlice";
@@ -12,11 +12,12 @@ export const useCustomHomeSelect = (
 ) => {
   const { pathname } = useLocation();
   const dispatch = useDispatch();
-  const { filters } = useSelector((state: RootState) => state.home);
-  const { search } = useSelector((state: RootState) => state.search);
+  const { filters } = useSelector((state: RootState) => state.home) || {};
+  const search = useSelector((state: RootState) => state.search);
   const [options, setOptions] = useState(selectOptions);
   const [showDropDown, setShowDropDown] = useState(false);
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState<boolean>(false);
+  const { distance, day, type, category } = search as SearchType;
   useEffect(() => {
     if (pathname === RouteEndpoints.SEARCH) {
       setIsActive(
@@ -31,8 +32,9 @@ export const useCustomHomeSelect = (
     } else {
       setIsActive(
         selectType === "type"
-          ? filters?.type?.value !== "" && filters?.type?.active
-          : filters?.distance?.value !== "" && filters?.distance?.active
+          ? filters?.type?.value !== "" && (filters?.type?.active as boolean)
+          : filters?.distance?.value !== "" &&
+              (filters?.distance?.active as boolean)
       );
     }
   }, [selectType, filters, search]);
@@ -55,12 +57,12 @@ export const useCustomHomeSelect = (
   const displayValue = () => {
     if (pathname === RouteEndpoints.SEARCH) {
       return selectType === "type"
-        ? search?.type?.label
+        ? type?.label
         : selectType === "distance"
-        ? search?.distance?.label
+        ? distance?.label
         : selectType === "day"
-        ? search?.day?.label
-        : search?.category?.label;
+        ? day?.label
+        : category?.label;
     } else {
       return selectType === "type"
         ? filters?.type?.label

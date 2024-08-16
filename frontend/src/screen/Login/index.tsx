@@ -2,12 +2,14 @@ import { FormControl, Button } from "@mui/material";
 import AuthWrapper from "@/Wrappers/AuthWrapper";
 import { InputField } from "@/components/Input";
 import { Link } from "react-router-dom";
+import CircularProgress from "@mui/material/CircularProgress";
 import { Endpoints } from "@/utils/Endpoints";
 import { useLogin } from "./useLogin";
 import SocialSignupSection from "@/components/SocialSignupSection";
 
 function Login() {
-  const { register, handleSubmit, onSubmit, errors, getValues } = useLogin();
+  const { register, handleSubmit, onSubmit, errors, getValues, isLoading } =
+    useLogin();
 
   return (
     <AuthWrapper>
@@ -39,11 +41,16 @@ function Login() {
           </div>
 
           <Button
-            className="bg-primary text-white px-4 py-2 rounded-md capitalize text-lg font-semibold"
+            className="bg-primary text-white px-4 py-2 rounded-md capitalize text-lg font-semibold disabled:bg-opacity-80"
             type="submit"
             variant="contained"
+            disabled={isLoading}
           >
-            Submit
+            {isLoading ? (
+              <CircularProgress className="text-white h-7 w-7" />
+            ) : (
+              "Login"
+            )}
           </Button>
           <p className="text-right">
             Don't have an account?{" "}

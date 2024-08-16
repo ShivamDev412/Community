@@ -53,7 +53,7 @@ export const GetEvents = async (
 ) => {
   try {
     const userId = request?.user?.id;
-    const { query, latitude, longitude, radius, type } = request.query;
+    const { latitude, longitude, radius, type } = request.query;
     const radiusValue = radius;
     const today = moment().utc().startOf("day");
     let events = await db.event.findMany({
@@ -99,20 +99,6 @@ export const GetEvents = async (
         };
       })
     );
-
-    if (typeof query === "string" && query.trim() !== "") {
-      const filteredEvents = events.filter((event) => {
-        const isQueryInName = event.name
-          .toLowerCase()
-          .includes(query.toLowerCase());
-        const isQueryInDescription = event.details
-          ?.toLowerCase()
-          .includes(query.toLowerCase());
-        return isQueryInName || isQueryInDescription;
-      });
-      events = filteredEvents;
-    }
-
     if (radiusValue) {
       events = events.filter((event) => {
         const distance = calculateDistance(
@@ -124,6 +110,10 @@ export const GetEvents = async (
         return distance <= +radiusValue;
       });
     } else if (type === "online") {
+      events = events.filter((event) => {
+        return event.event_type === type;
+      });
+    } else if (type === "in-person") {
       events = events.filter((event) => {
         return event.event_type === type;
       });

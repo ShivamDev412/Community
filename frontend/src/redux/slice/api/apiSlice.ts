@@ -16,6 +16,7 @@ const baseQuery = fetchBaseQuery({
 });
 const baseQueryWithReAuth = async (args: any, api: any, extraOptions: any) => {
   let result = await baseQuery(args, api, extraOptions);
+
   // debugger;
   if (result.error?.status === 403) {
     const response: any = await baseQuery(
@@ -36,6 +37,6 @@ const baseQueryWithReAuth = async (args: any, api: any, extraOptions: any) => {
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReAuth,
-  tagTypes: ["Groups", "Events", "User", "Auth", "Categories", "Tags"],
+  tagTypes: ["Groups", "Events", "User", "Auth", "Categories", "Tags", "RSVP_EVENTS"],
   endpoints: () => ({}),
 });

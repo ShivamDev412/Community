@@ -29,7 +29,6 @@ export const getUserGroups = async (
           group: true,
         },
       });
-      console.log(userGroups, "userGroups")
       res.status(200).json({
         success: true,
         message: "User groups fetched successfully",

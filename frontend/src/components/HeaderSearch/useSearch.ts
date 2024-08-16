@@ -21,8 +21,8 @@ export const useSearch = () => {
   const [isLeftInputFocused, setIsLeftInputFocused] = useState(false);
   const [isRightInputFocused, setIsRightInputFocused] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const { location } = useSelector((state: RootState) => state.home);
-  const { search } = useSelector((state: RootState) => state.search);
+  const { location } = useSelector((state: RootState) => state.home) || {};
+  const search = useSelector((state: RootState) => state.search);
   const [getCity] = useGetCityMutation();
   const {
     placesService,
@@ -117,7 +117,6 @@ export const useSearch = () => {
   };
 
   const handleLocationSelect = (paceId: String, place: string) => {
-    console.log(paceId);
     placesService?.getDetails(
       {
         placeId: place,
@@ -130,6 +129,7 @@ export const useSearch = () => {
         dispatch(setSearch({ ...search, lat: latitude, lon: longitude }));
         if (locationData.location.city && locationData.location.state) {
           dispatch(setLocation(locationData));
+
           handleSetPlace(
             locationData.location.city,
             locationData.location.state
@@ -154,7 +154,7 @@ export const useSearch = () => {
 
   const handleLocationBlur = () => {
     if (!placePredictions.length) {
-      handleSetPlace(location?.city, location?.state);
+      handleSetPlace(location?.city as string, location?.state as string);
     }
   };
   const handleSetEvent = (e: React.ChangeEvent<HTMLInputElement>) => {

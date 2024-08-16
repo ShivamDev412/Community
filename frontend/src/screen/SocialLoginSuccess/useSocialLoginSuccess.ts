@@ -6,7 +6,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 export const useSocialLoginSuccess = () => {
   const location = useLocation();
-  console.log(location);
   const token = location.search.split("=")[1];
   const dispatch = useDispatch();
   const navigate = useNavigate();

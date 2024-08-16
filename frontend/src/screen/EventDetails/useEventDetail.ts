@@ -16,13 +16,16 @@ export const useEventDetails = () => {
   const { eventId } = useParams();
   const { eventDetails } = useSelector((state: RootState) => state.events);
   const { data: user } = useUserQuery("");
-  const { data: eventData } = useEventDetailsQuery(eventId as string);
+  const { data: eventData } = useEventDetailsQuery(eventId as string, {
+    refetchOnMountOrArgChange: true,
+  });
   const [cancelEvent] = useCancelEventRSVPMutation();
   const [registerToEvent] = useRegisterToEventMutation();
   const attendEvent = async () => {
     try {
       const res = await registerToEvent(eventId as string).unwrap();
       if (res.success) {
+        
         // getEventDetails()
         setIsAttending(true);
         Toast(res.message, "success");
@@ -32,9 +35,11 @@ export const useEventDetails = () => {
     }
   };
   const isUserAttending = () => {
+
     return eventDetails.members.some(
       (attendee) => attendee.id === user?.data?.id
     );
+
   };
   const cancelRSVP = async () => {
     try {

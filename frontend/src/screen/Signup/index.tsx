@@ -3,20 +3,15 @@ import { Link } from "react-router-dom";
 import AuthWrapper from "@/Wrappers/AuthWrapper";
 import { InputField } from "@/components/Input";
 import { Endpoints } from "@/utils/Endpoints";
-
+import CircularProgress from "@mui/material/CircularProgress";
 import { useSignup } from "./useSignup";
 import FileUpload from "@/components/UploadFile";
 
 import SocialSignupSection from "@/components/SocialSignupSection";
 
 function Signup() {
-  const {
-    register,
-    handleSubmit,
-    onSubmit,
-    errors,
-    getValues,
-  } = useSignup();
+  const { register, handleSubmit, onSubmit, errors, getValues, isLoading } =
+    useSignup();
   return (
     <AuthWrapper>
       <section className=" bg-white xs:rounded-none sm:rounded-[25px] p-4 xs:h-screen lg:h-[85%] justify-center flex flex-col items-center overflow-y-auto">
@@ -69,11 +64,16 @@ function Signup() {
             getValues={getValues}
           />
           <Button
-            className="bg-primary text-white px-4 py-2 rounded-md capitalize text-lg font-semibold"
+            className="bg-primary text-white px-4 py-2 rounded-md capitalize text-lg font-semibold disabled:bg-opacity-80"
             type="submit"
             variant="contained"
+            disabled={isLoading}
           >
-            Submit
+            {isLoading ? (
+              <CircularProgress className="text-white h-7 w-7" />
+            ) : (
+              "Signup"
+            )}
           </Button>
           <p className="text-right">
             Already have an account?{" "}

@@ -546,8 +546,8 @@ export const registerToEvent = async (
 ) => {
   try {
     const userId: string | undefined = req.user?.id;
-    const { eventId } = req.body;
 
+    const { eventId } = req.body;
     if (!userId) {
       return throwError(next, "User not found");
     }

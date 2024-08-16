@@ -5,8 +5,8 @@ import MainWrapper from "../Wrappers/MainWrapper";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/Store";
 function PrivateRoute() {
-  const { token } = useSelector((state: RootState) => state.auth);
-  return token ? (
+  const token = useSelector((state: RootState) => state.auth);
+  return token?.token ? (
     <MainWrapper>
       <Suspense fallback={<h2>Loading...</h2>}>
         <Outlet />

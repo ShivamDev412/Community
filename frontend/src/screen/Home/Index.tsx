@@ -3,7 +3,7 @@ import YourGroups from "@/components/Home/YourGroups";
 import YourInterests from "@/components/Home/YourIntrests";
 import HomeFilter from "@/components/Home/HomeFilter";
 import HomeEvents from "@/components/Home/HomeEvents";
-import EventCalender from "@/components/Home/EventCalender";
+
 import { useUserQuery } from "@/redux/slice/api/userSlice";
 function Home() {
   const {data:user} = useUserQuery("")
@@ -14,7 +14,6 @@ function Home() {
       </h1>
       <section className="xs:flex xs:flex-col sm:flex-row justify-between gap-[3rem] items-start">
         <div className="sm:w-4/12">
-          <EventCalender />
           <div className="w-full bg-stone-100 p-4 rounded-lg gap-4 flex flex-col mt-5">
             <YourNextEvents />
             <YourGroups />

@@ -11,6 +11,7 @@ const persistConfig = {
   version: 1,
 };
 const persistedReducer = persistReducer(persistConfig, rootReducer);
+
 const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
@@ -19,6 +20,7 @@ const store = configureStore({
     }).concat(logger, apiSlice.middleware),
   devTools: import.meta.env.VITE_NODE_ENV !== "production",
 });
+
 export type RootState = ReturnType<typeof store.getState>;
 export const persistor = persistStore(store);
 

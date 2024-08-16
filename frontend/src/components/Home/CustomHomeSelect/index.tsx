@@ -36,7 +36,7 @@ const CustomHomeSelect: FC<{
             <button
               key={item?.value}
               onClick={() => handleSelect(item?.value)}
-              className="text-gray-600 hover:bg-stone-100 hover:cursor-pointer w-full px-2 py-1.5 text-sm whitespace-nowrap"
+              className="text-gray-600 hover:bg-stone-100 hover:cursor-pointer w-full px-2 py-1.5 text-sm"
             >
               {item?.label}
             </button>

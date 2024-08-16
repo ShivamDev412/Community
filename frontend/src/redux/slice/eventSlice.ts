@@ -1,10 +1,7 @@
 import { EventsState } from "@/Types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-// dd
 const initialState: EventsState = {
-  hostingEvents: [],
-  attendingEvents: [],
-  pastEvents: [],
+
   eventDetails: {
     id: "",
     name: "",
@@ -43,15 +40,6 @@ const userEventsSlice = createSlice({
   name: "groups",
   initialState,
   reducers: {
-    setHostingEvents: (state, action: PayloadAction<any[]>) => {
-      state.hostingEvents = action.payload;
-    },
-    setAttendingEvents: (state, action: PayloadAction<any[]>) => {
-      state.attendingEvents = action.payload;
-    },
-    setPastEvents: (state, action: PayloadAction<any[]>) => {
-      state.pastEvents = action.payload;
-    },
     setHostingPageNumber: (state, action: PayloadAction<number>) => {
       state.hostingPageNumber = action.payload;
     },
@@ -64,22 +52,13 @@ const userEventsSlice = createSlice({
     setEventDetails: (state, action: PayloadAction<any>) => {
       state.eventDetails = action.payload;
     },
-    clearAllEvents: (state) => {
-      state.hostingEvents = [];
-      state.attendingEvents = [];
-      state.pastEvents = [];
-    },
   },
 });
 
 export const {
-  setHostingEvents,
-  setAttendingEvents,
-  setPastEvents,
   setHostingPageNumber,
   setAttendingPageNumber,
   setPastPageNumber,
   setEventDetails,
-  clearAllEvents,
 } = userEventsSlice.actions;
 export default userEventsSlice.reducer;

@@ -13,8 +13,7 @@ const refreshToken = async () => {
     );
     const token = response.data["auth-token"];
     return token;
-  } catch (err:any) {
-    console.log(err);
+  } catch (err: any) {
     Toast(err.message, "error");
     throw err;
   }
@@ -22,7 +21,9 @@ const refreshToken = async () => {
 
 const useAxiosPrivate = () => {
   const dispatch = useDispatch();
-  const { token } = useSelector((state: RootState) => state.auth);
+  const { token } = useSelector((state: RootState) => state.auth) as {
+    token: string | null;
+  };
 
   const handleInterceptors = async () => {
     const requestInterceptor = axiosPrivate.interceptors.request.use(
@@ -92,7 +93,7 @@ const useAxiosPrivate = () => {
   };
 
   useEffect(() => {
-    handleInterceptors(); 
+    handleInterceptors();
   }, [token]);
 
   return {

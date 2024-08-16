@@ -50,7 +50,7 @@ const GroupEventCard: FC<EventDetailType> = ({
               </div>
             )}
           </div>
-          <p className="mt-2 text-gray-600">{details}</p>
+          {/* <p className="mt-2 text-gray-600 ">{details}</p> */}
           <div className="mt-2 flex relative items-center">
             {members?.slice(0, 5).map((member, index) => (
               <div

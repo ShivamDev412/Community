@@ -160,7 +160,7 @@ export const getEventDetails = async (
       await Promise.all([
         getImage(event?.image || ""),
         getImage(event?.compressed_image || ""),
-        findUser(userId, {
+        findUser(event?.host_id as string, {
           id: true,
           name: true,
           image: true,
@@ -202,10 +202,9 @@ export const getEventDetails = async (
     const groupCompressedImage = group
       ? await getImage(group?.compressed_image || "")
       : null;
-
     const membersToSend = members.reduce(
       (accumulator, member) => {
-        if (member.id !== userId) {
+        if (member.id !== host?.id) {
           accumulator.push({
             ...member,
             image: member?.image || null,
@@ -225,8 +224,6 @@ export const getEventDetails = async (
         },
       ]
     );
-
-    console.log(membersToSend);
     res.status(200).json({
       success: true,
       message: "Event details fetched successfully",

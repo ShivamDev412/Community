@@ -3,9 +3,6 @@ import cors from "cors";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-import fs from "fs";
-import path from "path";
-import spdy from 'spdy';
 
 // @ts-ignore
 import passport from "passport";

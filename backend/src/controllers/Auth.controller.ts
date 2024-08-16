@@ -158,7 +158,6 @@ export const HandleRefreshToken = async (
     },
   });
   // ClearCookie(response, "community-refresh-token");
-  console.log(existingUser, "EXISTING USER");
   // Detected refresh token reuse
   if (!existingUser) {
     jwt.verify(
@@ -192,11 +191,10 @@ export const HandleRefreshToken = async (
       process.env.REFRESH_TOKEN_SECRET!,
       async (err: any, decode: any) => {
         if (err) {
-          console.log("expired refresh token ");
+
           const result = await updateUser(existingUser.id, {
             refresh_token: [...newRefreshTokenArray],
           });
-          console.log(result, "RESULT");
         }
         if (err || existingUser.id !== decode?.id) {
           return response.status(403).json({
@@ -323,13 +321,11 @@ export const googleCallback = (req: Request, res: Response) => {
         id: existingUser.id,
         email: existingUser.email,
       });
-      console.log(req.cookies, "REF");
       const newRefreshTokenArray = !req.cookies["community-refresh-token"]
         ? existingUser.refresh_token
         : existingUser.refresh_token.filter((token: string) => {
             token !== req.cookies["community-refresh-token"];
           });
-      console.log(newRefreshTokenArray, "REFRESH_TOKEN_ARRAY");
       if (req.cookies["community-refresh-token"])
         ClearCookie(res, "community-refresh-token");
       await updateUser(existingUser.id, {

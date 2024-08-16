@@ -23,6 +23,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: { eventId },
       }),
+      invalidatesTags: ["Events", "RSVP_EVENTS"],
     }),
     updateUserPersonalInfo: builder.mutation<
       PersonalInfoResponse,
@@ -62,7 +63,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: { eventId },
       }),
-      invalidatesTags: ["Events"],
+      invalidatesTags: ["Events", "RSVP_EVENTS"],
     }),
     forgotPassword: builder.mutation<DefaultResponseType, { email: string }>({
       query: (data) => ({

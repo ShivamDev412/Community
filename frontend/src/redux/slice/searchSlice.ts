@@ -1,26 +1,22 @@
-import { SearchPageType } from "@/Types";
+import { SearchType } from "@/Types";
 import {
   Distances,
   HomeEvents,
   SearchCategory,
   SearchDay,
 } from "@/utils/Constant";
-// import { Distances, HomeEvents } from "@/utils/Constant";
 import { createSlice } from "@reduxjs/toolkit";
-const initialState: SearchPageType = {
-  search: {
-    keyword: "",
-    day: SearchDay[0],
-    distance: Distances[0],
-    type: HomeEvents[0],
-    category: SearchCategory[0],
-    sortBy: "date",
-    lat: 0,
-    lon: 0,
-    tab: "events",
-  },
-  events: [],
-  groups: [],
+
+const initialState: SearchType = {
+  keyword: "",
+  day: SearchDay[0],
+  distance: Distances[0],
+  type: HomeEvents[0],
+  category: SearchCategory[0],
+  sortBy: "date",
+  lat: 0,
+  lon: 0,
+  tab: "events",
 };
 const searchSlice = createSlice({
   name: "home",
@@ -29,67 +25,19 @@ const searchSlice = createSlice({
     setSearch: (state, action) => {
       return {
         ...state,
-        search: action.payload,
+        ...action.payload,
       };
     },
-    setEvents: (state, action) => {
-      return {
-        ...state,
-        events: action.payload,
-      };
-    },
-    setGroups: (state, action) => {
-      return {
-        ...state,
-        groups: action.payload,
-      };
-    },
-    clearEvents: (state) => {
-      return {
-        ...state,
-        events: [],
-      };
-    },
-    clearGroups: (state) => {
-      return {
-        ...state,
-        groups: [],
-      };
-    },
-    clearSearch: (state) => {
-      return {
-        ...state,
-        search: {
-          keyword: "",
-          day: SearchDay[0],
-          distance: Distances[0],
-          type: HomeEvents[0],
-          category: SearchCategory[0],
-          sortBy: "date",
-          lat: 0,
-          lon: 0,
-          tab: "events",
-        },
-      };
+    clearSearch: () => {
+      return initialState;
     },
     changeTab: (state, action) => {
       return {
         ...state,
-        search: {
-          ...state.search,
-          tab: action.payload,
-        },
+        tab: action.payload,
       };
     },
   },
 });
-export const {
-  setSearch,
-  clearSearch,
-  setEvents,
-  setGroups,
-  clearGroups,
-  clearEvents,
-  changeTab,
-} = searchSlice.actions;
+export const { setSearch, clearSearch, changeTab } = searchSlice.actions;
 export default searchSlice.reducer;
