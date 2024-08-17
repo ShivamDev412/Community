@@ -4,10 +4,23 @@ import {
   getImage,
   uploadCompressedImageToS3,
   uploadToS3,
-} from "../utils/UploadToS3";
-import getImageDimensions from "../utils/GetImageDimension";
-import { getLatitudeAndLongitude } from "../utils/GetLatitudeAndLongitude";
-import db from "../database/db.config";
+} from "../services/UploadToS3";
+import getImageDimensions from "../services/GetImageDimension";
+import { getLatitudeAndLongitude } from "../services/GetLatitudeAndLongitude";
+import { NewEventSchema } from "../utils/Validation";
+import {
+  findInterests,
+  findInterestsByIds,
+} from "../prisma/schema/Interest.schema";
+import {
+  addEvent,
+  existingEvent,
+  findEvent,
+  findEventMembers,
+  updateEventById,
+} from "../prisma/schema/Event.schema";
+import { findUser } from "../prisma/schema/User.schema";
+import { findGroup } from "../prisma/schema/Group.schema";
 
 export const getTags = async (
   request: Request,
@@ -20,7 +33,7 @@ export const getTags = async (
   }
 
   try {
-    const interests = await db.interest.findMany();
+    const interests = await findInterests();
 
     response.status(200).json({
       success: true,
@@ -46,17 +59,15 @@ export const createEvent = async (
       type,
       tags,
       group,
-      location,
+      address,
       link,
-    } = request.body;
-    console.log(request.body);
+      category,
+    } = NewEventSchema.parse(request.body);
     const userId: string | undefined = request?.user?.id;
     const file = request?.file;
     const imageBuffer = file?.buffer;
-    const eventExists = await db.event.findFirst({
-      where: {
-        name,
-      },
+    const eventExists = await existingEvent({
+      name,
     });
     if (eventExists) {
       return throwError(next, { name: "Event name already exists" });
@@ -75,7 +86,7 @@ export const createEvent = async (
         return throwError(next, "Image not provided");
       }
       const linkToSend = type === "online" ? link : null;
-      const locationToSend = type === "in-person" ? location : null;
+      const locationToSend = type === "in-person" ? address : null;
       const tagsToSend = JSON.parse(tags);
       const imageUrl = await uploadToS3(name, file?.buffer, file.mimetype);
       const compressedImageUrl = await uploadCompressedImageToS3(
@@ -86,39 +97,35 @@ export const createEvent = async (
       let latitude = 0;
       let longitude = 0;
       if (type === "in-person") {
-        const locationCoord = await getLatitudeAndLongitude(location);
+        const locationCoord = await getLatitudeAndLongitude(address as string);
         if (locationCoord) {
           latitude = locationCoord.latitude;
           longitude = locationCoord.longitude;
         }
       }
-      const newEvent = await db.event.create({
-        data: {
-          name,
-          image: imageUrl,
-          compressed_image: compressedImageUrl,
-          details,
-          host_id: userId,
-          group_id: group,
-          event_date: `${date}T00:00:00Z`,
-          event_time: new Date(`${date}T${time}:00Z`).toISOString(), // Convert event time to ISO-8601 string
-          event_end_time: new Date(
-            `${date}T${event_end_time}:00Z`
-          ).toISOString(),
-          event_type: type,
-          link: linkToSend,
-          address: locationToSend,
-          // tags: tagsToSend,
-          latitude,
-          longitude,
-        },
+
+      const newEvent = await addEvent({
+        name,
+        image: imageUrl,
+        compressed_image: compressedImageUrl,
+        details,
+        host_id: userId,
+        group_id: group,
+        event_date: `${date}T00:00:00Z`,
+        event_time: new Date(`${date}T${time}:00Z`).toISOString(),
+        event_end_time: new Date(`${date}T${event_end_time}:00Z`).toISOString(),
+        event_type: type,
+        link: linkToSend,
+        address: locationToSend,
+        latitude,
+        longitude,
+        category_id: category,
       });
-      await db.event.update({
-        where: { id: newEvent.id },
-        data: {
-          tags: {
-            connect: tagsToSend,
-          },
+      const tagIds = tagsToSend.map((tag: { id: string }) => tag.id);
+      const interests = await findInterestsByIds(tagIds);
+      await updateEventById(newEvent.id, {
+        tags: {
+          connect: interests.map((interest) => ({ id: interest.id })),
         },
       });
       if (!newEvent) {
@@ -146,60 +153,38 @@ export const getEventDetails = async (
     }
     const eventId = req.params.eventId;
     const [event, eventMembers] = await Promise.all([
-      db.event.findUnique({
-        where: {
-          id: eventId,
-        }
-      }),
-      db.userEvent.findMany({
-        where: {
-          event_id: eventId
-        },
-        include: {
-          user: true 
-        }
-      })
+      findEvent(eventId),
+      findEventMembers(eventId),
     ]);
     const [eventImage, compressedEventImage, host, group, members] =
       await Promise.all([
         getImage(event?.image || ""),
         getImage(event?.compressed_image || ""),
-        db.user.findUnique({
-          where: {
-            id: event?.host_id,
-          },
-          select: {
-            name: true,
-            image: true,
-            compressed_image: true,
-            id: true,
-          },
+        findUser(event?.host_id as string, {
+          id: true,
+          name: true,
+          image: true,
+          compressed_image: true,
         }),
-        db.group.findUnique({
-          where: {
-            id: event?.group_id,
-          },
-          select: {
-            name: true,
-            image: true,
-            compressed_image: true,
-            location: true,
-            group_type: true,
-          },
+        findGroup(event?.group_id as string, {
+          name: true,
+          image: true,
+          compressed_image: true,
+          location: true,
+          group_type: true,
         }),
         Promise.all(
-          eventMembers.map(async (user) => {
-            try {
-              const image = user?.user?.image?.includes("https://")
-                ? user?.user.image
-                : await getImage(user.user?.image || "");
-              const compressedImage = user?.user?.image?.includes("https://")
-                ? user.user?.image
-                : await getImage(user.user?.compressed_image || "");
-              return image ? { ...user, image, compressedImage } : null;
-            } catch (error) {
-              throw new Error("Error fetching image");
-            }
+          eventMembers.map(async ({ user }) => {
+            return {
+              ...user,
+              image: user?.image?.includes("https://")
+                ? user.image
+                : await getImage(user?.image || ""),
+              compressed_image: user?.image?.includes("https://")
+                ? user.image
+                : await getImage(user?.compressed_image || ""),
+              id: user?.id,
+            };
           })
         ),
       ]);
@@ -217,20 +202,28 @@ export const getEventDetails = async (
     const groupCompressedImage = group
       ? await getImage(group?.compressed_image || "")
       : null;
-    const membersToSend = members.map((member) => ({
-      ...member,
-      image: member?.image || null,
-      compressed_image: member?.compressedImage || null,
-      type: "member",
-    }));
-
-    membersToSend.unshift({
-      ...host,
-      image: hostImage || null,
-      compressed_image: hostCompressedImage || null,
-      type: "host",
-    });
-
+    const membersToSend = members.reduce(
+      (accumulator, member) => {
+        if (member.id !== host?.id) {
+          accumulator.push({
+            ...member,
+            image: member?.image || null,
+            compressed_image: member?.compressed_image || null,
+            type: "member",
+          });
+        }
+        return accumulator;
+      },
+      [
+        {
+          id: host?.id || "",
+          image: hostImage || null,
+          compressed_image: hostCompressedImage || null,
+          type: "host",
+          name: host?.name || "",
+        },
+      ]
+    );
     res.status(200).json({
       success: true,
       message: "Event details fetched successfully",
@@ -271,10 +264,10 @@ export const updateEvent = async (
       type,
       tags,
       group,
-      location,
+      address,
       link,
       image,
-    } = request.body;
+    } = NewEventSchema.parse(request.body);
     const userId: string | undefined = request?.user?.id;
     if (!userId) {
       return throwError(next, "User not found");
@@ -282,20 +275,13 @@ export const updateEvent = async (
     const eventId = request.params.eventId;
     const file = request?.file;
     const imageBuffer = file?.buffer;
-    const event = await db.event.findUnique({
-      where: {
-        id: eventId,
-      }
-    });
-    // Check if event name already exists and is not the same event
+    const event = await findEvent(eventId);
     if (event?.name !== name) {
-      const eventExists = await db.event.findFirst({
-        where: {
-          id: eventId,
-        }
+      const eventExists = await existingEvent({
+        name,
       });
       if (eventExists) {
-        return throwError(next, { name: "Event name already exists" });
+        return throwError(next, { name: "Event with that name already exists" });
       }
     }
     let imageUrl = "";
@@ -326,52 +312,48 @@ export const updateEvent = async (
       : event?.compressed_image || "";
 
     const linkToSend = type === "online" ? link : null;
-    const locationToSend = type === "in-person" ? location : null;
+    const locationToSend = type === "in-person" ? address : null;
     const tagsToSend = JSON.parse(tags);
     let latitude = 0;
     let longitude = 0;
     if (type === "in-person") {
-      const locationCoord = await getLatitudeAndLongitude(location);
+      const locationCoord = await getLatitudeAndLongitude(address as string);
 
       if (locationCoord) {
         latitude = locationCoord.latitude;
         longitude = locationCoord.longitude;
       }
     }
-    const newEvent = await db.event.update({
-      where: { id: eventId },
-      data: {
-        name,
-        image: imageUrl,
-        compressed_image: compressedImageUrl,
-        details,
-        host_id: userId,
-        group_id: group,
-        event_date: `${date}T00:00:00Z`,
-        event_time: new Date(`${date}T${time}:00Z`).toISOString(),
-        event_end_time: new Date(`${date}T${event_end_time}:00Z`).toISOString(),
-        event_type: type,
-        link: linkToSend,
-        address: locationToSend,
-        latitude,
-        longitude,
+    const tagIds = tagsToSend.map((tag: { id: string }) => tag.id);
+    const interests = await findInterestsByIds(tagIds);
+    const updateEvent = await updateEventById(eventId, {
+      name,
+      image: imageUrl,
+      compressed_image: compressedImageUrl,
+      details,
+      host_id: userId,
+      group_id: group,
+      event_date: `${date}T00:00:00Z`,
+      event_time: new Date(`${date}T${time}:00Z`).toISOString(),
+      event_end_time: new Date(`${date}T${event_end_time}:00Z`).toISOString(),
+      event_type: type,
+      link: linkToSend,
+      address: locationToSend,
+      latitude,
+      longitude,
+    });
+    const updateEventWithTag = await updateEventById(updateEvent.id, {
+      tags: {
+        set: interests.map((interest) => ({ id: interest.id })),
       },
     });
-    await db.event.update({
-      where: { id: newEvent.id },
-      data: {
-        tags: {
-          connect: tagsToSend,
-        },
-      },
-    });
-    if (!newEvent) {
+    if (!updateEventWithTag) {
       return throwError(next, "Event not created");
     }
     response.status(200).json({
       success: true,
       message: "Event updated successfully",
-      data: newEvent,
+      data: updateEventWithTag,
     });
   } catch (error) {
     next(error);

@@ -4,22 +4,26 @@ import {
   SignupSchema,
   LoginSchema,
   ResetPasswordSchema,
+  ForgotPasswordValidation,
 } from "../utils/Validation";
 // @ts-ignore
 import passport from "passport";
-import { generateRefreshToken, generateToken } from "../utils/GenerateToken";
+import { generateRefreshToken, generateToken } from "../services/GenerateToken";
 import { throwError } from "../utils/Error";
-import {
-  uploadToS3,
-  uploadCompressedImageToS3,
-} from "../utils/UploadToS3";
+import { uploadToS3, uploadCompressedImageToS3 } from "../services/UploadToS3";
 import { sendToMail } from "../services/SendEmail";
 import jwt from "jsonwebtoken";
 import db from "../database/db.config";
 import dotenv from "dotenv";
 import ForgotPasswordTemplate from "../emailTemplates/ForgotPasswordTemplate";
 import { DecodedToken } from "../Types/Auth.type";
-import SetCookies, { ClearCookie } from "../utils/SetCookies";
+import SetCookies, { ClearCookie } from "../services/SetCookies";
+import {
+  createUser,
+  finUserByEmail,
+  findUser,
+  updateUser,
+} from "../prisma/schema/User.schema";
 dotenv.config();
 export const Login = async (
   req: Request,
@@ -30,11 +34,7 @@ export const Login = async (
   try {
     const { email, password } = LoginSchema.parse(req.body);
 
-    const existingUser = await db.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const existingUser = await finUserByEmail(email);
 
     if (!existingUser) {
       throwError(next, "No user with that email exists");
@@ -53,7 +53,7 @@ export const Login = async (
         email: existingUser.email,
       });
       const newRefreshToken = generateRefreshToken({
-        id: existingUser.id.toString(),
+        id: existingUser.id,
       });
       const newRefreshTokenArray = !cookies["community-refresh-token"]
         ? existingUser.refresh_token
@@ -62,14 +62,10 @@ export const Login = async (
           });
       if (cookies["community-refresh-token"])
         ClearCookie(res, "community-refresh-token");
-      await db.user.update({
-        where: {
-          id: existingUser.id,
-        },
-        data: {
-          refresh_token: [...newRefreshTokenArray, newRefreshToken],
-        },
+      await updateUser(existingUser.id, {
+        refresh_token: [...newRefreshTokenArray, newRefreshToken],
       });
+
       SetCookies(res, "community-refresh-token", newRefreshToken);
       res.status(200).json({
         success: true,
@@ -95,11 +91,7 @@ export const Signup = async (
     if (!file) {
       return throwError(next, "Profile Image not provided");
     }
-    const isUserExists = await db.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const isUserExists = await finUserByEmail(email);
     if (isUserExists) {
       throwError(next, "User with this email already exists");
       return;
@@ -111,14 +103,12 @@ export const Signup = async (
       file?.buffer,
       file.mimetype
     );
-    const newUser = await db.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        image,
-        compressed_image: compressedImage,
-      },
+    const newUser = await createUser({
+      name,
+      email,
+      password: hashedPassword,
+      image,
+      compressed_image: compressedImage,
     });
     if (newUser) {
       const token = generateToken({
@@ -128,13 +118,8 @@ export const Signup = async (
       const refreshToken = generateRefreshToken({
         id: newUser.id.toString(),
       });
-      await db.user.update({
-        where: {
-          id: newUser.id,
-        },
-        data: {
-          refresh_token: [refreshToken],
-        },
+      await updateUser(newUser.id, {
+        refresh_token: [refreshToken],
       });
       SetCookies(res, "community-refresh-token", refreshToken);
       res.status(200).json({
@@ -158,7 +143,6 @@ export const HandleRefreshToken = async (
 ) => {
   const cookies = request.cookies;
   const refreshToken = cookies["community-refresh-token"];
-  console.log(request.cookies, "REFRESH_COOKIES");
   if (!refreshToken) {
     response.status(401).json({
       success: false,
@@ -166,10 +150,6 @@ export const HandleRefreshToken = async (
     });
     return;
   }
-  const data = jwt.decode(refreshToken) as DecodedToken;
-  console.log(data, "DATA");
-  ClearCookie(response, "community-refresh-token");
-
   const existingUser = await db.user.findFirst({
     where: {
       refresh_token: {
@@ -177,7 +157,7 @@ export const HandleRefreshToken = async (
       },
     },
   });
-  console.log(existingUser, "EXISTING USER");
+  // ClearCookie(response, "community-refresh-token");
   // Detected refresh token reuse
   if (!existingUser) {
     jwt.verify(
@@ -190,27 +170,17 @@ export const HandleRefreshToken = async (
             message: "Invalid refresh token",
           });
           // Finding the user whose refresh token is reused
-          const hackedUser = await db.user.findUnique({
-            where: {
-              id: decode?.id,
-            },
-          });
+          const hackedUser = await findUser(decode?.id);
           // Deleting all the refresh token of the user
-          const result = await db.user?.update({
-            where: {
-              id: hackedUser?.id,
-            },
-            data: {
-              refresh_token: [],
-            },
+          await updateUser(hackedUser?.id as string, {
+            refresh_token: [],
           });
-          console.log(result, "HACKED_USER");
         }
       }
     );
     return response.status(403).json({
       success: false,
-      message: "Forbidden",
+      message: "Forbidden. No user found with this refresh token",
     });
   } else {
     const newRefreshTokenArray = existingUser?.refresh_token.filter((token) => {
@@ -221,16 +191,10 @@ export const HandleRefreshToken = async (
       process.env.REFRESH_TOKEN_SECRET!,
       async (err: any, decode: any) => {
         if (err) {
-          console.log("expired refresh token ");
-          const result = await db.user?.update({
-            where: {
-              id: existingUser.id,
-            },
-            data: {
-              refresh_token: [...newRefreshTokenArray],
-            },
+
+          const result = await updateUser(existingUser.id, {
+            refresh_token: [...newRefreshTokenArray],
           });
-          console.log(result, "RESULT");
         }
         if (err || existingUser.id !== decode?.id) {
           return response.status(403).json({
@@ -246,13 +210,8 @@ export const HandleRefreshToken = async (
         const newRefreshToken = generateRefreshToken({
           id: existingUser.id,
         });
-        const userWithUpdatedRefreshToken = await db.user?.update({
-          where: {
-            id: existingUser.id,
-          },
-          data: {
-            refresh_token: [...newRefreshTokenArray, newRefreshToken],
-          },
+        const userWithUpdatedRefreshToken = await updateUser(existingUser.id, {
+          refresh_token: [...newRefreshTokenArray, newRefreshToken],
         });
         if (userWithUpdatedRefreshToken) {
           SetCookies(response, "community-refresh-token", newRefreshToken);
@@ -273,12 +232,8 @@ export const forgotPassword = async (
   next: NextFunction
 ) => {
   try {
-    const { email } = req.body;
-    const user = await db.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const { email } = ForgotPasswordValidation.parse(req.body);
+    const user = await finUserByEmail(email);
     if (!user) {
       throwError(next, "No user with that email exists");
       return;
@@ -311,17 +266,11 @@ export const verifyTokenAndSetPassword = async (
   try {
     const { email, newPassword, confirmPassword, token } =
       ResetPasswordSchema.parse(req.body);
-    const user = await db.user.findUnique({
-      where: {
-        email,
-      },
-    });
-
+    const user = await finUserByEmail(email);
     if (!user) {
       throwError(next, "No user with that email exists");
       return;
     }
-
     try {
       const decoded: DecodedToken = jwt.verify(
         token,
@@ -343,13 +292,8 @@ export const verifyTokenAndSetPassword = async (
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await db.user.update({
-      where: {
-        email,
-      },
-      data: {
-        password: hashedPassword,
-      },
+    await updateUser(user.id, {
+      password: hashedPassword,
     });
     res
       .status(200)
@@ -361,38 +305,49 @@ export const verifyTokenAndSetPassword = async (
 export const googleLogin = async (req: Request, res: Response) => {
   passport.authenticate("google", { scope: ["profile", "email"] })(req, res);
 };
-export const googleCallback = (req: any, res: any) => {
+export const googleCallback = (req: Request, res: Response) => {
   passport.authenticate("google", {
     failureRedirect: process.env.SOCIAL_LOGIN_FAILURE_REDIRECT_URL!,
-  })(req, res, () => {
+  })(req, res, async () => {
     if (!req.user) {
       res.redirect(process.env.SOCIAL_LOGIN_FAILURE_REDIRECT_URL!);
       return;
     } else {
+      const existingUser = req.user;
+      const newRefreshToken = generateRefreshToken({
+        id: existingUser.id,
+      });
       const token = generateToken({
-        id: req.user.id,
-        email: req.user.email,
+        id: existingUser.id,
+        email: existingUser.email,
       });
-      res.cookie("community-auth-token", token, {
-        httpOnly: false,
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7 * 30),
+      const newRefreshTokenArray = !req.cookies["community-refresh-token"]
+        ? existingUser.refresh_token
+        : existingUser.refresh_token.filter((token: string) => {
+            token !== req.cookies["community-refresh-token"];
+          });
+      if (req.cookies["community-refresh-token"])
+        ClearCookie(res, "community-refresh-token");
+      await updateUser(existingUser.id, {
+        refresh_token: [...newRefreshTokenArray, newRefreshToken],
       });
-      res.redirect(process.env.SOCIAL_LOGIN_SUCCESS_REDIRECT_URL!);
+      SetCookies(res, "community-refresh-token", newRefreshToken);
+      res.redirect(
+        `${process.env.SOCIAL_LOGIN_SUCCESS_REDIRECT_URL}?token=${token}`
+      );
     }
-
-    return;
   });
 };
 export const githubLogin = async (req: Request, res: Response) => {
   passport.authenticate("github", { scope: ["user:email"] })(req, res);
 };
-export const githubCallback = (req: any, res: any) => {
+export const githubCallback = (req: Request, res: Response) => {
   passport.authenticate("github", {
     failureRedirect: process.env.SOCIAL_LOGIN_FAILURE_REDIRECT_URL!,
   })(req, res, () => {
     const token = generateToken({
-      id: req.user.user_id,
-      email: req.user.email,
+      id: req?.user?.id as string,
+      email: req?.user?.email,
     });
     res.cookie("community-auth-token", token, {
       httpOnly: false,
@@ -405,13 +360,13 @@ export const githubCallback = (req: any, res: any) => {
 export const facebookLogin = async (req: Request, res: Response) => {
   passport.authenticate("facebook", { scope: ["email"] })(req, res);
 };
-export const facebookCallback = (req: any, res: any) => {
+export const facebookCallback = (req: Request, res: Response) => {
   passport.authenticate("facebook", {
     failureRedirect: process.env.SOCIAL_LOGIN_FAILURE_REDIRECT_URL!,
   })(req, res, () => {
     const token = generateToken({
-      id: req.user.user_id,
-      email: req.user.email,
+      id: req?.user?.id as string,
+      email: req?.user?.email,
     });
     res.cookie("community-auth-token", token, {
       httpOnly: false,

@@ -1,12 +1,13 @@
 export const ENDPOINTS = {
     HOME: "/home",
     LOGIN: "/login",
-    LOGOUT: "/logout",
+    LOGOUT:  "/logout/",
     REFRESH_TOKEN: "/refresh-token",
     SIGNUP: "/signup",
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
     USER: "/",
+    REGISTER_TO_EVENT: "/register-to-event",
     
     GOOGLE_LOGIN: "/login/google",
     GOOGLE_CALLBACK: "/google/callback",
@@ -34,7 +35,11 @@ export const ENDPOINTS = {
     EVENTS_DETAILS:"/event-details/:eventId",
 
     SEARCH:"/search",
+    SEARCH_EVENTS:"/search-events",
     GET_CITY:"/get-city",
+    GET_EVENTS:"/get-events",
+    RSVP_EVENTS:"/rspv-events",
+    CANCEL_RSVP:"/cancel-rsvp",
 
     EDIT_PROFILE:"/edit-profile",
     UPDATE_PERSONAL_INFO:"/update-personal-info",

@@ -13,6 +13,8 @@ import {
   getUserEvents,
   removeUserInterests,
   updateUserPersonalInfo,
+  registerToEvent,
+  cancelRSVP,
 } from "../controllers/User.controller";
 import { AuthMiddleware } from "../middlewares/Auth.middleware";
 import multer from "multer";
@@ -39,5 +41,7 @@ route.get(
 );
 route.get(ENDPOINTS.USER_EVENTS, AuthMiddleware, getUserEvents);
 route.post(ENDPOINTS.LOGOUT, AuthMiddleware, LogOut);
+route.post(ENDPOINTS.REGISTER_TO_EVENT, AuthMiddleware, registerToEvent);
+route.post(ENDPOINTS.CANCEL_RSVP, AuthMiddleware, cancelRSVP);
 
 export default route;

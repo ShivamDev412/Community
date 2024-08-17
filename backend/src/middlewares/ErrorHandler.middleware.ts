@@ -15,13 +15,11 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error("ERROR:", err);
 
   if (isZodError(err) || (err as any)?.code === "custom") {
     const validationErrors = isZodError(err)
       ? err.errors.map((error) => error.message)
       : [err.message];
-    console.error("Validation Errors:", validationErrors);
     res.status(400).json({
       success: false,
       error: "Validation Error",

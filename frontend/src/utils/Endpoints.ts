@@ -3,7 +3,8 @@ export const RouteEndpoints = {
   LOGIN: "/login",
   SIGNUP: "/signup",
   LOGOUT: "/logout",
- 
+  GOOGLE_SUCCESS_LOGIN: "/login/google/success",
+  GOOGLE_FAILURE_LOGIN: "/login/google/failure",
   PROFILE: "/profile",
   EDIT_PROFILE: "/edit-profile",
   FORGOT_PASSWORD: "/forgot-password",
@@ -24,7 +25,8 @@ export const RouteEndpoints = {
   GROUP_DETAILS: "/group/:name/",
   GROUP_DETAILS_MEMBERS:"/group/:name/members",
   GROUP_DETAILS_EVENTS:"/group/:name/events",
-  EVENT_DETAILS:"/event/:eventId"
+  EVENT_DETAILS:"/event/:eventId",
+  SEARCH:"/search",
 };
 export const Endpoints = {
   LOGIN: "/login",
@@ -41,7 +43,6 @@ export const Endpoints = {
 
   SETTINGS: "/settings",
   
- 
   TAGS: "/tags",
 
   GROUPS_ORGANIZED_BY_USER: "/groups-organized-by-user",
@@ -57,6 +58,8 @@ export const Endpoints = {
 
   SEARCH: "/search",
   GET_CITY: "/get-city",
+  GET_EVENTS: "/get-events",
+  RSVP_EVENTS: "/rspv-events",
 
   EDIT_PROFILE: "/edit-profile",
   UPDATE_PERSONAL_INFO: "/update-personal-info",
@@ -66,6 +69,9 @@ export const Endpoints = {
   ADD_INTERESTS:"/add-interests",
   DELETE_INTERESTS:"/delete-interests",
   GET_USER_INTERESTS:"/get-user-interests",
+  REGISTER_TO_EVENT:"/register-to-event",
+  CANCEL_RSVP:"/cancel-rsvp",
+  SEARCH_EVENTS:"/search-events",
 
 
   USER_EVENTS:"/user-events",

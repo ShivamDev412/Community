@@ -26,10 +26,10 @@ model User {
   google_id             String?             @unique
   Event                 Event[]
   password_reset_tokens PasswordResetToken?
-  events                UserEvent?
+  events                UserEvent[]
   groups                UserGroup?
-  interests             UserInterest?
-  refresh_token         String[]             @default([])
+  interests             UserInterest[]
+  refresh_token         String[]            @default([])
 }
 
 model PasswordResetToken {
@@ -63,7 +63,7 @@ model Event {
   image            String?
   compressed_image String?
   details          String?
-  host_id          String
+  host_id          String 
   group_id         String
   event_date       DateTime
   event_time       DateTime
@@ -77,8 +77,9 @@ model Event {
   updated_at       DateTime   @default(now())
   group            Group      @relation(fields: [group_id], references: [id])
   host             User       @relation(fields: [host_id], references: [id])
+  category_id      String?
   tags             Interest[] @relation("EventInterests")
-  user_events      UserEvent?
+  user_events      UserEvent[]
 }
 
 model Category {
@@ -98,27 +99,19 @@ model Interest {
   updated_at       DateTime          @default(now())
   CategoryInterest CategoryInterest?
   category         Category          @relation(fields: [category_id], references: [id])
-  users            UserInterest?
+  users            UserInterest[]
   events           Event[]           @relation("EventInterests")
 }
 
-// model Tag {
-//   id         String    @id @default(cuid())
-//   name       String
-//   created_at DateTime  @default(now())
-//   updated_at DateTime  @default(now())
-//   eventId    String?
-//   events     EventTag?
-//   Event      Event?    @relation(fields: [eventId], references: [id])
-// }
-
 model UserInterest {
-  user_id     String   @unique
-  interest_id String   @unique
+  user_id     String
+  interest_id String
   created_at  DateTime @default(now())
   updated_at  DateTime @default(now())
-  interest    Interest @relation(fields: [interest_id], references: [id])
   user        User     @relation(fields: [user_id], references: [id])
+  interest    Interest @relation(fields: [interest_id], references: [id])
+
+  @@unique([user_id, interest_id])
 }
 
 model UserGroup {
@@ -131,12 +124,13 @@ model UserGroup {
 }
 
 model UserEvent {
-  user_id    String   @unique
-  event_id   String   @unique
+  user_id    String   
+  event_id   String   
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
   event      Event    @relation(fields: [event_id], references: [id])
   user       User     @relation(fields: [user_id], references: [id])
+  @@unique([user_id, event_id])
 }
 
 // model EventTag {

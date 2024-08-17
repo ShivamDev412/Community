@@ -8,20 +8,20 @@ import { useSelector } from "react-redux";
 
 const MainWrapper: FC<WrapperProps> = ({ children }) => {
   const { loading } = useSelector((state: RootState) => state.loading);
-  
+
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">
-      {loading && (
-        <Backdrop
-          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={loading}
-        >
-          <CircularProgress color="inherit" />
-        </Backdrop>
-      )}
-
       <Header />
-      <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 pt-[4.5rem] pb-10 min-h-screen">
+      {loading && (
+          <Backdrop
+            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={loading}
+          >
+            <CircularProgress color="inherit" />
+          </Backdrop>
+        )}
+      <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 pt-[5.5rem] pb-10 min-h-full">
+  
         {children}
       </main>
       <Footer />

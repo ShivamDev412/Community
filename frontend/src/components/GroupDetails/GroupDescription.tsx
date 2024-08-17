@@ -10,7 +10,9 @@ const GroupDescription = ({ about }: { about: string }) => {
   return (
     <div>
       <h3 className="font-bold text-xl mb-4">What we’re about</h3>
-      <p>{showMore ? about : about.slice(0, 105)}</p>
+      <div style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
+        <p>{showMore ? about : about.slice(0, 105)}</p>
+      </div>
       {!showMore && about.length > 50 && (
         <button
           onClick={toggleShowMore}

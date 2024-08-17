@@ -11,6 +11,7 @@ import SearchLocation from "@/components/SearchLocation";
 import FileUpload from "@/components/UploadFile";
 import Button from "@/components/Button";
 import { EventType } from "@/utils/Constant";
+import {DevTool} from "@hookform/devtools"
 const NewEvent = () => {
   const {
     register,
@@ -27,6 +28,9 @@ const NewEvent = () => {
     getValues,
     setError,
     isEditableEvent,
+    categories,
+    getTags,
+    control,
   } = useNewEvent();
   return (
     <>
@@ -72,6 +76,16 @@ const NewEvent = () => {
             onChange={setEventType}
             defaultValue={getValues("type") || EventType[0]?.value}
             getValues={getValues}
+          />
+            <SelectField
+            id={"category"}
+            register={register}
+            label={"Category"}
+            errors={errors}
+            options={[...categories]}
+            defaultValue={getValues("category") || categories[0]?.value}
+            getValues={getValues}
+            onChange={getTags}
           />
           <MultiSelectField
             id={"tags"}
@@ -149,6 +163,7 @@ const NewEvent = () => {
             </Button>
           </div>
         </form>
+        <DevTool control={control} placement="top-right" />
       </section>
     </>
   );

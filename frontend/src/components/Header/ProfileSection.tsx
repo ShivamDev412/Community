@@ -6,9 +6,8 @@ import { Menu } from "@mui/base/Menu";
 import { MenuButton } from "@mui/base/MenuButton";
 import { MenuDataProps } from "@/Types";
 import { RouteEndpoints } from "@/utils/Endpoints";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/RootReducer";
 import { useHeader } from "./useHeader";
+import { useUserQuery } from "@/redux/slice/api/userSlice";
 
 const MenuData: FC<MenuDataProps> = ({ menu, link, setShowDropdown }) => {
   return (
@@ -20,17 +19,17 @@ const MenuData: FC<MenuDataProps> = ({ menu, link, setShowDropdown }) => {
   );
 };
 const ProfileSection = () => {
-  const { name, image } = useSelector((state: RootState) => state.user);
+  const { data: user } = useUserQuery("");
   const { logoutHandler } = useHeader();
   const [showDropdown, setShowDropdown] = useState(false);
   return (
     <div>
       <Dropdown open={showDropdown}>
         <MenuButton>
-          {image ? (
+          {user?.data?.image ? (
             <Avatar
-              alt={`${name}_profile_picture`}
-              src={image}
+              alt={`${user?.data?.name}_profile_picture`}
+              src={user?.data?.image}
               onClick={() => setShowDropdown(!showDropdown)}
               className="h-[3rem] w-[3rem]"
             />
@@ -38,8 +37,8 @@ const ProfileSection = () => {
             <Avatar
               className="bg-primary h-[3rem] w-[3rem]"
               onClick={() => setShowDropdown(!showDropdown)}
-            >{`${name?.split(" ")[0]?.split("")[0]}${
-              name?.split(" ")[1]?.split("")[0]
+            >{`${user?.data?.name?.split(" ")[0]?.split("")[0]}${
+              user?.data?.name?.split(" ")[1]?.split("")[0]
             }`}</Avatar>
           )}
         </MenuButton>

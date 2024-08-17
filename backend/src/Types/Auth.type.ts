@@ -1,10 +1,10 @@
 import { JwtPayload } from "jsonwebtoken";
-
+import {User} from "./index";
 export type TokenData = {
   id: string;
   email?: string;
 }
-export type AuthPayload = {
+export interface AuthPayload extends User{
   token: string;
   id: string;
 }

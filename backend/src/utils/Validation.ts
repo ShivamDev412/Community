@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { ZodIssueCode, z } from "zod";
 import moment from "moment";
 const LoginSchema = z.object({
   email: z
@@ -7,7 +7,9 @@ const LoginSchema = z.object({
     .refine((email) => !!email, { message: "Email is required" }),
   password: z.string().nonempty({ message: "Password is required" }),
 });
-
+const ForgotPasswordValidation = z.object({
+  email: z.string().email({ message: "Invalid email format" }),
+});
 const SignupSchema = z.object({
   name: z
     .string()
@@ -66,15 +68,7 @@ export const NewGroupSchema = z.object({
   name: z.string().min(1, "Name is required"),
   about: z.string().min(1, "About is required"),
   group_type: z.string().min(1, "Group Type is required"),
-  image: z.any().refine(
-    (value) => {
-    
-      return value !== null;
-    },
-    {
-      message: "Group Image is required",
-    }
-  ),
+  image: z.string().optional(),
   location: z.string().min(1, "Group Location is required"),
 });
 export const EditProfileSchema = z.object({
@@ -88,17 +82,23 @@ export const EditProfileSchema = z.object({
   bio: z.string().optional(),
 });
 export const PersonalInfoSchema = z.object({
-  birthday: z.string().refine((value) => {
-    if (!value) return true
-    const birthDate = moment(value);
-    const age = moment().diff(birthDate, 'years');
-    return age >= 18 && age <= 60;
-  }, {
-    message: "You must be at least 18 years old and at most 60 years old.",
-  }).optional(),
-  gender:z.string().optional(),
+  birthday: z
+    .string()
+    .refine(
+      (value) => {
+        if (!value) return true;
+        const birthDate = moment(value);
+        const age = moment().diff(birthDate, "years");
+        return age >= 18 && age <= 60;
+      },
+      {
+        message: "You must be at least 18 years old and at most 60 years old.",
+      }
+    )
+    .optional(),
+  gender: z.string().optional(),
   lookingFor: z.array(z.string()).optional(),
-  lifeStages: z.array(z.string()).optional()
+  lifeStages: z.array(z.string()).optional(),
 });
 export const ChangePasswordSchema = z
   .object({
@@ -113,7 +113,7 @@ export const ChangePasswordSchema = z
     confirmPassword: z.string().min(1, "Confirm Password is required"),
   })
   .superRefine(({ confirmPassword, newPassword, currentPassword }, ctx) => {
-    if(currentPassword === newPassword) {
+    if (currentPassword === newPassword) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Your old password and new password should not be same",
@@ -128,5 +128,53 @@ export const ChangePasswordSchema = z
       });
     }
   });
-
-export { LoginSchema, SignupSchema };
+export const NewEventSchema = z
+  .object({
+    name: z.string().min(1, { message: "Event Name is required" }),
+    image: z.string().optional(),
+    type: z.string().min(1, { message: "Event Type is required" }),
+    details: z.string().min(1, { message: "Event Details are required" }),
+    group: z.string().min(1, { message: "Group is required" }),
+    category: z.string().min(1, { message: "Category is required" }),
+    tags: z.string().min(1, { message: "Tags are required" }),
+    date: z.string().min(1, { message: "Event Date is required" }),
+    time: z.string().min(1, { message: "Event Time is required" }),
+    event_end_time: z
+      .string()
+      .min(1, { message: "Event End Time is required" }),
+    address: z.string().optional(),
+    link: z.string().optional(),
+  })
+  .superRefine(
+    ({ type, address, link, time, event_end_time }, refinementContext) => {
+      if (type === "in-person") {
+        if (!address || address.length < 1) {
+          refinementContext.addIssue({
+            code: ZodIssueCode.custom,
+            message: "Address is required for in-person events",
+            path: ["address"],
+          });
+        }
+      } else if (type === "online") {
+        if (!link || link.length < 1) {
+          refinementContext.addIssue({
+            code: ZodIssueCode.custom,
+            message: "Link is required for online events",
+            path: ["link"],
+          });
+        }
+      }
+      const startTime = new Date(`01/01/2000 ${time}`);
+      const endTime = new Date(`01/01/2000 ${event_end_time}`);
+      const timeDifferenceInMinutes =
+        (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+      if (endTime <= startTime || timeDifferenceInMinutes < 30) {
+        refinementContext.addIssue({
+          code: ZodIssueCode.custom,
+          message: "Event should be at least of 30 minutes.",
+          path: ["event_end_time"],
+        });
+      }
+    }
+  );
+export { LoginSchema, SignupSchema, ForgotPasswordValidation };

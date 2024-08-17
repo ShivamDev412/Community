@@ -1,3 +1,4 @@
+import { UserType } from "@/Types";
 import { useProfile } from "./useProfile";
 import {
   EditProfileLink,
@@ -9,15 +10,17 @@ import {
 } from "@/components/Profile";
 
 const Profile = () => {
-  const { image,compressedImage ,name, location, email, joined_on_date } = useProfile();
+  const { user, joined_on_date } =
+    useProfile();
+    const {image, name, email, location, compressed_image} = user?.data as UserType;
   return (
-    <section className="overflow-x-hidden bg-[#f8f8f9] h-full pb-10">
+    <section className="overflow-x-hidden bg-[#f8f8f9] h-full pb-10 mt-5">
       <section className="flex justify-between flex-wrap xs:w-11/12 w-11/12 sm:w-10/12 lg:w-9/12 2xl:w-6/12 mx-auto overflow-x-hidden h-full mt-5 pb-10">
         <section className="xs:w-full sm:w-[30%] xl:w-4/12">
           <section className="bg-white p-6 rounded-lg">
             <ProfileImage
-              image={image}
-              compressedImage={compressedImage}
+              image={image ? image : ""}
+              compressedImage={compressed_image ? compressed_image : ""}
               name={name}
               email={email}
               joined_on_date={joined_on_date}
@@ -32,7 +35,7 @@ const Profile = () => {
             </div>
             <ImLookingTo />
           </section>
-          <EditProfileLink image={image} name={name} />
+          <EditProfileLink image={image ? image : ""} name={name} />
         </section>
 
         <section className="xs:w-full sm:w-[60%]">

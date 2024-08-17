@@ -23,13 +23,13 @@ const Interests = () => {
           <h3 className="font-bold text-lg mt-5">Your Interests</h3>
         </section>
         <section className="flex gap-3 flex-wrap items-center mt-10">
-          {selectedInterests.map((interest) => (
+          {selectedInterests?.data?.map((interest) => (
             <button
-              key={interest.interest_id}
+              key={interest.id}
               className="border border-cyan-700 p-2 rounded-lg text-white font-semibold flex gap-2 items-center bg-cyan-700"
               onClick={() => handleRemoveInterest(interest)}
             >
-              {interest.name} <IoMdClose className="fill-white" />
+              {interest.name}<IoMdClose className="fill-white" />
             </button>
           ))}
         </section>
@@ -45,8 +45,8 @@ const Interests = () => {
               value={category}
               onChange={handleCategory}
             >
-              {categories.map((option) => (
-                <MenuItem value={option.name} key={option.category_id}>
+              {categories?.data.map((option) => (
+                <MenuItem value={option.name} key={option.id}>
                   {option.name}
                 </MenuItem>
               ))}
@@ -56,7 +56,7 @@ const Interests = () => {
         <section className="flex gap-3 flex-wrap items-center mt-10">
           {interests.map((interest) => (
             <button
-              key={interest.interest_id}
+              key={interest.id}
               className="border border-gray-500 p-2 rounded-lg text-gray-500 font-semibold flex gap-2 items-center"
               onClick={() => handleSelectedInterests(interest)}
             >

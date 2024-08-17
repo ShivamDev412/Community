@@ -1,5 +1,6 @@
 import { EventGroupDetailsProp } from "@/Types";
 import { FC } from "react";
+import { Link } from "react-router-dom";
 
 const EventGroupDetails: FC<EventGroupDetailsProp> = ({
   groupImage,
@@ -7,7 +8,8 @@ const EventGroupDetails: FC<EventGroupDetailsProp> = ({
   groupType,
 }) => {
   return (
-    <div className="bg-white p-3 rounded-lg shadow md:w-[49%] h-fit lg:w-full">
+    <Link to={`/group/${groupName}`}>
+     <div className="bg-white p-3 rounded-lg shadow md:w-[49%] h-fit lg:w-full">
       <div className="flex gap-4">
         <div className="w-1/2 h-auto">
           <img
@@ -22,6 +24,8 @@ const EventGroupDetails: FC<EventGroupDetailsProp> = ({
         </div>
       </div>
     </div>
+    </Link>
+   
   );
 };
 

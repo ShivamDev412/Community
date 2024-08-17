@@ -1,4 +1,4 @@
-import { getImage, uploadCompressedImageToS3 } from "./../utils/UploadToS3";
+import { getImage, uploadCompressedImageToS3 } from "../services/UploadToS3";
 import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
 import { throwError } from "../utils/Error";
@@ -7,11 +7,31 @@ import {
   PersonalInfoSchema,
   ChangePasswordSchema,
 } from "../utils/Validation";
-import { uploadToS3 } from "../utils/UploadToS3";
+import { uploadToS3 } from "../services/UploadToS3";
 import moment from "moment";
-import { QueryResultRow } from "pg";
-import db from "../database/db.config";
-import { ClearCookie } from "../utils/SetCookies";
+import { ClearCookie } from "../services/SetCookies";
+import {
+  cancelEvent,
+  createNewUserInterest,
+  findUser,
+  findUserEvents,
+  findUserInterest,
+  findUserInterests,
+  registerEvent,
+  removeUserInterest,
+  updateUser,
+} from "../prisma/schema/User.schema";
+import {
+  findInterest,
+  findInterestsByCategory,
+} from "../prisma/schema/Interest.schema";
+import { findGroupsByOrganizer } from "../prisma/schema/Group.schema";
+import {
+  findEvent,
+  findEventMembers,
+  findEventsOrganizedByUser,
+} from "../prisma/schema/Event.schema";
+import { findCategories } from "../prisma/schema/Category.schema";
 
 export const LogOut = async (
   req: Request,
@@ -25,23 +45,13 @@ export const LogOut = async (
   if (!refreshToken) {
     return throwError(next, "No refresh token found");
   }
-
-  const existingUser = await db.user.findFirst({
-    where: {
-      id: userId,
-    },
+  const existingUser = await findUser(userId as string);
+  const deleteRefreshTokenFromDb = await updateUser(userId as string, {
+    refresh_token: existingUser?.refresh_token.filter((token) => {
+      return token !== refreshToken;
+    }),
   });
 
-  const deleteRefreshTokenFromDb = await db.user.update({
-    where: {
-      id: existingUser?.id,
-    },
-    data: {
-      refresh_token: existingUser?.refresh_token.filter((token) => {
-        return token !== refreshToken;
-      }),
-    },
-  });
   if (!deleteRefreshTokenFromDb) {
     return throwError(next, "Something went wrong while logging out");
   } else {
@@ -59,21 +69,38 @@ export const GetUserData = async (
 ) => {
   try {
     const userId: string | undefined = req?.user?.id;
-
     if (userId) {
-      const user = await db.user.findUnique({
-        where: {
-          id: userId,
-        },
+      const user = await findUser(userId, {
+        id: true,
+        name: true,
+        image: true,
+        compressed_image: true,
+        bio: true,
+        location: true,
+        dob: true,
+        sex: true,
+        email: true,
+        looking_for: true,
+        life_state: true,
+        joined_on: true,
+        google_id: true,
       });
-      const imageData = await getImage(user?.image || "");
-      const compressedImageData = await getImage(user?.compressed_image || "");
+
+      const interests = await findUserInterests(userId);
+      const interestsToSend = interests.map((interest) => interest.interest);
+      const imageData = user?.google_id
+        ? user?.image
+        : await getImage(user?.image || "");
+      const compressedImageData = user?.google_id
+        ? user?.image
+        : await getImage(user?.compressed_image || "");
       res.status(200).json({
         success: true,
         data: {
           ...user,
           image: imageData,
           compressed_image: compressedImageData,
+          interests: interestsToSend,
         },
       });
     } else {
@@ -90,35 +117,39 @@ export const editUserProfile = async (
 ) => {
   const { name, address, bio, image } = EditProfileSchema.parse(req.body);
   const file = req.file;
+  const user = await findUser(req.user?.id as string);
   try {
     const imageToSend = file
       ? await uploadToS3(name, file?.buffer, file.mimetype)
-      : image;
-    const compressedImageToSend = await uploadCompressedImageToS3(
-      name,
-      file?.buffer,
-      file?.mimetype
-    );
+      : user?.image;
+    const compressedImageToSend = file
+      ? await uploadCompressedImageToS3(name, file?.buffer, file?.mimetype)
+      : user?.compressed_image;
+
     const userId: string | undefined = req?.user?.id;
     if (userId) {
       const bioToSend = bio ? bio : "";
       if (imageToSend) {
-        await db.user.update({
-          where: {
-            id: userId,
-          },
-          data: {
-            name: name,
-            image: imageToSend,
-            compressed_image: compressedImageToSend,
-            bio: JSON.parse(bioToSend),
-            location: address ? address : "",
-          },
+        await updateUser(userId, {
+          name: name,
+          image: imageToSend,
+          compressed_image: compressedImageToSend,
+          bio: JSON.parse(bioToSend),
+          location: address ? address : "",
         });
-        const updatedUser = await db.user.findUnique({
-          where: {
-            id: userId,
-          },
+        const updatedUser = await findUser(userId, {
+          id: true,
+          name: true,
+          image: true,
+          compressed_image: true,
+          bio: true,
+          location: true,
+          dob: true,
+          sex: true,
+          email: true,
+          looking_for: true,
+          life_state: true,
+          joined_on: true,
         });
         const imageData = file
           ? await getImage(updatedUser?.image || "")
@@ -132,7 +163,7 @@ export const editUserProfile = async (
             data: {
               ...updatedUser,
               image: imageData,
-              compressedImage: compressedImageData,
+              compressed_image: compressedImageData,
             },
             message: "Profiled updated successfully",
           });
@@ -161,27 +192,23 @@ export const updateUserPersonalInfo = async (
 
       const userId: string | undefined = req?.user?.id;
       if (userId) {
-        await db.user.update({
-          where: {
-            id: userId,
-          },
-          data: {
-            dob: `${birthday}T00:00:00Z`,
-            sex: gender,
-            looking_for: lookingFor,
-            life_state: lifeStages,
-          },
+        await updateUser(userId, {
+          dob: `${birthday}T00:00:00Z`,
+          sex: gender,
+          looking_for: lookingFor,
+          life_state: lifeStages,
         });
-        const updatedUser = await db.user.findUnique({
-          where: {
-            id: userId,
-          },
-        });
+        const updatedUser = await findUser(userId);
         res.status(200).json({
           success: true,
           data: {
             ...updatedUser,
-            image: await getImage(updatedUser?.image || ""),
+            image: updatedUser?.image?.includes("https://")
+              ? updatedUser.image
+              : await getImage(updatedUser?.image || ""),
+            compressed_image: updatedUser?.image?.includes("https://")
+              ? updatedUser.image
+              : await getImage(updatedUser?.compressed_image || ""),
           },
           message: "Update Info updated successfully",
         });
@@ -205,30 +232,20 @@ export const changePassword = async (
       ChangePasswordSchema.parse(req.body);
     const userId: string | undefined = req?.user?.id;
     if (userId) {
-      const existingUser: QueryResultRow | null = await db.user.findUnique({
-        where: {
-          id: userId,
-        },
-        select: {
-          password: true,
-        },
+      const existingUser = await findUser(userId, {
+        password: true,
       });
       if (existingUser) {
         const isPasswordCorrect = await bcrypt.compare(
           currentPassword,
-          existingUser.password
+          existingUser?.password as string
         );
         if (!isPasswordCorrect) {
           return throwError(next, "Current password is incorrect");
         }
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await db.user.update({
-          where: {
-            id: userId,
-          },
-          data: {
-            password: hashedPassword,
-          },
+        await updateUser(userId, {
+          password: hashedPassword,
         });
         res.status(200).json({
           success: true,
@@ -250,7 +267,7 @@ export const getAllCategories = async (
   try {
     const userId: string | undefined = req?.user?.id;
     if (userId) {
-      const categories = await db.category.findMany();
+      const categories = await findCategories();
       res.status(200).json({
         success: true,
         data: categories,
@@ -272,11 +289,7 @@ export const getInterestsByCategories = async (
     const userId: string | undefined = req?.user?.id;
     const { categoryId } = req.params;
     if (userId) {
-      const interests = await db.interest.findMany({
-        where: {
-          category_id: categoryId,
-        },
-      });
+      const interests = await findInterestsByCategory(categoryId);
       res.status(200).json({
         success: true,
         data: interests,
@@ -297,33 +310,28 @@ export const addUserInterests = async (
   try {
     const { interestId } = req.body;
     const userId: string | undefined = req?.user?.id;
-    if (userId) {
-      await db.userInterest.create({
-        data: {
-          user_id: userId,
-          interest_id: interestId,
-        },
-      });
-      const userInterests = await db.userInterest.findMany({
-        where: {
-          user_id: userId,
-        },
-        include: {
-          interest: true,
-        },
-      });
-      res.status(200).json({
-        success: true,
-        message: "Interests updated successfully",
-        data: userInterests,
-      });
-    } else {
+
+    if (!userId) {
       return throwError(next, "User not found");
     }
+    const interest = await findInterest(interestId);
+
+    if (!interest) {
+      return throwError(next, "Interest not found");
+    }
+    await createNewUserInterest(userId, interestId);
+    const userInterests = await findUserInterests(userId);
+
+    res.status(200).json({
+      success: true,
+      message: "Interest added to user successfully",
+      data: userInterests,
+    });
   } catch (err) {
     next(err);
   }
 };
+
 export const removeUserInterests = async (
   req: Request,
   res: Response,
@@ -333,24 +341,19 @@ export const removeUserInterests = async (
     const { interestId } = req.params;
     const userId: string | undefined = req?.user?.id;
     if (userId) {
-      await db.userInterest.delete({
-        where: {
-          interest_id: interestId,
-          user_id: userId,
-        },
+      const userInterest = await findUserInterest(userId, interestId, {
+        interest: true,
       });
-      const userInterests = await db.userInterest.findMany({
-        where: {
-          user_id: userId,
-        },
-        include: {
-          interest: true,
-        },
-      });
+      if (!userInterest) {
+        return throwError(next, "User interest not found");
+      }
+      await removeUserInterest(userId, interestId);
+      const userInterests = await findUserInterests(userId);
+      const interestToSend = userInterests.map((interest) => interest.interest);
       res.status(200).json({
         success: true,
         message: "Interest removed successfully",
-        data: userInterests,
+        data: interestToSend,
       });
     } else {
       return throwError(next, "User not found");
@@ -367,18 +370,12 @@ export const getUserAllInterests = async (
   try {
     const userId: string | undefined = req?.user?.id;
     if (userId) {
-      const userInterests = await db.userInterest.findMany({
-        where: {
-          user_id: userId,
-        },
-        include: {
-          interest: true,
-        },
-      });
+      const userInterests = await findUserInterests(userId);
+      const interestToSend = userInterests.map((interest) => interest.interest);
       res.status(200).json({
         success: true,
         message: "Interests fetched successfully",
-        data: userInterests,
+        data: interestToSend,
       });
     } else {
       return throwError(next, "User not found");
@@ -404,20 +401,7 @@ export const getUserCreatedGroups = async (
       pageNum = 1;
     }
     const offset = (pageNum - 1) * pageSize;
-    const groups = await db.group.findMany({
-      where: {
-        organized_by: userId,
-      },
-      select: {
-        name: true,
-        image: true,
-        compressed_image: true,
-      },
-      orderBy: {
-        created_at: "desc",
-      },
-      skip: offset,
-    });
+    const groups = await findGroupsByOrganizer(userId, offset);
     const groupToSend = await Promise.all(
       groups.map(async (group) => {
         try {
@@ -463,60 +447,148 @@ export const getUserEvents = async (
     }
     const offset = (pageNum - 1) * pageSize;
     let events: any[] = [];
+    const today = moment().utc().startOf("day");
     switch (tab) {
       case "attending":
-        events = await db.event.findMany({
-          where: {
-            user_events: {
-              user_id: userId,
+        events = await findUserEvents(
+          userId,
+          {
+            event_date: {
+              gte: today.toDate(),
+            },
+            event_end_time: {
+              gt: moment.utc().toDate(),
             },
           },
-          skip: offset,
-          take: pageSize,
-        });
+          {
+            event: true,
+          },
+          {
+            event: {
+              event_date: "asc",
+            },
+          },
+          offset
+        );
+        events = events.map((event) => event.event);
         break;
       case "hosting":
-        events = await db.event.findMany({
-          where: {
+        events = await findEventsOrganizedByUser(
+          {
             host_id: userId,
             event_date: {
-              gte: new Date(),
+              gte: today.toDate(),
             },
           },
-          skip: offset,
-          take: pageSize,
-        });
+          offset
+        );
         break;
       case "past":
-        events = await db.event.findMany({
-          where: {
+        events = await findUserEvents(
+          userId,
+          {
             event_date: {
-              lt: moment().subtract(24, "hours").toDate(),
+              lt: today.toDate(),
+            },
+            event_end_time: {
+              lt: moment.utc().toDate(),
             },
           },
-          skip: offset,
-          take: pageSize,
-        });
+          {
+            event: true,
+          },
+          {
+            event: {
+              event_date: "desc",
+            },
+          },
+          offset
+        );
         break;
       default:
         return throwError(next, "Invalid tab provided");
     }
 
-    // Process events and send response
     const eventsToSend = await Promise.all(
-      events.map(async (event) => {
-        return {
-          ...event,
-          image: await getImage(event.image || ""),
-          compressed_image: await getImage(event.compressed_image || ""),
-        };
+      events?.map(async (event) => {
+        if (event.event) {
+          return {
+            ...event.event,
+            image: await getImage(event?.event?.image || ""),
+            compressed_image: await getImage(
+              event?.event?.compressed_image || ""
+            ),
+            members: (await findEventMembers(event?.event?.id || "")).length,
+          };
+        } else
+          return {
+            ...event,
+            image: await getImage(event?.image || ""),
+            compressed_image: await getImage(event?.compressed_image || ""),
+            members: (await findEventMembers(event?.id || "")).length,
+          };
       })
     );
-
     res.status(200).json({
       success: true,
       message: "Events fetched successfully",
       data: eventsToSend,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const registerToEvent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId: string | undefined = req.user?.id;
+
+    const { eventId } = req.body;
+    if (!userId) {
+      return throwError(next, "User not found");
+    }
+
+    // Check if the event exists
+    const event = await findEvent(eventId);
+
+    if (!event) {
+      return throwError(next, "Event not found");
+    }
+
+    // Create userEvent entry for the event
+    await registerEvent(userId, eventId);
+    res.status(200).json({
+      success: true,
+      message: "User registered to event successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+export const cancelRSVP = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId: string | undefined = req.user?.id;
+    const { eventId } = req.body;
+
+    if (!userId) {
+      return throwError(next, "User not found");
+    }
+    const event = findEvent(eventId);
+    if (!event) {
+      return throwError(next, "Event not found");
+    }
+    await cancelEvent(userId, eventId);
+    res.status(200).json({
+      success: true,
+      message: "RSVP canceled successfully",
     });
   } catch (err) {
     next(err);

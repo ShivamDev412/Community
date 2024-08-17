@@ -35,7 +35,7 @@ const OrganizerAndMembers: FC<{ groupDetails: GroupDetails }> = ({
         <div className="flex items-center gap-4 mt-5 flex-wrap">
           {groupDetails.members.slice(0, 15).map((member) => (
             <ProfileAvatar
-              key={member.user_id}
+              key={member.id}
               image={member?.image || ""}
               name={member?.name || ""}
             />

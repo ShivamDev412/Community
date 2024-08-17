@@ -1,26 +1,29 @@
 import { setLocation } from "@/redux/slice/homeSlice";
+import { setSearch } from "@/redux/slice/searchSlice";
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { RootState } from "@/redux/Store";
 import { useGooglePlaces } from "@/Hooks/useGooglePlaces";
 import Toast from "@/utils/Toast";
-import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import { handleLocation } from "@/utils/CommonFunctions/handleLocation";
 import { setLoading } from "@/redux/slice/loadingSlice";
+import { useGetCityMutation } from "@/redux/slice/api/homeSlice";
 
 export const useSearch = () => {
+  const navigate = useNavigate();
   const [event, setEvent] = useState("");
   const [place, setPlace] = useState("");
-  const { axiosPrivate } = useAxiosPrivate();
   const dispatch = useDispatch();
   const ref1 = useRef<HTMLInputElement>(null);
   const ref2 = useRef<HTMLInputElement>(null);
   const [isLeftInputFocused, setIsLeftInputFocused] = useState(false);
   const [isRightInputFocused, setIsRightInputFocused] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const { location } = useSelector((state: RootState) => state.home);
-
+  const { location } = useSelector((state: RootState) => state.home) || {};
+  const search = useSelector((state: RootState) => state.search);
+  const [getCity] = useGetCityMutation();
   const {
     placesService,
     placePredictions,
@@ -30,6 +33,7 @@ export const useSearch = () => {
 
   //* Use effect for handling focus and blur events on input fields
   useEffect(() => {
+    dispatch(setSearch({ ...search, keyword: event }));
     const handleLeftInputFocus = () => setIsLeftInputFocused(true);
     const handleRightInputFocus = () => setIsRightInputFocused(true);
     const handleLeftInputBlur = () => setIsLeftInputFocused(false);
@@ -52,7 +56,6 @@ export const useSearch = () => {
 
   useEffect(() => {
     if (location?.city && location?.state) {
-      console.log(place);
       if (!place.includes(location.city) && !place.includes(location.state)) {
         handleSetPlace(location?.city, location?.state);
       }
@@ -70,21 +73,16 @@ export const useSearch = () => {
   const fetchCity = async (lat: number, lon: number) => {
     dispatch(setLoading(true));
     try {
-      const response = await axiosPrivate.post(
-        `${API_ENDPOINTS.HOME}${Endpoints.GET_CITY}`,
-        {
-          lat,
-          lon,
-        }
-      );
-
-      if (response.statusText === "OK") {
-        const data = response.data;
+      const response = await getCity({
+        lat,
+        lon,
+      }).unwrap();
+      if (response) {
         dispatch(
           setLocation({
             location: {
-              city: data.city,
-              state: data.state,
+              city: response.city,
+              state: response.state,
             },
           })
         );
@@ -102,6 +100,13 @@ export const useSearch = () => {
         (position) => {
           const latitude = position.coords.latitude;
           const longitude = position.coords.longitude;
+          dispatch(
+            setSearch({
+              ...search,
+              lat: latitude,
+              lon: longitude,
+            })
+          );
           fetchCity(latitude, longitude);
         },
         () => Toast("Unable to retrieve your location", "error")
@@ -112,16 +117,19 @@ export const useSearch = () => {
   };
 
   const handleLocationSelect = (paceId: String, place: string) => {
-    console.log(paceId);
     placesService?.getDetails(
       {
         placeId: place,
-        fields: ["address_components"],
+        fields: ["address_components", "geometry"],
       },
       (placeDetails: any) => {
         const locationData = handleLocation(placeDetails.address_components);
+        const latitude = placeDetails.geometry.location.lat();
+        const longitude = placeDetails.geometry.location.lng();
+        dispatch(setSearch({ ...search, lat: latitude, lon: longitude }));
         if (locationData.location.city && locationData.location.state) {
           dispatch(setLocation(locationData));
+
           handleSetPlace(
             locationData.location.city,
             locationData.location.state
@@ -146,25 +154,21 @@ export const useSearch = () => {
 
   const handleLocationBlur = () => {
     if (!placePredictions.length) {
-      handleSetPlace(location?.city, location?.state);
+      handleSetPlace(location?.city as string, location?.state as string);
     }
   };
   const handleSetEvent = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(
+      setSearch({
+        ...search,
+        keyword: e.target.value,
+      })
+    );
     setEvent(e.target.value);
   };
+
   const handleSearch = async () => {
-    let query = `city=${location.city}&state=${location.state}`;
-    if (event.trim()) {
-      query += `&event=${event}`;
-    }
-    try {
-      const res = await axiosPrivate.get(
-        `${API_ENDPOINTS.HOME}${Endpoints.SEARCH}?${query}`
-      );
-      console.log(res);
-    } catch (error) {
-      Toast("Something went wrong", "error");
-    }
+    navigate(RouteEndpoints.SEARCH);
   };
   return {
     event,

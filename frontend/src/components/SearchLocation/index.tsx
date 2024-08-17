@@ -40,7 +40,7 @@ const SearchLocation: FC<
         disabled={disabled}
       />
       {showLocationDropdown && (
-        <LocationDropdown
+        <LocationDropdown 
           placePredictions={placePredictions}
           isPlacePredictionsLoading={isPlacePredictionsLoading}
           handleLocationSelect={handleLocationSelect}

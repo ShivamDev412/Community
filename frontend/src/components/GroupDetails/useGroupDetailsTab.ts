@@ -7,7 +7,7 @@ const useGroupDetailsTab = () => {
 
   const { groupDetails } = useSelector((state: RootState) => state.groups);
   const getLink = (link: string) => {
-    return `/group/${groupDetails.name}${link}`;
+    return `/group/${groupDetails?.name}${link}`;
   };
   return { getLink, path };
 };
