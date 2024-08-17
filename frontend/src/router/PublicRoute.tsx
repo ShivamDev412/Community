@@ -5,8 +5,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/Store";
 
 function PublicRoute() {
-  const { token } = useSelector((state: RootState) => state.auth);
-  return token ? (
+  const  token  = useSelector((state: RootState) => state.auth);
+  return token?.token ? (
     <Navigate to={RouteEndpoints.HOME} />
   ) : (
     <Suspense fallback={<h2>Loading...</h2>}>

@@ -22,18 +22,18 @@ const GroupDetailWrapper = ({ children }: { children: React.ReactNode }) => {
             <section className="w-11/12 sm:w-10/12 lg:w-9/12 2xl:w-6/12 mx-auto overflow-x-hidden h-full mt-5">
               <section className="flex flex-wrap justify-between xs:gap-4 sm:gap-0 overflow-hidden">
                 <GroupImageSection
-                  image={groupDetails?.image}
-                  name={groupDetails?.name}
-                  compressedImage={groupDetails?.compressed_image}
+                  image={groupDetails?.data?.image}
+                  name={groupDetails?.data?.name}
+                  compressedImage={groupDetails?.data?.compressed_image}
                 />
                 <></>
                 <PrimaryInfoSection
-                  host={groupDetails?.organized_by?.id}
-                  name={groupDetails?.name}
-                  location={groupDetails?.location}
-                  membersCount={groupDetails?.membersCount}
-                  groupType={groupDetails?.group_type}
-                  organizedBy={groupDetails?.organized_by.name}
+                  host={groupDetails?.data?.organized_by?.id || ""}
+                  name={groupDetails?.data?.name}
+                  location={groupDetails?.data?.location}
+                  membersCount={groupDetails?.data?.membersCount}
+                  groupType={groupDetails?.data?.group_type}
+                  organizedBy={groupDetails?.data?.organized_by.name}
                 />
               </section>
             </section>

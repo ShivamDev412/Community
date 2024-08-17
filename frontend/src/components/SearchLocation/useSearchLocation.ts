@@ -15,7 +15,6 @@ export const useSearchLocation = (setValue: Function, id: String) => {
   } = useGooglePlaces(path === "edit-profile" ? "cities" : "");
 
   const handleLocationSelect = (placeId:string, place: string, addressType: string) => {
-    console.log(placeId);
     if (addressType == "placedId") {
       placesService?.getDetails(
         {

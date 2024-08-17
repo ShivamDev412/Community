@@ -1,32 +1,23 @@
 import { useDispatch } from "react-redux";
 import Toast from "@/utils/Toast";
-import { clearUser } from "@/redux/slice/userSlice";
-import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import { useNavigate } from "react-router-dom";
-import { clearGroups } from "@/redux/slice/groupSlice";
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 
 import { logOut } from "@/redux/slice/authSlice";
-import { clearAllEvents } from "@/redux/slice/eventSlice";
+import { useLogOutMutation } from "@/redux/slice/api/userSlice";
 
 export const useHeader = () => {
-  const { axiosPrivate } = useAxiosPrivate();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const [logout] = useLogOutMutation();
   const logoutHandler = async () => {
-    const response: any = await axiosPrivate.post(
-      `${API_ENDPOINTS.USER}${Endpoints.LOGOUT}`
-    );
+    const response = await logout().unwrap();
     try {
-      if (response.data.success) {
+      if (response.success) {
         navigate(RouteEndpoints.LOGIN);
-        Toast(response.data.message, "success");
-        //* Clear all the data from redux store
+        Toast(response.message, "success");
         dispatch(logOut());
-        dispatch(clearAllEvents());
-        dispatch(clearUser());
-        dispatch(clearGroups());
+     
       }
     } catch (error) {
       Toast("Something went wrong", "error");

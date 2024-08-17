@@ -105,14 +105,8 @@ export const NewEventSchema = z
     type: z.string().min(1, { message: "Event Type is required" }),
     details: z.string().min(1, { message: "Event Details are required" }),
     group: z.string().min(1, { message: "Group is required" }),
-    tags: z.array(z.string()).refine(
-      (value) => {
-        return value.length !== 0;
-      },
-      {
-        message: "At least one tag is required",
-      }
-    ),
+    category: z.string().min(1, { message: "Category is required" }),
+    tags: z.array(z.string()).min(1, { message: "Tags are required" }),
     date: z.string().min(1, { message: "Event Date is required" }),
     time: z.string().min(1, { message: "Event Time is required" }),
     event_end_time: z.string().min(1, { message: "Event End Time is required" }),
@@ -127,7 +121,7 @@ export const NewEventSchema = z
           refinementContext.addIssue({
             code: ZodIssueCode.custom,
             message: "Address is required for in-person events",
-            path: ["address"],
+            path: ["location"],
           });
         }
       } 
@@ -157,10 +151,10 @@ export const NewEventSchema = z
 export const EditProfileSchema = z.object({
   image: z.any().refine(
     (value) => {
-      if (value instanceof FileList) {
-        return value.length > 0;
+      if (typeof value === "string" || value instanceof FileList) {
+        return true;
       }
-      value !== null && value !== undefined;
+      return false;
     },
     {
       message: "Profile Image is required",

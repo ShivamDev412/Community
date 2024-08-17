@@ -21,7 +21,6 @@ export const getLatitudeAndLongitude = async (address: string) => {
       throw new Error("Address is not provided");
     }
   } catch (error) {
-    console.error("Error fetching latitude and longitude:", error);
     throw error;
   }
 };

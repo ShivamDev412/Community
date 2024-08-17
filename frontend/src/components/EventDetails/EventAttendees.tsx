@@ -14,7 +14,7 @@ const EventAttendees: FC<EventAttendeesProps> = ({ members }) => {
       <div className="bg-white p-4 rounded-lg flex gap-4 shadow mt-5 flex-wrap">
         {members?.map((member) => (
           <div
-            key={member?.user_id}
+            key={member?.id}
             className="flex items-center gap-2 mb-2 flex-col border rounded-md p-3 w-[47%] sm:w-[25%] lg:w-[30%] xl:w-[23%] relative pb-10"
           >
             {member?.type === "host" && (

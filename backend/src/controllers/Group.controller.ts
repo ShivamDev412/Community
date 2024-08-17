@@ -5,11 +5,12 @@ import {
   getImage,
   uploadCompressedImageToS3,
   uploadToS3,
-} from "../utils/UploadToS3";
-import getImageDimensions from "../utils/GetImageDimension";
-import { getAllImages } from "../Types/GetAllImages";
-import { getLatitudeAndLongitude } from "../utils/GetLatitudeAndLongitude";
+} from "../services/UploadToS3";
+import getImageDimensions from "../services/GetImageDimension";
+import { getAllImages } from "../services/GetAllImages";
+import { getLatitudeAndLongitude } from "../services/GetLatitudeAndLongitude";
 import db from "../database/db.config";
+import { NewGroupSchema } from "../utils/Validation";
 export const getUserGroups = async (
   req: Request,
   res: Response,
@@ -33,6 +34,7 @@ export const getUserGroups = async (
         message: "User groups fetched successfully",
         data: userGroups,
       });
+
     }
   } catch (error) {
     next(error);
@@ -45,7 +47,10 @@ export const createUserGroup = async (
   next: NextFunction
 ) => {
   try {
-    const { about, name, group_type, location } = req.body;
+    const { about, name, group_type, location } = NewGroupSchema.parse(
+      req.body
+    );
+
     const userId: string | undefined = req?.user?.id;
     const file = req?.file;
     const imageBuffer = file?.buffer;
@@ -108,8 +113,9 @@ export const updateUserGroup = async (
   next: NextFunction
 ) => {
   try {
-    const { about, name, group_type, location, image } = req.body;
-
+    const { about, name, group_type, location, image } = NewGroupSchema.parse(
+      req.body
+    );
     const groupId = req?.params?.groupId;
     const userId: string | undefined = req?.user?.id;
     const file = req?.file;
@@ -119,7 +125,6 @@ export const updateUserGroup = async (
         id: groupId,
       },
     });
-    console.log(groupData, name);
     if (groupData?.name !== name) {
       const groupExists = await db.group.findUnique({
         where: {
@@ -302,8 +307,8 @@ export const getAllEventsInGroup = async (
   next: NextFunction
 ) => {
   try {
-    const userId: string | undefined = request?.user?.id;
-    const groupId: any = request?.query?.groupId;
+    const userId = request?.user?.id;
+    const groupId: unknown = request?.query?.groupId;
     if (!userId) {
       return throwError(next, "User not found");
     }
@@ -319,8 +324,7 @@ export const getAllEventsInGroup = async (
       }),
       next
     );
-
-    const eventIds = eventsWithImages.map((event) => event.event_id);
+    const eventIds = eventsWithImages.map((event) => event.id);
     const members = await Promise.all(
       eventIds.map(async (eventId) => {
         const eventMembers = await db.userEvent.findMany({
@@ -334,10 +338,12 @@ export const getAllEventsInGroup = async (
         const membersWithImages = await Promise.all(
           eventMembers.map(async (member) => ({
             ...member,
-            image: await getImage(member?.user?.image || ""),
-            compressed_image: await getImage(
-              member.user.compressed_image || ""
-            ),
+            image: member?.user?.image?.includes("https://")
+              ? member?.user?.image
+              : await getImage(member?.user?.image || ""),
+            compressed_image: member?.user?.image?.includes("https://")
+              ? member?.user?.image
+              : await getImage(member.user.compressed_image || ""),
           }))
         );
         return membersWithImages;
@@ -364,12 +370,12 @@ export const deleteGroup = async (
   next: NextFunction
 ) => {
   try {
-    const groupId: any = request?.query?.groupId;
+    const groupId: unknown = request?.query?.groupId;
     if (!groupId) {
       return throwError(next, "Group ID is missing");
     }
     await db.group.update({
-      where: { id: groupId },
+      where: { id: groupId as string },
       data: {
         deletion_request_date: new Date(),
       },
@@ -378,7 +384,7 @@ export const deleteGroup = async (
       try {
         await db.group.delete({
           where: {
-            id: groupId,
+            id: groupId as string,
           },
         });
         await db.event.deleteMany({

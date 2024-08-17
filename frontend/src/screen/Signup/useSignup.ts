@@ -4,11 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { SignupSchema } from "@/utils/Validations";
 import { SignupType } from "@/Types";
-import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import Toast from "@/utils/Toast";
 import { useDispatch } from "react-redux";
-import { axiosPublicFile } from "@/utils/Axios";
 import { setCredentials } from "@/redux/slice/authSlice";
+import { useSignupMutation } from "@/redux/slice/api/authSlice";
 
 export const useSignup = () => {
   const navigate = useNavigate();
@@ -35,6 +35,7 @@ export const useSignup = () => {
     },
     resolver: zodResolver(SignupSchema),
   });
+  const [signup, { isLoading }] = useSignupMutation();
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     const formData = new FormData();
     formData.append("image", data.image[0]);
@@ -42,13 +43,11 @@ export const useSignup = () => {
     formData.append("email", data.email);
     formData.append("password", data.password);
     try {
-      const response:any = await axiosPublicFile.post(
-        `${API_ENDPOINTS.AUTH}${Endpoints.SIGNUP}`,
-        formData
-      );
-      if (response.data.success) {
-        Toast(response.data.message, "success");
-        dispatch(setCredentials(response.data.data['auth-token']));
+      const response = await signup(formData).unwrap();
+      const { success, message, data } = response;
+      if (success) {
+        Toast(message, "success");
+        dispatch(setCredentials(data["auth-token"]));
         navigate(RouteEndpoints.HOME);
         reset();
         clearErrors();
@@ -61,5 +60,14 @@ export const useSignup = () => {
     }
   };
 
-  return { register, handleSubmit, onSubmit, errors, control,setValue, getValues };
+  return {
+    register,
+    handleSubmit,
+    onSubmit,
+    errors,
+    control,
+    setValue,
+    getValues,
+    isLoading,
+  };
 };

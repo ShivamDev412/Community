@@ -1,18 +1,16 @@
+import { HomeDataType } from "@/Types";
+import { Distances, HomeEvents } from "@/utils/Constant";
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
+const initialState: HomeDataType = {
   location: {
     city: "",
     state: "",
   },
-  coord: {
-    lat: 0,
-    lon: 0,
+  filters: {
+    distance: Distances[0],
+    type: HomeEvents[0],
   },
-  user: {},
-  groups: {},
-  events: {},
-  intrusts: {},
 };
 const homeSlice = createSlice({
   name: "home",
@@ -28,43 +26,32 @@ const homeSlice = createSlice({
         },
       };
     },
-    setCoord: (state, action) => {
+    setFilters: (state, action) => {
       return {
         ...state,
-        coord: {
-          ...state.coord,
-          lat: action.payload.lat,
-          lon: action.payload.lon,
+        filters: {
+          ...state.filters,
+          distance: action.payload.distance,
+          type: action.payload.type,
         },
       };
     },
-    setUser: (state, action) => {
+    resetFilters: (state) => {
       return {
         ...state,
-        user: action.payload.user,
+        filters: {
+          ...state.filters,
+          distance: Distances[0],
+          type: HomeEvents[0],
+        },
       };
     },
-    setGroups: (state, action) => {
-      return {
-        ...state,
-        groups: action.payload.groups,
-      };
-    },
-    setEvents: (state, action) => {
-      return {
-        ...state,
-        events: action.payload.events,
-      };
-    },
-    setIntrusts: (state, action) => {
-      return {
-        ...state,
-        intrusts: action.payload.intrusts,
-      };
-    },
-    clearState: () => initialState, // Clear the state when the user logs out
-    clearUser: () => initialState, // Clear the user state when the user logs out
   },
 });
-export const { setLocation, setCoord } = homeSlice.actions;
+export const {
+  setLocation,
+  setFilters,
+  resetFilters,
+  
+} = homeSlice.actions;
 export default homeSlice.reducer;

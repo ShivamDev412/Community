@@ -1,32 +1,13 @@
 import { RootState } from "@/redux/RootReducer";
-import { setLoading } from "@/redux/slice/loadingSlice";
-import {
-  setAttendingEvents,
-  setHostingEvents,
-  setPastEvents,
-} from "@/redux/slice/eventSlice";
-import { API_ENDPOINTS, Endpoints } from "@/utils/Endpoints";
-import Toast from "@/utils/Toast";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { useUserEventsQuery } from "@/redux/slice/api/eventsSlice";
 const useEventTab = () => {
-  const {axiosPrivate} = useAxiosPrivate()
-  const dispatch = useDispatch();
-  const {
-    hostingEvents,
-    attendingEvents,
-    pastEvents,
-    hostingPageNumber,
-    attendingPageNumber,
-    pastPageNumber,
-  } = useSelector((state: RootState) => state.events);
+  const { hostingPageNumber, attendingPageNumber, pastPageNumber } =
+    useSelector((state: RootState) => state.events);
   const [value, setValue] = useState("1");
   const [page, setPage] = useState(1);
   const [tab, setTab] = useState("attending");
-  useEffect(() => {
-    getEvents();
-  }, [tab]);
   const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
 
@@ -55,39 +36,13 @@ const useEventTab = () => {
         break;
     }
   };
-  const getEvents = async () => {
-    try {
-      dispatch(setLoading(true));
-      const res = await axiosPrivate.get(
-        `${API_ENDPOINTS.USER}${Endpoints.USER_EVENTS}?tab=${tab}&page=${page}`
-      );
-      if (res.data.success) {
-        switch (tab) {
-          case "attending":
-            dispatch(setAttendingEvents(res?.data.data));
-            break;
-          case "hosting":
-            dispatch(setHostingEvents(res?.data.data));
-            break;
-          case "past":
-            dispatch(setPastEvents(res?.data.data));
-            break;
-        }
-        dispatch(setLoading(false));
-      }
-    } catch (error: any) {
-      dispatch(setLoading(false));
-      Toast(error.message, "error");
-    }
-  };
+  const { data: userEvents } = useUserEventsQuery(`?tab=${tab}&page=${page}`);
 
   return {
+    userEvents,
     value,
     handleChange,
     handlePageChange,
-    hostingEvents,
-    attendingEvents,
-    pastEvents,
   };
 };
 export default useEventTab;

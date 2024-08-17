@@ -1,7 +1,7 @@
 import { FaGoogle } from "react-icons/fa";
 
 const GoogleSignUpButton = () => {
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     window.location.href = "http://localhost:4000/api/auth/login/google";
   };
 

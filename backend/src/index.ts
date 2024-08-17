@@ -1,10 +1,12 @@
 import express from "express";
 import cors from "cors";
+import session from "express-session";
 import cookieParser from "cookie-parser";
-import app from "./app";
 import dotenv from "dotenv";
+
 // @ts-ignore
 import passport from "passport";
+import app from "./app";
 import { RouteMiddleware } from "./middlewares/Route.middleware";
 import errorHandler from "./middlewares/ErrorHandler.middleware";
 import {
@@ -12,7 +14,7 @@ import {
   GithubMiddleware,
   FacebookMiddleware,
 } from "./middlewares/Passport.middleware";
-import session from "express-session";
+
 // const GoogleStrategy = require("passport-google-oauth2").Strategy;
 dotenv.config();
 
@@ -24,6 +26,7 @@ const corsOptions = {
       : "http://localhost:5173",
   credentials: true,
 };
+
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -43,6 +46,10 @@ GithubMiddleware();
 FacebookMiddleware();
 RouteMiddleware();
 app.use(errorHandler);
+// const server = spdy.createServer({
+//   key: fs.readFileSync(path.join(__dirname,'cert', 'server.key')),
+//   cert: fs.readFileSync(path.join(__dirname, 'cert', 'server.crt')),
+// }, app);
 app.listen(PORT, () => {
   console.clear();
   console.log(`Server is running on port ${PORT}`);

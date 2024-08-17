@@ -9,7 +9,6 @@ const getCity = async (lat: number, lon: number) => {
     const data = response.data;
     if (data.status === "OK") {
       const addressComponents = data.results[0].address_components;
-      debugger;
       return addressComponents;
     }
   } catch (error: any) {

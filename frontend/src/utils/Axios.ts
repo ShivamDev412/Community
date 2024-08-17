@@ -2,6 +2,7 @@ import axios from "axios";
 const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 const headers = {
   "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": import.meta.env.VITE_BASE_URL as string,
 };
 const fileHeaders = {
   "Content-Type": "multipart/form-data",

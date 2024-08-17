@@ -1,41 +1,41 @@
-import { AccountManagementType } from "@/Types";
-import { RootState } from "./../../../redux/RootReducer";
+import { AccountManagementType, UserType } from "@/Types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SubmitHandler, useForm } from "react-hook-form";
-import {  useSelector } from "react-redux";
+import { useForm } from "react-hook-form";
 import { AccountManagementSchema } from "@/utils/Validations";
-import { z } from "zod";
+// import { z } from "zod";
+import { useUserQuery } from "@/redux/slice/api/userSlice";
 
 export const useAccountManagement = () => {
-  type FormField = z.infer<typeof AccountManagementSchema>;
-  const { email } = useSelector((state: RootState) => state.user);
+  // type FormField = z.infer<typeof AccountManagementSchema>;
+  const { data: user } = useUserQuery("");
+  const { email } = user?.data as UserType;
+
   const {
     register,
-    handleSubmit,
+    // handleSubmit,
     reset,
-  
+
     clearErrors,
     getValues,
     formState: { errors },
     setValue,
-    
   } = useForm<AccountManagementType>({
     defaultValues: {
-      email: email ? email : "",
+      email: email || "",
     },
     resolver: zodResolver(AccountManagementSchema),
   });
-  const onSubmit: SubmitHandler<FormField> = async (data) => {
-    console.log(data);
-  };
+  // const onSubmit: SubmitHandler<FormField> = async (data) => {
+  //  
+  // };
   return {
     register,
-    handleSubmit,
+    // handleSubmit,
     reset,
     clearErrors,
     getValues,
     errors,
     setValue,
-    onSubmit,
+    // onSubmit,
   };
 };

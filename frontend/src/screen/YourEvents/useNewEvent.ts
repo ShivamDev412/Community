@@ -1,6 +1,5 @@
-import useAxiosPrivate from "@/Hooks/useAxiosPrivate";
 import { NewEventType } from "@/Types";
-import { API_ENDPOINTS, Endpoints, RouteEndpoints } from "@/utils/Endpoints";
+import { RouteEndpoints } from "@/utils/Endpoints";
 import { NewEventSchema } from "@/utils/Validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -14,11 +13,21 @@ import { RootState } from "@/redux/RootReducer";
 import { setEventDetails } from "@/redux/slice/eventSlice";
 import { EventDetailsInitialState } from "@/utils/Constant";
 import dayjs from "dayjs";
+import moment from "moment";
+import {
+  useCreateEventMutation,
+  useUpdateEventMutation,
+} from "@/redux/slice/api/eventsSlice";
+import { useGroupsCreatedQuery } from "@/redux/slice/api/groupsSlice";
+import { useCategoriesQuery } from "@/redux/slice/api/categoriesSlice";
+import { useLazyTagsQuery, useTagsQuery } from "@/redux/slice/api/tagsSlice";
 
 export const useNewEvent = () => {
-  const { axiosPrivate, axiosPrivateFile } = useAxiosPrivate();
   const navigation = useNavigate();
   const dispatch = useDispatch();
+  const [categories, setCategories] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
   const [tags, setTags] = useState<Array<{ value: string; label: string }>>([]);
   const isEditableEvent = location.pathname.includes("edit-event");
   const { eventDetails } = useSelector((state: RootState) => state.events);
@@ -26,49 +35,71 @@ export const useNewEvent = () => {
   const [groups, setGroups] = useState<Array<{ value: string; label: string }>>(
     []
   );
-  const { groupsCreated } = useSelector((state: RootState) => state.groups);
+  const [createEvent] = useCreateEventMutation();
+  const [updateEvent] = useUpdateEventMutation();
+  const { data: userGroupsData } = useGroupsCreatedQuery("");
+  const { data: categoriesData } = useCategoriesQuery("");
+  const [trigger, { data: tagsData }] = useLazyTagsQuery();
+  const { data: onMountTagsData } = useTagsQuery(
+    eventDetails?.category_id || "",
+    {
+      skip: !isEditableEvent,
+    }
+  );
   useEffect(() => {
-    if (eventDetails) {
+    if (eventDetails.event_type) {
       setEventType(eventDetails.event_type);
     }
-  }, [eventDetails]);
-  useEffect(() => {
+    if (onMountTagsData) {
+      setTags(
+        onMountTagsData?.data.length
+          ? onMountTagsData?.data?.map((value) => ({
+              value: value.id,
+              label: value.name,
+            }))
+          : []
+      );
+    }
     if (!isEditableEvent) {
       reset();
       dispatch(setEventDetails(EventDetailsInitialState));
     }
-  }, [isEditableEvent]);
-  useEffect(() => {
-    if (groupsCreated.length) {
-      setGroups(
-        groupsCreated.map((value) => ({
-          value: value.id,
-          label: value.name,
-        }))
-      );
-    }
-    getAllTags();
-  }, [groupsCreated]);
-
-  const getAllTags = async () => {
-    dispatch(setLoading(true));
-    try {
-      const res = await axiosPrivate.get(`/api/event${Endpoints.TAGS}`);
-      if (res.data.success) {
-        setTags(
-          res.data.data.map((value: { id: string; name: string }) => {
-            return {
+    if (tagsData) {
+      setTags(
+        tagsData?.data.length
+          ? tagsData?.data?.map((value) => ({
               value: value.id,
               label: value.name,
-            };
-          })
-        );
-      }
-      dispatch(setLoading(false));
-    } catch (e) {
-      dispatch(setLoading(false));
+            }))
+          : []
+      );
     }
+  }, [eventDetails, isEditableEvent, tagsData, onMountTagsData]);
+  useEffect(() => {
+    userGroupsData &&
+      setGroups(
+        userGroupsData?.data.length
+          ? userGroupsData?.data?.map((value) => ({
+              value: value.id,
+              label: value.name,
+            }))
+          : []
+      );
+    categoriesData?.data.length &&
+      setCategories(
+        categoriesData?.data.length
+          ? categoriesData?.data?.map((value) => ({
+              value: value.id,
+              label: value.name,
+            }))
+          : []
+      );
+  }, [userGroupsData, categoriesData]);
+  const getTags = (categoryId: string) => {
+    setValue("tags", []);
+    trigger(categoryId);
   };
+
   type FormField = z.infer<typeof NewEventSchema>;
   const {
     register,
@@ -85,37 +116,24 @@ export const useNewEvent = () => {
       name: isEditableEvent ? eventDetails?.name : "",
       image: isEditableEvent ? eventDetails?.image : null,
       details: isEditableEvent ? eventDetails?.details : "",
-      group: isEditableEvent ? eventDetails?.group.id : "",
+      group: isEditableEvent ? eventDetails?.group.group_id : "",
+      category: isEditableEvent ? eventDetails?.category_id : "",
       date: isEditableEvent
         ? eventDetails?.event_date
         : dayjs().format("YYYY-MM-DD"),
       time: isEditableEvent
-        ? eventDetails?.event_time
+        ? moment(eventDetails?.event_time).utc().format("HH:mm")
         : dayjs().format("HH:mm"),
       event_end_time: isEditableEvent
-        ? eventDetails?.event_end_time
+        ? moment(eventDetails?.event_end_time).utc().format("HH:mm")
         : dayjs().format("HH:mm"),
       type: isEditableEvent ? eventDetails?.event_type : "",
-      tags: isEditableEvent ? eventDetails?.tags : [],
+      tags: isEditableEvent ? eventDetails?.tags.map((tag) => tag.name) : [],
       link: isEditableEvent ? eventDetails?.link || undefined : "",
       address: isEditableEvent ? eventDetails?.address || undefined : "",
     },
     resolver: zodResolver(NewEventSchema),
   });
-  const addAndUpdateApi = async (type: string, formData: FormData) => {
-    switch (type) {
-      case "add":
-        return await axiosPrivateFile.post(
-          `${API_ENDPOINTS.EVENT}${Endpoints.CREATE_EVENT}`,
-          formData
-        );
-      case "update":
-        return await axiosPrivateFile.put(
-          `${API_ENDPOINTS.EVENT}${Endpoints.UPDATE_EVENT}/${eventDetails.event_id}`,
-          formData
-        );
-    }
-  };
   const onSubmit: SubmitHandler<FormField> = async (data) => {
     const tagsToSend = tags
       .filter((value) => data.tags.includes(value.label))
@@ -124,6 +142,7 @@ export const useNewEvent = () => {
           id: value.value,
         };
       });
+   
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("details", data.details);
@@ -131,45 +150,49 @@ export const useNewEvent = () => {
     formData.append("time", data.time);
     formData.append("event_end_time", data.event_end_time);
     formData.append("type", data.type);
+    formData.append("category", data.category);
     formData.append("tags", JSON.stringify(tagsToSend));
+
     formData.append(
       "image",
       typeof data?.image[0] === "object" ? data?.image[0] : data.image
     );
     formData.append("group", data.group);
     if (data.type === "in-person") {
-      data?.address && formData.append("location", data?.address);
+      data?.address && formData.append("address", data?.address);
     } else {
       data?.link && formData.append("link", data?.link);
     }
 
     try {
       dispatch(setLoading(true));
-      const res: any = await addAndUpdateApi(
-        isEditableEvent ? "update" : "add",
-        formData
-      );
-      if (res.data.success) {
+      const res = isEditableEvent
+        ? await updateEvent({
+            eventId: eventDetails.id,
+            body: formData,
+          }).unwrap()
+        : await createEvent(formData).unwrap();
+      if (res.success) {
         dispatch(setLoading(false));
-        Toast(res.data.message, "success");
+        Toast(res.message, "success");
         navigation(RouteEndpoints.YOUR_EVENTS);
         reset();
         clearErrors();
       }
     } catch (e: any) {
       dispatch(setLoading(false));
-      if (e.response.data.message.hasOwnProperty("name")) {
+      if (e.data.message.hasOwnProperty("name")) {
         setError("name", {
           type: "manual",
-          message: e.response.data.message.name,
+          message: e.data.message.name,
         });
-      } else if (e.response.data.message.hasOwnProperty("image")) {
+      } else if (e.data.message.hasOwnProperty("image")) {
         setError("image", {
           type: "manual",
-          message: e.response.data.message.image,
+          message: e.data.message.image,
         });
       } else {
-        Toast(e.response.data.message, "error");
+        Toast(e.data.message, "error");
       }
     }
   };
@@ -192,5 +215,7 @@ export const useNewEvent = () => {
     setError,
     getValues,
     isEditableEvent,
+    categories,
+    getTags,
   };
 };

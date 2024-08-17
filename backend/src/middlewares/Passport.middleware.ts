@@ -3,7 +3,7 @@ import passport from "passport";
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const GitHubStrategy = require("passport-github2").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
-import db from "../database/db.config";
+import { createUser, findUser, findUserByGoogleId } from "../prisma/schema/User.schema";
 
 const GoogleMiddleware = () => {
   passport.use(
@@ -28,20 +28,14 @@ const GoogleMiddleware = () => {
           google_id: profile.id,
         };
         try {
-          const existingUser = await db.user.findFirst({
-            where: {
-              google_id: profile.id,
-            }
-          })
+          const existingUser = await findUserByGoogleId(profile.id);
           if (!existingUser) {
-            const newUser = await db.user.create({
-              data: {
-                name: defaultUser.name,
-                email: defaultUser.email,
-                image: defaultUser.image,
-                google_id: defaultUser.google_id
-              }
-            })
+            const newUser = await createUser({
+              name: defaultUser.name,
+              email: defaultUser.email,
+              image: defaultUser.image,
+              google_id: defaultUser.google_id,
+            });
             return cb(null, newUser);
           } else {
             return cb(null, existingUser);
@@ -70,28 +64,25 @@ const GithubMiddleware = () => {
         profile: any,
         cb: any
       ) => {
-        console.log(profile);
         const defaultUser = {
           email: profile.email,
           name: `${profile.given_name} ${profile.family_name}`,
-          image: profile.photos[0].value,
+          image: profile.photos[0].value.replace("s96-c", "s400-c"),
           google_id: profile.id,
         };
         try {
-          // const existingUser = await getUserByGoogleId(profile.id);
-          // console.log("existingUser", existingUser);
-          // if (!existingUser) {
-          //   await addUserWithGoogleId(
-          //     defaultUser.name,
-          //     defaultUser.email,
-          //     defaultUser.image,
-          //     defaultUser.google_id
-          //   );
-          //   return cb(null, defaultUser);
-          // } else {
-          //   console.log("existingUser", existingUser);
-          //   return cb(null, existingUser);
-          // }
+          const existingUser = await findUser(profile.id);
+          if (!existingUser) {
+            const newUser = await createUser({
+              name: defaultUser.name,
+              email: defaultUser.email,
+              image: defaultUser.image,
+              google_id: defaultUser.google_id,
+            });
+            return cb(null, newUser);
+          } else {
+            return cb(null, existingUser);
+          }
         } catch (error) {
           return cb(error, null);
         }
@@ -114,7 +105,6 @@ const FacebookMiddleware = () => {
         profile: any,
         cb: any
       ) => {
-        console.log(profile);
         const defaultUser = {
           email: profile.email,
           name: `${profile.given_name} ${profile.family_name}`,

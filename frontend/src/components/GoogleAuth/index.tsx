@@ -1,6 +1,6 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
-const GoogleAuth = ({setGoogleData}:{setGoogleData:Function}) => {
+const GoogleAuth = ({ setGoogleData }: { setGoogleData: Function }) => {
   const responseMessage = (response: any) => {
     const {
       email,
@@ -19,9 +19,16 @@ const GoogleAuth = ({setGoogleData}:{setGoogleData:Function}) => {
     setGoogleData("image", picture);
   };
   const errorMessage: any = (error: any) => {
-    console.log(error);
+    throw new Error(error);
   };
-  return <GoogleLogin onSuccess={responseMessage} onError={errorMessage} size="large" width="500px"/>;
+  return (
+    <GoogleLogin
+      onSuccess={responseMessage}
+      onError={errorMessage}
+      size="large"
+      width="500px"
+    />
+  );
 };
 
 export default GoogleAuth;

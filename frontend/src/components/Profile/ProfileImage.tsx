@@ -29,7 +29,7 @@ const ProfileImage: FC<ProfileImageProps> = ({
         alt={"placeholder_image"}
         height={"100%"}
         effect="opacity"
-        src={image}
+        src={image ? image : ""}
         width={"100%"}
        
         placeholderSrc={compressedImage}

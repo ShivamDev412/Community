@@ -15,7 +15,6 @@ const getPlaceId = async (
       throw new Error("Failed to retrieve place ID");
     }
   } catch (error) {
-    console.error("Error getting place ID:", error);
     throw error;
   }
 };

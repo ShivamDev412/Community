@@ -5,14 +5,12 @@ import { Avatar, Drawer } from "@mui/material";
 import LogoSection from "./LogoSection";
 import CloseIcon from "@mui/icons-material/Close";
 import { ResponsiveMenu } from "@/utils/Constant";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/RootReducer";
 import { Link } from "react-router-dom";
 import SearchSection from "../HeaderSearch";
+import { useUserQuery } from "@/redux/slice/api/userSlice";
 const ResponsiveHeader = () => {
   const [open, setOpen] = useState(false);
   const [openSearch, setOpenSearch] = useState(false);
-  const { name } = useSelector((state: RootState) => state.user);
   const drawerClose = () => {
     setOpen(false);
   };
@@ -22,7 +20,7 @@ const ResponsiveHeader = () => {
   const handleSearch = () => {
     setOpenSearch(!openSearch);
   };
-
+  const { data: user } = useUserQuery("");
   return (
     <div
       className={`border-b border-gray-200  ${
@@ -57,10 +55,10 @@ const ResponsiveHeader = () => {
               <div className="flex justify-between items-center p-4 bg-slate-100">
                 <div className="flex gap-2 items-center">
                   <Avatar className="bg-primary">{`${
-                    name?.split(" ")[0]?.split("")[0]
-                  }${name?.split(" ")[1]?.split("")[0]}`}</Avatar>
+                    user?.data?.name?.split(" ")[0]?.split("")[0]
+                  }${user?.data?.name?.split(" ")[1]?.split("")[0]}`}</Avatar>
                   <div>
-                    <p className="font-bold text-[1.2rem]">{name}</p>
+                    <p className="font-bold text-[1.2rem]">{user?.data.name}</p>
                     <button className="text-[1.1rem]">Your Profile</button>
                   </div>
                 </div>
